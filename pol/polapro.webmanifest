@@ -1,9 +1,9 @@
 {
-  "id": "./",
+  "id": "./polapro",
   "name": "PolaPro",
   "short_name": "PolaPro",
   "description": "Take, upload or randomly find a photo and develop it like a Polaroid.",
-  "start_url": "./",
+  "start_url": "./?app=polapro",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

@@ -1,4 +1,4 @@
-const CACHE='polapro-v1';
+const CACHE='polapro-v2';
 const SHELL=['./','./index.html','./polapro.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./favicon-32.png'];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting()));
