@@ -63,6 +63,16 @@ button:disabled{opacity:.6;cursor:default}
 .tip[hidden]{display:none}
 .tipgo{display:block;width:100%;flex:none;margin-top:10px;padding:11px 12px;font-size:14px}
 .tipgo[hidden]{display:none}
+
+.pick{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding-top:max(24px,calc(env(safe-area-inset-top) + 16px));padding-bottom:max(24px,calc(env(safe-area-inset-bottom) + 16px));padding-left:max(22px,env(safe-area-inset-left));padding-right:max(22px,env(safe-area-inset-right))}
+.pick.open{display:flex}
+.pickbox{background:#fff;color:#1b1b1b;border-radius:20px;width:100%;max-width:400px;max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px;box-shadow:0 12px 34px rgba(0,0,0,.35)}
+.pickbox h2{margin:0 0 4px;font:700 19px 'Inter',sans-serif}
+.pickbox h3{margin:16px 0 8px;font:700 12px 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;opacity:.6}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{flex:none;padding:9px 14px;font:600 14px 'Inter',sans-serif;background:#f1efe6;color:#1b1b1b;border-radius:999px}
+.chip.any{background:#1b1b1b;color:#fff;margin-top:12px}
+.pickx{width:100%;margin-top:18px;background:#fff;color:#1b1b1b;box-shadow:inset 0 0 0 2px #1b1b1b}
 </style>
 </head>
 <body>
@@ -96,6 +106,14 @@ button:disabled{opacity:.6;cursor:default}
 </div>
 <a class="elx" href="https://easylandx.github.io" target="_blank" rel="noopener">EasyLandX</a>
 <button class="elx inst" id="install" type="button">⬇ Install app</button>
+<div class="pick" id="pick" role="dialog" aria-modal="true" aria-labelledby="picktitle">
+  <div class="pickbox" id="pickbox">
+    <h2 id="picktitle">Choose a category</h2>
+    <button class="chip any" id="pickany" type="button">🎲 Surprise me (any topic)</button>
+    <div id="pickgroups"></div>
+    <button class="pickx" id="pickx" type="button">Cancel</button>
+  </div>
+</div>
 <div class="tip" id="tip" role="status" hidden><span id="tiptxt"></span><button class="tipgo" id="tipgo" type="button" hidden>Install now</button></div>
 <script>
 const $=id=>document.getElementById(id);
@@ -106,14 +124,26 @@ $('take').onclick=()=>$('fcam').click();
 $('up').onclick=()=>$('fup').click();
 // random photo from Wikimedia Commons
 let rndBusy=false,curTitle='';
+// random photos come only from these Wikimedia Commons topics
+const GROUPS=[
+['Nature',['Animalia','Fossils','Landscapes','Marine organisms','Plantae','Weather']],
+['Society & Culture',['Art','Flags','History','Language','Literature','Music','Objects']],
+['Science',['Astronomy','Biology','Chemistry','Earth sciences','Mathematics','Medicine','Physics','Technology']],
+['Engineering',['Architecture','Environmental engineering','Geophysical engineering','Mechanical engineering']]];
+const TOPICS=[].concat(...GROUPS.map(g=>g[1]));
+const topicLabel=t=>t.replace(/ engineering$/,'');
+const OFFS=[1000,500,200,50,0,0];
 function cleanTitle(t){return (t||'').replace(/^File:/i,'').replace(/\.(jpe?g|png|tiff?)$/i,'').replace(/_/g,' ').trim();}
 function loadImg(u){return new Promise((res,rej)=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>res(i);i.onerror=rej;i.src=u;});}
-async function randomPhoto(){
+async function randomPhoto(chosen){
   if(rndBusy)return;rndBusy=true;const rb=$('rnd');rb.disabled=true;
-  $('msg').textContent='Finding a random photo…';
+  $('msg').textContent=chosen?'Finding a photo: '+topicLabel(chosen)+'…':'Finding a random photo…';
   try{
-    for(let a=0;a<4;a++){
-      const r=await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=random&grnnamespace=6&grnlimit=30&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=1000');
+    for(let a=0;a<OFFS.length;a++){
+      const topic=chosen||TOPICS[Math.floor(Math.random()*TOPICS.length)];
+      const off=Math.floor(Math.random()*OFFS[a]);
+      const q='deepcategory:"'+topic+'" filetype:bitmap';
+      const r=await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=30&gsroffset='+off+'&gsrsearch='+encodeURIComponent(q)+'&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=1000');
       const j=await r.json();
       const pages=Object.values((j.query&&j.query.pages)||{});
       const c=pages.map(p=>p.imageinfo&&p.imageinfo[0]?Object.assign({},p.imageinfo[0],{ttl:cleanTitle(p.title)}):null).filter(i=>i&&i.mime==='image/jpeg'&&i.width>=800&&i.height>=600&&i.thumburl);
@@ -123,10 +153,26 @@ async function randomPhoto(){
       }
     }
     throw new Error('none');
-  }catch(e){$('msg').textContent='Couldn’t get a random photo. Try again.';}
+  }catch(e){$('msg').textContent=chosen?'Couldn’t find a photo in “'+topicLabel(chosen)+'”. Try again or pick another category.':'Couldn’t get a random photo. Try again.';}
   rndBusy=false;rb.disabled=false;
 }
-$('rnd').onclick=randomPhoto;
+// category picker
+(function(){
+  const pk=$('pick'),gr=$('pickgroups');
+  GROUPS.forEach(g=>{
+    const h=document.createElement('h3');h.textContent=g[0];gr.appendChild(h);
+    const w=document.createElement('div');w.className='chips';
+    g[1].forEach(t=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=topicLabel(t);b.onclick=()=>{close();randomPhoto(t);};w.appendChild(b);});
+    gr.appendChild(w);
+  });
+  function open(){if(rndBusy)return;pk.classList.add('open');$('pickbox').scrollTop=0;}
+  function close(){pk.classList.remove('open');}
+  $('rnd').onclick=open;
+  $('pickany').onclick=()=>{close();randomPhoto();};
+  $('pickx').onclick=close;
+  pk.addEventListener('click',e=>{if(e.target===pk)close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+})();
 $('fcam').onchange=$('fup').onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);const i=new Image();i.onload=()=>{img=i;curTitle='';start();};i.src=u;e.target.value='';};
 function drawSquare(ctx,s,x,y){const m=Math.min(img.width,img.height),sx=(img.width-m)/2,sy=(img.height-m)/2;ctx.drawImage(img,sx,sy,m,m,x,y,s,s);}
 function start(){
@@ -242,7 +288,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.ad
       else t='To install: tap the browser menu (⋮), then choose “Install app” or “Add to Home screen”.';
     }
     else if(safariDesk){t='To install: in Safari, choose File → Add to Dock.';}
-    else{t='To install: click the install icon at the right of the address bar, or open the browser menu and choose “Install PolaPro”.';}
+    else{t='To install: click the install icon at the right of the address bar, or open the Chrome menu (⋮), then Cast, save, and share, then “Install page as app”.';}
     tt.textContent=t;tb.hidden=!go;
   }
   b.onclick=()=>{
