@@ -1,0 +1,17 @@
+{
+  "id": "/app/pol/",
+  "name": "PolaPro",
+  "short_name": "PolaPro",
+  "description": "Turn any photo into an instant Polaroid. Shake to develop.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fed90f",
+  "theme_color": "#fdd20a",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -12,9 +12,9 @@
 <title>PolaPro</title>
 <meta name="application-name" content="PolaPro">
 <meta name="apple-mobile-web-app-title" content="PolaPro">
-<link rel="manifest" href="/app/pol/manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="32x32" href="/app/pol/icons/favicon-32.png">
-<link rel="apple-touch-icon" href="/app/pol/icons/apple-touch-icon.png">
+<link rel="manifest" href="polapro.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script>
 // catch the browser's install event as early as possible
 window.__pp=null;
@@ -54,6 +54,8 @@ input[type=file]{display:none}
 .share .btns{margin-top:10px}
 .wa{background:#25d366}
 .elx{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,calc(env(safe-area-inset-bottom) + 8px));background:#1b1b1b;color:#fdd20a;border-radius:999px;padding:12px 18px;font:700 14px 'Inter',sans-serif;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:9;flex:none}
+.r2{margin-top:12px}
+button:disabled{opacity:.6;cursor:default}
 .inst{right:auto;left:max(16px,env(safe-area-inset-left));border:0;cursor:pointer;flex:none}
 .inst[hidden]{display:none}
 .tip{position:fixed;left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));bottom:calc(max(16px,env(safe-area-inset-bottom) + 8px) + 54px);max-width:300px;z-index:10;background:#fff;color:#1b1b1b;border-radius:14px;padding:13px 15px;font:600 14px/1.35 'Inter',sans-serif;box-shadow:0 8px 22px rgba(0,0,0,.28)}
@@ -76,6 +78,9 @@ input[type=file]{display:none}
   <div class="btns" id="main">
     <button id="take">📷 Take photo</button>
     <button id="up" class="alt">🖼 Upload</button>
+  </div>
+  <div class="btns r2">
+    <button id="rnd" class="alt">🎲 Random</button>
   </div>
   <input type="file" id="fcam" accept="image/*" capture="environment">
   <input type="file" id="fup" accept="image/*">
@@ -100,6 +105,28 @@ let img=null,p=0,done=false,active=false,last=0,rafOn=false;
 $('cam').onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=2;const x=c.getContext('2d');x.drawImage($('cam'),0,0,2,2);const d=x.getImageData(0,0,1,1).data;document.body.style.background=`rgb(${d[0]},${d[1]},${d[2]})`;}catch(e){}};
 $('take').onclick=()=>$('fcam').click();
 $('up').onclick=()=>$('fup').click();
+// random photo from Wikimedia Commons
+let rndBusy=false;
+function loadImg(u){return new Promise((res,rej)=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>res(i);i.onerror=rej;i.src=u;});}
+async function randomPhoto(){
+  if(rndBusy)return;rndBusy=true;const rb=$('rnd');rb.disabled=true;
+  $('msg').textContent='Finding a random photo…';
+  try{
+    for(let a=0;a<4;a++){
+      const r=await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=random&grnnamespace=6&grnlimit=30&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=1000');
+      const j=await r.json();
+      const pages=Object.values((j.query&&j.query.pages)||{});
+      const c=pages.map(p=>p.imageinfo&&p.imageinfo[0]).filter(i=>i&&i.mime==='image/jpeg'&&i.width>=800&&i.height>=600&&i.thumburl);
+      c.sort(()=>Math.random()-.5);
+      for(const i of c.slice(0,3)){
+        try{const im=await loadImg(i.thumburl);img=im;rndBusy=false;rb.disabled=false;start();return;}catch(_){}
+      }
+    }
+    throw new Error('none');
+  }catch(e){$('msg').textContent='Couldn’t get a random photo. Try again.';}
+  rndBusy=false;rb.disabled=false;
+}
+$('rnd').onclick=randomPhoto;
 $('fcam').onchange=$('fup').onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);const i=new Image();i.onload=()=>{img=i;start();};i.src=u;e.target.value='';};
 function drawSquare(ctx,s,x,y){const m=Math.min(img.width,img.height),sx=(img.width-m)/2,sy=(img.height-m)/2;ctx.drawImage(img,sx,sy,m,m,x,y,s,s);}
 function start(){
@@ -188,7 +215,7 @@ function playEject(){
   o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+2.3);}catch(e){}
 }
 // PWA: service worker + install button
-if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('/app/pol/sw.js',{scope:'/app/pol/'}).catch(()=>{}));}
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('polapro-sw.js',{scope:'./'}).catch(()=>{}));}
 (function(){
   const b=$('install'),tip=$('tip'),tt=$('tiptxt'),tb=$('tipgo');
   const ua=navigator.userAgent;
