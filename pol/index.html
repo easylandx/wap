@@ -56,6 +56,11 @@ input[type=file]{display:none}
 .elx{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,calc(env(safe-area-inset-bottom) + 8px));background:#1b1b1b;color:#fdd20a;border-radius:999px;padding:12px 18px;font:700 14px 'Inter',sans-serif;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:9;flex:none}
 .inst{right:auto;left:max(16px,env(safe-area-inset-left));border:0;cursor:pointer;flex:none}
 .inst[hidden]{display:none}
+.tip{position:fixed;left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));bottom:calc(max(16px,env(safe-area-inset-bottom) + 8px) + 54px);max-width:300px;z-index:10;background:#fff;color:#1b1b1b;border-radius:14px;padding:13px 15px;font:600 14px/1.35 'Inter',sans-serif;box-shadow:0 8px 22px rgba(0,0,0,.28)}
+.tip::after{content:"";position:absolute;left:30px;bottom:-6px;width:14px;height:14px;background:#fff;transform:rotate(45deg);border-radius:2px}
+.tip[hidden]{display:none}
+.tipgo{display:block;width:100%;flex:none;margin-top:10px;padding:11px 12px;font-size:14px}
+.tipgo[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -86,7 +91,8 @@ input[type=file]{display:none}
   </div>
 </div>
 <a class="elx" href="https://easylandx.github.io" target="_blank" rel="noopener">EasyLandX</a>
-<button class="elx inst" id="install" type="button" hidden>⬇ Install app</button>
+<button class="elx inst" id="install" type="button">⬇ Install app</button>
+<div class="tip" id="tip" role="status" hidden><span id="tiptxt"></span><button class="tipgo" id="tipgo" type="button" hidden>Install now</button></div>
 <script>
 const $=id=>document.getElementById(id);
 let img=null,p=0,done=false,active=false,last=0,rafOn=false;
@@ -184,19 +190,44 @@ function playEject(){
 // PWA: service worker + install button
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('/app/pol/sw.js',{scope:'/app/pol/'}).catch(()=>{}));}
 (function(){
-  const b=$('install');
-  const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  function sync(){b.hidden=standalone()||!(window.__pp||(ios&&navigator.share));}
-  window.addEventListener('pp-ready',sync);
-  window.addEventListener('appinstalled',()=>{window.__pp=null;b.hidden=true;});
-  matchMedia('(display-mode: standalone)').addEventListener&&matchMedia('(display-mode: standalone)').addEventListener('change',sync);
-  b.onclick=async()=>{
-    const e=window.__pp;
-    if(e){window.__pp=null;b.hidden=true;try{await e.prompt();const r=await e.userChoice;if(r.outcome!=='accepted'){/* dismissed: allow trying again on next load */}}catch(_){}return;}
-    // iOS Safari has no install API: open the share sheet, where "Add to Home Screen" lives
-    if(ios&&navigator.share){try{await navigator.share({title:'PolaPro',url:location.href});}catch(_){}}
+  const b=$('install'),tip=$('tip'),tt=$('tiptxt'),tb=$('tipgo');
+  const ua=navigator.userAgent;
+  const ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const android=/Android/i.test(ua);
+  const phone=ios||android;
+  const safariDesk=!phone&&/^((?!chrome|chromium|crios|fxios|edg|android).)*safari/i.test(ua);
+  const mq=matchMedia('(display-mode: standalone)');
+  const standalone=()=>mq.matches||navigator.standalone===true;
+  function sync(){b.hidden=standalone();if(b.hidden)tip.hidden=true;}
+  // opens the browser's own install popup (when the browser offers it)
+  function native(){
+    const e=window.__pp;if(!e)return false;
+    window.__pp=null;
+    try{e.prompt();}catch(_){return false;}
+    try{e.userChoice.then(r=>{if(r&&r.outcome==='accepted'){b.hidden=true;tip.hidden=true;}}).catch(()=>{});}catch(_){}
+    return true;
+  }
+  function fill(){
+    let t='',go=false;
+    if(ios){t='To install: tap the Share icon in your browser’s toolbar, then choose “Add to Home Screen”.';}
+    else if(android){
+      if(window.__pp){t='Add PolaPro to your home screen so it opens like a normal app.';go=true;}
+      else t='To install: tap the browser menu (⋮), then choose “Install app” or “Add to Home screen”.';
+    }
+    else if(safariDesk){t='To install: in Safari, choose File → Add to Dock.';}
+    else{t='To install: click the install icon at the right of the address bar, or open the browser menu and choose “Install PolaPro”.';}
+    tt.textContent=t;tb.hidden=!go;
+  }
+  b.onclick=()=>{
+    if(!tip.hidden){tip.hidden=true;return;}
+    if(!phone&&native())return;      // computer: straight to the browser's install popup
+    fill();tip.hidden=false;         // phone (or no popup available): short how-to
   };
+  tb.onclick=()=>{native();tip.hidden=true;};
+  document.addEventListener('click',e=>{if(!tip.hidden&&!tip.contains(e.target)&&e.target!==b)tip.hidden=true;});
+  window.addEventListener('pp-ready',()=>{if(!tip.hidden)fill();});
+  window.addEventListener('appinstalled',()=>{window.__pp=null;b.hidden=true;tip.hidden=true;});
+  if(mq.addEventListener)mq.addEventListener('change',sync);
   sync();
 })();
 </script>
