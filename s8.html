@@ -130,7 +130,7 @@ button:disabled{opacity:.5}
 <p class="hint pj-only">Develop the reel first, then press Play. Tap the projector knob for the lamp.</p>
 
 <h2>Film cartridge</h2>
-<div class="row"><button id="dev">Develop reel</button><button id="dlAll">Save reel</button><button id="waAll">WhatsApp reel</button><button id="reload">Load new film</button></div>
+<div class="row"><button id="up">Upload video</button><input type="file" id="upf" accept="video/*" hidden><button id="dev">Develop reel</button><button id="dlAll">Save reel</button><button id="waAll">WhatsApp reel</button><button id="reload">Load new film</button></div>
 <div id="clips"></div>
 </div>
 
@@ -195,9 +195,9 @@ let clips=[];
 const db=new Promise((res,rej)=>{try{const r=indexedDB.open('super8-74',1);r.onupgradeneeded=()=>r.result.createObjectStore('clips',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});
 const tx=async(m,f)=>{const d=await db;return new Promise((res,rej)=>{const t=d.transaction('clips',m),r=f(t.objectStore('clips'));t.oncomplete=()=>res(r.result);t.onerror=()=>rej(t.error)})};
 const save=c=>tx('readwrite',s=>s.put(c)).catch(()=>{});
-const usedSec=()=>clips.reduce((a,c)=>a+c.dur,0);
+const usedSec=()=>clips.reduce((a,c)=>a+(c.imp?0:c.dur),0); // uploaded videos don’t use up film
 const MIME=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m))||'';
-const ext=()=>MIME.includes('mp4')?'mp4':'webm';
+const ext=()=>MIME.includes('mp4')?'mp4':'webm';const ex=b=>/mp4|quicktime/.test(b.type)?'mp4':'webm';
 const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 function showLeft(extra=0){const left=MAXFILM-usedSec()-extra;$('#lcd').textContent='Film '+fmt(left);$('#bat').textContent=left<=0?'▯▯▯▯':'▮▮▮▮'}
 function render(){showLeft();
@@ -249,7 +249,7 @@ async function pipe(blobs,draw){
  m.ondataavailable=e=>e.data&&e.data.size&&ch.push(e.data);const done=new Promise(r=>m.onstop=r);
  const v=Object.assign(document.createElement('video'),{muted:true,playsInline:true});v.setAttribute('playsinline','');m.start(250);
  for(const b of blobs){const u=URL.createObjectURL(b);v.src=u;
-  await new Promise(res=>{let fin=false,last=0;const end=()=>{fin=true;res()};v.onended=end;v.onerror=end;setTimeout(end,MAXC*1000+4000);
+  await new Promise(res=>{let fin=false,last=0;const end=()=>{fin=true;res()};v.onended=end;v.onerror=end;setTimeout(end,300000);
    v.play().then(()=>{const f=t=>{if(fin)return;if(t-last>52){draw(x,v,t);last=t}requestAnimationFrame(f)};requestAnimationFrame(f)}).catch(end)});
   URL.revokeObjectURL(u)}
  m.stop();await done;return new Blob(ch,{type:m.mimeType||MIME||'video/mp4'})}
@@ -271,11 +271,20 @@ async function share(b,n){const f=new File([b],n,{type:b.type});
  window.open('https://wa.me/?text='+encodeURIComponent('Filmed on my Super 8 ’74 🎞️ (video attached separately)'),'_blank');dl(b,n);toast('Saved. Attach the file in WhatsApp.')}
 $('#dlAll').onclick=async()=>{const b=await reelBlob();b&&dl(b,'super8-74-reel.'+ext())};
 $('#waAll').onclick=async()=>{const b=await reelBlob();b&&share(b,'super8-74-reel.'+ext())};
-$('#clips').onclick=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,c=clips[i],a=b.dataset.a,blob=c.dev||c.raw,name=`super8-74-clip${i+1}${c.dev?'':'-raw'}.${ext()}`;
+$('#clips').onclick=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,c=clips[i],a=b.dataset.a,blob=c.dev||c.raw,name=`super8-74-clip${i+1}${c.dev?'':'-raw'}.${ex(blob)}`;
  if(a==='save')dl(blob,name);else if(a==='wa')share(blob,name);
  else if(a==='del'){clips.splice(i,1);tx('readwrite',s=>s.delete(c.id)).catch(()=>{});render()}
  else if(a==='play'){if(!c.dev){toast('Develop the reel first.');return}setMode('proj');play([i])}};
 $('#reload').onclick=()=>{if(confirm('Load a fresh cartridge? The current reel is erased. Save anything you want first.')){clips=[];tx('readwrite',s=>s.clear()).catch(()=>{});render();toast('Fresh cartridge loaded.')}};
+
+/* ---- upload a video from the device: it joins the reel as an undeveloped clip, then Develop gives it the Super 8 look ---- */
+$('#up').onclick=()=>$('#upf').click();
+$('#upf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+ const u=URL.createObjectURL(f),v=document.createElement('video');v.preload='metadata';v.muted=true;
+ const dur=await new Promise(res=>{v.onloadedmetadata=()=>res(isFinite(v.duration)?v.duration:0);v.onerror=()=>res(-1);v.src=u});URL.revokeObjectURL(u);
+ if(dur<0){toast('That video can’t be read in this browser.');return}
+ const c={id:Date.now(),dur:dur||MAXC,look:lookSel.value,raw:f,dev:null,imp:true};clips.push(c);save(c);render();
+ toast('Video added, undeveloped. Pick a film stock, then tap Develop reel.',4000)};
 
 /* ---- projector + living room playback ---- */
 const pv=Object.assign(document.createElement('video'),{muted:true,playsInline:true});pv.setAttribute('playsinline','');
