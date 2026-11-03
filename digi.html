@@ -92,7 +92,6 @@ button{font-family:inherit;cursor:pointer;color:inherit}
  <button id="shutter" aria-label="Shutter">Shutter</button>
  <button class="fab" id="bWa" aria-label="Send photos on WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5a9.4 9.4 0 0 0-8 14.3L2.7 21.5l4.8-1.2A9.4 9.4 0 1 0 12 2.5zm0 1.9a7.5 7.5 0 1 1-3.9 13.9l-.3-.2-2.8.7.8-2.7-.2-.3A7.5 7.5 0 0 1 12 4.4z"/><path d="M8.7 7.9c.3-.5.7-.5 1-.4.2.1 1 1.7 1 1.9 0 .3-.5.8-.7 1 .5 1 1.3 1.8 2.5 2.4.2-.3.6-.9.9-.9.3 0 1.7.8 1.8 1 .1.2.1.9-.5 1.4-.7.6-1.700.7-3.100.1-1.900-.8-3.600-2.600-4.200-4.500-.2-.7.1-1.400.5-2z"/></svg></button>
 </div>
-<input type="file" id="waFile" accept="image/*" hidden>
 <button id="bSend">SEND ON WHATSAPP</button>
 <div class="scr" id="gal"><div id="galin">
   <div id="galtop"><span id="galcount">MEMORY STICK</span><button class="sm" id="bAll">SAVE ALL</button><button class="sm" id="bBack">BACK</button></div>
@@ -197,7 +196,7 @@ function loop(t){ requestAnimationFrame(loop); if(frozen||!stream||t-last<66)ret
 
 /* ---- camera controls: invisible hit zones laid over the photo of the real camera ---- */
 const IW=1448,IH=1086,wait0=ms=>new Promise(r=>setTimeout(r,ms));
-function hud(){hud0();if(playing){$('#hMode').textContent='PLAY ▶';$('#hFlash').textContent='◀ ▶';$('#hLeft').textContent=(pIdx+1)+'/'+photos.length;$('#hZoom').textContent='DSC'+String(pIdx+1).padStart(5,'0');}}
+function hud(){hud0();if(playing){$('#hMode').textContent='PLAY ▶';$('#hFlash').textContent='◀ ▶';$('#hLeft').textContent=(pIdx+1)+'/'+photos.length;$('#hZoom').textContent=pz>1?'ZOOM '+pz.toFixed(1)+'x':'DSC'+String(pIdx+1).padStart(5,'0');}}
 function hud0(){
  $('#hudTop').style.display=$('#hudBot').style.display=showHud?'flex':'none';
  $('#hMode').textContent=MODES[mode].n+(facing==='user'?' SELF':'');
@@ -222,13 +221,29 @@ function trashLast(){
 /* playback: the play button shows the saved photos on the LCD; ◀ ▶ browse them, OK opens one, shutter goes back to shooting */
 let playing=false,pIdx=0;
 function playToggle(){ if(busy||flipping)return; if(playing){exitPlay();return;} if(!photos.length){noteMsg('NO IMAGES');return;} playing=true;frozen=true;showMsg('');pIdx=photos.length-1;drawPlay(); }
-function exitPlay(){playing=false;frozen=false;showMsg('');hud();}
-function drawPlay(){pIdx=(pIdx+photos.length)%photos.length;const im=new Image();im.onload=()=>{if(playing)vctx.drawImage(im,0,0,320,240);};im.src=photos[pIdx].src;hud();}
+function exitPlay(){playing=false;frozen=false;pImg=null;view.width=320;view.height=240;view.style.touchAction='';showMsg('');hud();}
+/* playback zoom + drag: the photo is drawn at 640x480 so zooming in keeps real detail */
+let pImg=null,pz=1,px=0,py=0,drag=null;
+function paint(){ if(!pImg)return; const W=view.width,H=view.height; vctx.fillStyle='#000';vctx.fillRect(0,0,W,H); vctx.save(); vctx.translate(W/2+px,H/2+py); vctx.scale(pz,pz); vctx.drawImage(pImg,-W/2,-H/2,W,H); vctx.restore(); }
+function clampPan(){const mx=view.width/2*(pz-1),my=view.height/2*(pz-1);px=Math.max(-mx,Math.min(mx,px));py=Math.max(-my,Math.min(my,py));}
+function playZoom(d){pz=Math.min(4,Math.max(1,pz+d));clampPan();paint();hud();}
+function drawPlay(){
+ pIdx=(pIdx+photos.length)%photos.length; pz=1;px=py=0;
+ if(view.width!==640){view.width=640;view.height=480;} view.style.touchAction='none';
+ const im=new Image(); im.onload=()=>{if(playing){pImg=im;paint();}}; im.src=photos[pIdx].src; hud();
+}
+view.addEventListener('pointerdown',e=>{if(!playing||pz<=1)return;drag={x:e.clientX,y:e.clientY};try{view.setPointerCapture(e.pointerId);}catch(_){}});
+view.addEventListener('pointermove',e=>{
+ if(!drag)return; let dx=e.clientX-drag.x,dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+ if(innerHeight>innerWidth)[dx,dy]=[dy,-dx];            // the app is turned 90° in portrait, so turn the finger movement too
+ const k=view.width/view.clientWidth; px+=dx*k;py+=dy*k;clampPan();paint();});
+['pointerup','pointercancel'].forEach(t=>view.addEventListener(t,()=>{drag=null;}));
+view.addEventListener('wheel',e=>{if(!playing)return;e.preventDefault();playZoom(e.deltaY<0?.5:-.5);},{passive:false});
 function okBtn(){ if(playing){cur=photos[pIdx];$('#vimg').src=cur.src;$('#viewer').style.display='flex';} else shoot(); }
 const ZONES=[['Shutter',1095,78,220,60,shoot],['Mode dial',780,80,240,50,()=>setMode(mode+1)],['Menu: next mode',1112,400,90,90,()=>setMode(mode+1)],
- ['Display on/off',1175,488,80,40,()=>{showHud=!showHud;hud();}],['Previous mode',1090,655,70,80,()=>setMode(mode-1)],['Next mode',1280,655,70,80,()=>setMode(mode+1)],
+ ['Display / index',1175,488,80,40,()=>{if(playing){openGal();return;}showHud=!showHud;hud();}],['Previous mode',1090,655,70,80,()=>setMode(mode-1)],['Next mode',1280,655,70,80,()=>setMode(mode+1)],
  ['OK',1185,655,90,90,okBtn],['Flash',1185,745,100,60,cycleFlash],['Play',1112,848,80,80,playToggle],['Delete last',1275,848,80,80,trashLast],
- ['Zoom in',1340,272,100,80,()=>setZoom(.5)],['Zoom out / index',1340,352,100,80,()=>{if(playing)openGal();else setZoom(-.5);}]];
+ ['Zoom in',1340,272,100,80,()=>{if(playing)playZoom(.5);else setZoom(.5);}],['Zoom out',1340,352,100,80,()=>{if(playing)playZoom(-.5);else setZoom(-.5);}]];
 ZONES.forEach(([n,cx,cy,w,h,fn])=>{
  const z=document.createElement('button'); z.className='zone'; z.setAttribute('aria-label',n);
  z.style.cssText=`left:${(cx-w/2)/IW*100}%;top:${(cy-h/2)/IH*100}%;width:${w/IW*100}%;height:${h/IH*100}%`;
@@ -353,16 +368,14 @@ fit();hideBar();
 /* ---- WhatsApp: pick a photo from the camera roll, copy it to the clipboard (nothing is saved), open WhatsApp with the message so the photo can be pasted ---- */
 const SHARE_TEXT='Taken with DigiPro https://easylandx.github.io/digipro', WA_URL='https://wa.me/?text='+encodeURIComponent(SHARE_TEXT);
 let waBlob=null;
-const toPng=f=>new Promise((ok,no)=>{const u=URL.createObjectURL(f),i=new Image();
- i.onload=()=>{const s=Math.min(1,2048/Math.max(i.naturalWidth,i.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(i.naturalWidth*s);c.height=Math.round(i.naturalHeight*s);
-  c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?ok(b):no(),'image/png');};
- i.onerror=no;i.src=u;});
+const pngOf=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;c.getContext('2d').drawImage(i,0,0);c.toBlob(x=>x?ok(x):no(),'image/png');};i.onerror=no;i.src=src;});
 const copyPhoto=()=>navigator.clipboard.write([new ClipboardItem({'image/png':waBlob})]);
 function setBtn(t){const b=$('#bSend');b.textContent=t;b.style.display='flex';}
-$('#bWa').onclick=()=>{click();$('#waFile').click();};
-$('#waFile').onchange=async e=>{
- const f=e.target.files[0]; e.target.value=''; if(!f)return;
- try{waBlob=await toPng(f);}catch(err){noteMsg('CAN’T OPEN','Try a JPG or PNG.');return;}
+/* no file picker: the photo on the camera screen (the one being played back, or else the latest shot) is copied */
+$('#bWa').onclick=async()=>{
+ const p=playing?photos[pIdx]:photos[photos.length-1];
+ if(!p){noteMsg('NO IMAGES');return;}
+ click(); waBlob=pngOf(p.src);        // a promise: the clipboard accepts it while the tap is still fresh
  let ok=true; try{await copyPhoto();}catch(err){ok=false;}
  if(ok){noteMsg('PHOTO COPIED'); if(!window.open(WA_URL,'_blank'))setBtn('OPEN WHATSAPP');}
  else setBtn('COPY & OPEN WHATSAPP');
