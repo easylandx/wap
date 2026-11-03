@@ -151,13 +151,13 @@ $('wa').onclick=async()=>{
   const canFiles=mobile&&!!(navigator.canShare&&navigator.canShare({files:[probe]}));
   const src=urls[i];
   if(!canFiles){
-    /* Desktop: open WhatsApp Web directly with the message; slide is copied to the clipboard to paste */
-    window.open('https://web.whatsapp.com/send?text='+encodeURIComponent(MSG),'_blank');
+    /* Desktop: copy the Kodachrome slide to the clipboard FIRST (while the tab is focused and the click is still fresh), then open WhatsApp Web */
     try{
       if(navigator.clipboard&&window.ClipboardItem){
         await navigator.clipboard.write([new ClipboardItem({'image/png':render(src).then(c=>toBlob(c,'image/png'))})]);
       }
     }catch(e){}
+    window.open('https://web.whatsapp.com/send?text='+encodeURIComponent(MSG),'_blank');
     return;
   }
   try{
