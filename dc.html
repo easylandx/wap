@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Y2K Digicam</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#cfe6f7;--bg2:#f2d3ee;--ink:#2b3140;--body1:#f4f6f9;--body2:#aeb5c2;--edge:#7b8394;--lcd:#0b1210;--btn:#dfe3ea;--accent:#e8402f;--stamp:#ffa530;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#232a4a;--bg2:#3c2748;--ink:#e8ebf3}}
+:root[data-theme="dark"]{--bg1:#232a4a;--bg2:#3c2748;--ink:#e8ebf3}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--ink);font-family:Orbitron,Arial,sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden}
+button{font-family:inherit;cursor:pointer;color:inherit}
+#cam{width:min(94vw,440px);max-height:98%;padding:16px 16px 18px;border-radius:30px 30px 38px 38px;background:linear-gradient(170deg,var(--body1),var(--body2) 70%,#8d95a5);border:2px solid var(--edge);box-shadow:0 18px 40px rgba(40,40,80,.35),inset 0 2px 0 #fff,inset 0 -6px 12px rgba(0,0,0,.18);position:relative}
+.brand{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;padding:0 6px 10px;color:#4b5365}
+.brand i{font-style:normal;font-size:9px;font-weight:600;background:#4b5365;color:#e8ecf3;padding:2px 6px;border-radius:3px}
+#lcdwrap{background:#1a1e26;padding:9px;border-radius:14px;box-shadow:inset 0 3px 8px #000,0 1px 0 #fff}
+#lcd{position:relative;aspect-ratio:4/3;background:var(--lcd);border-radius:10px;overflow:hidden;font-family:VT323,monospace;color:#fff;box-shadow:inset 0 0 22px rgba(0,0,0,.8)}
+#view{width:100%;height:100%;display:block}
+#lcd::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.09) 0 1px,transparent 1px 3px),radial-gradient(ellipse at 30% 10%,rgba(255,255,255,.1),transparent 50%)}
+.hud{position:absolute;left:0;right:0;display:flex;justify-content:space-between;padding:4px 8px;font-size:20px;text-shadow:1px 1px 0 #000;z-index:2;pointer-events:none}
+#hudTop{top:0;background:linear-gradient(rgba(0,0,0,.55),transparent)}
+#hudBot{bottom:0;background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.bat{display:inline-block;width:20px;height:9px;border:2px solid #fff;margin-left:6px;position:relative;vertical-align:middle}
+.bat::before{content:"";position:absolute;inset:1px 5px 1px 1px;background:#7dff7d}
+.bat::after{content:"";position:absolute;right:-5px;top:1px;width:3px;height:5px;background:#fff}
+#flashfx{position:absolute;inset:0;background:#fff;opacity:0;z-index:5;pointer-events:none;transition:opacity .45s ease-out}
+#msg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:6px;font-size:30px;background:rgba(0,0,0,.55);z-index:4;text-align:center;padding:14px;line-height:1}
+#msg small{font-size:19px;opacity:.85}
+.hg{display:inline-block;animation:spin 1s steps(4) infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#thumb{position:absolute;right:8px;bottom:30px;width:30%;border:2px solid #fff;z-index:3;display:none;box-shadow:0 0 6px #000}
+#modes{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:12px 0 4px}
+#modes button,.sm{font-size:9px;font-weight:600;padding:8px 0;border-radius:7px;border:1px solid var(--edge);background:linear-gradient(var(--btn),#bcc2cd);box-shadow:0 2px 0 #7b8394}
+#modes button.on{background:linear-gradient(#ffd24a,#ffb000);color:#3a2a00}
+#modes button:active,.sm:active{transform:translateY(2px);box-shadow:none}
+#row{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:0 4px}
+.sm{width:76px;padding:11px 0}
+#shutter{width:84px;height:84px;border-radius:50%;border:3px solid #6f2018;background:radial-gradient(circle at 35% 30%,#ff8a74,var(--accent) 55%,#a02416);box-shadow:0 5px 0 #6f2018,0 8px 14px rgba(0,0,0,.35);font-size:0}
+#shutter:active{transform:translateY(4px);box-shadow:0 1px 0 #6f2018}
+#row2{display:flex;justify-content:space-between;margin-top:14px;padding:0 4px}
+#row2 .sm{width:auto;flex:1;margin:0 3px}
+.scr{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center}
+#splash{display:flex;background:linear-gradient(160deg,#ffe36e,#ff9ccf 55%,#7fd6ff);text-align:center;cursor:pointer;padding:24px}
+#splash .box{background:#fff;border:4px solid #2b3140;border-radius:18px;padding:26px 30px;box-shadow:8px 8px 0 #2b3140;max-width:340px;color:#2b3140}
+#splash h1{margin:0 0 4px;font-size:30px;font-weight:800;line-height:1}
+#splash p{margin:6px 0;font-size:11px;font-weight:600}
+#splash .go{display:inline-block;margin-top:14px;background:#2b3140;color:#ffe36e;padding:12px 18px;border-radius:8px;font-size:12px;animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+#gal{background:linear-gradient(160deg,var(--bg1),var(--bg2));justify-content:flex-start;padding:max(14px,env(safe-area-inset-top)) 16px 16px}
+#galin{width:min(100%,520px);height:100%;display:flex;flex-direction:column;background:linear-gradient(170deg,var(--body1),var(--body2));border:2px solid var(--edge);border-radius:22px;padding:12px}
+#galtop{display:flex;gap:6px;align-items:center;margin-bottom:10px;font-size:11px;font-weight:800}
+#galtop span{flex:1}
+#grid{flex:1;overflow:auto;background:var(--lcd);border-radius:10px;padding:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-content:start;box-shadow:inset 0 0 14px #000}
+#grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border:2px solid #333;cursor:pointer;display:block}
+#grid p{grid-column:1/-1;color:#fff;font-family:VT323,monospace;font-size:22px;text-align:center;margin-top:30px}
+#viewer{background:rgba(10,12,20,.92);gap:12px;padding:16px}
+#viewer img{max-width:100%;max-height:68%;border:3px solid #fff}
+#viewer .bar{display:flex;gap:8px}
+#viewer .sm{width:90px}
+</style>
+</head>
+<body>
+<div id="cam">
+  <div class="brand"><span>CyberShot ’03</span><i>3.2 MEGA PIXELS</i></div>
+  <div id="lcdwrap"><div id="lcd">
+    <canvas id="view" width="320" height="240"></canvas>
+    <div class="hud" id="hudTop"><span id="hMode">AUTO</span><span id="hFlash">⚡A</span><span id="hLeft">50</span></div>
+    <div class="hud" id="hudBot"><span>SIZE 640×480</span><span>BATT<span class="bat"></span></span></div>
+    <img id="thumb" alt="Last photo">
+    <div id="flashfx"></div>
+    <div id="msg"></div>
+  </div></div>
+  <div id="modes"></div>
+  <div id="row">
+    <button class="sm" id="bFlash">FLASH</button>
+    <button id="shutter" aria-label="Shutter">Shutter</button>
+    <button class="sm" id="bFlip">FLIP</button>
+  </div>
+  <div id="row2"><button class="sm" id="bGal">MEMORY STICK</button></div>
+</div>
+
+<div class="scr" id="splash"><div class="box"><h1>Y2K<br>DIGICAM</h1><p>Point-and-shoot, circa 2003.</p><p>Photos stay on this device.</p><div class="go">TAP TO POWER ON</div></div></div>
+
+<div class="scr" id="gal"><div id="galin">
+  <div id="galtop"><span id="galcount">MEMORY STICK</span><button class="sm" id="bAll">SAVE ALL</button><button class="sm" id="bBack">BACK</button></div>
+  <div id="grid"></div>
+</div></div>
+<div class="scr" id="viewer"><img id="vimg" alt="Photo"><div class="bar"><button class="sm" id="vSave">SAVE</button><button class="sm" id="vDel">DELETE</button><button class="sm" id="vBack">BACK</button></div></div>
+
+<script>
+/* ===== Y2K DIGICAM =====
+   Pipeline per frame (preview 320x240, capture 640x480):
+   1. Crop video to 4:3, downscale to 320x240 (the "CCD") and mirror for the front camera.
+   2. Upscale with smoothing -> built-in softness.
+   3. Per pixel: red/blue channel offset (chromatic aberration), saturation, per-channel gain (colour cast),
+      contrast + brightness, random noise.
+   4. Bloom: shrink to 40x30, keep only highlights, upscale and blend with "screen".
+   5. Vignette, optional hard-flash overexpose, then the date stamp burned in. */
+const $=s=>document.querySelector(s), MAX=50, KEY='y2k_roll';
+const MODES=[
+ {n:'AUTO', g:[1,1,1],       s:1.05,c:1.05,b:4, no:10,bl:.25},
+ {n:'PARTY',g:[1.12,1.02,.86],s:1.25,c:1.2, b:8, no:12,bl:.35,force:1},
+ {n:'NIGHT',g:[.9,1.02,1.18], s:.9, c:1.1, b:26,no:38,bl:.3},
+ {n:'CYBER',g:[.82,1.18,1.12],s:1.3,c:1.15,b:2, no:14,bl:.6},
+ {n:'SEPIA',g:[1.12,.95,.72], s:0,  c:1.1, b:4, no:14,bl:.2},
+ {n:'B&W',  g:[1,1,1],       s:0,  c:1.25,b:0, no:20,bl:.2}
+];
+const FLASH=['AUTO','ON','OFF'];
+let mode=0, flashMode=0, facing='environment', stream=null, busy=false, frozen=false, avgLuma=128, photos=[];
+const video=document.createElement('video'); video.playsInline=true; video.muted=true;
+const view=$('#view'), vctx=view.getContext('2d',{willReadFrequently:true});
+const cap=document.createElement('canvas'); cap.width=640; cap.height=480; const cctx=cap.getContext('2d',{willReadFrequently:true});
+const low=document.createElement('canvas'); low.width=320; low.height=240; const lctx=low.getContext('2d');
+const tiny=document.createElement('canvas'); tiny.width=40; tiny.height=30; const tctx=tiny.getContext('2d',{willReadFrequently:true});
+
+/* ---- audio ---- */
+let ac=null;
+function tone(f,d,type='square',v=.05,t0=0,slide=0){ if(!ac)return; const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+t0;
+ o.type=type;o.frequency.setValueAtTime(f,t); if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);
+ g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d+.02);}
+function noiseBurst(d,v=.15,t0=0){ if(!ac)return; const n=ac.sampleRate*d,b=ac.createBuffer(1,n,ac.sampleRate),a=b.getChannelData(0);
+ for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n); const s=ac.createBufferSource(),g=ac.createGain(); s.buffer=b;g.gain.value=v;s.connect(g).connect(ac.destination);s.start(ac.currentTime+t0);}
+const click=()=>tone(1800,.04,'square',.04);
+const shutterSnd=()=>{noiseBurst(.05,.2);tone(900,.05,'square',.05,.06);noiseBurst(.07,.15,.14);};
+const powerOn=()=>[660,880,1320].forEach((f,i)=>tone(f,.12,'square',.05,i*.1));
+const whine=()=>tone(300,.35,'sawtooth',.03,0,4000);
+
+/* ---- camera ---- */
+async function startCam(){
+ if(stream) stream.getTracks().forEach(t=>t.stop());
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:960}},audio:false});
+  video.srcObject=stream; await video.play(); showMsg('');
+ }catch(e){ stream=null; showMsg('NO CAMERA','Allow camera access, then tap FLIP to retry.'); }
+}
+function showMsg(a,b){const m=$('#msg'); if(!a){m.style.display='none';return;} m.style.display='flex'; m.innerHTML=a+(b?'<small>'+b+'</small>':'');}
+
+/* ---- the filter pipeline ---- */
+let bufs={};
+function render(ctx,W,H,flash){
+ const vw=video.videoWidth,vh=video.videoHeight; if(!vw)return;
+ let sw=vw,sh=vw*3/4; if(sh>vh){sh=vh;sw=vh*4/3;}
+ lctx.save(); if(facing==='user'){lctx.translate(320,0);lctx.scale(-1,1);}
+ lctx.drawImage(video,(vw-sw)/2,(vh-sh)/2,sw,sh,0,0,320,240); lctx.restore();     // step 1
+ ctx.imageSmoothingEnabled=true; ctx.drawImage(low,0,0,W,H);                         // step 2
+ const m=MODES[mode], img=ctx.getImageData(0,0,W,H), src=img.data, k=W+'x'+H;
+ const out=bufs[k]||(bufs[k]=new Uint8ClampedArray(src.length)), o=out;
+ const g=m.g.slice(), sat=m.s*(flash?1.1:1), con=m.c*(flash?1.25:1), br=m.b+(flash?42:0), no=m.no;
+ if(flash){g[0]*=1.05;g[2]*=.95;}
+ let sum=0;
+ for(let y=0,i=0;y<H;y++){ for(let x=0;x<W;x++,i+=4){
+   const il=x>0?i-4:i, ir=x<W-1?i+4:i;                                               // step 3
+   let r=src[il],gg=src[i+1],b=src[ir+2];
+   const l=.3*r+.59*gg+.11*b; sum+=l;
+   r=l+(r-l)*sat; gg=l+(gg-l)*sat; b=l+(b-l)*sat;
+   const n=(Math.random()-.5)*no;
+   o[i]  =(r*g[0]-128)*con+128+br+n;
+   o[i+1]=(gg*g[1]-128)*con+128+br+n;
+   o[i+2]=(b*g[2]-128)*con+128+br+n;
+   o[i+3]=255;
+ }}
+ avgLuma=sum/(W*H); img.data.set(out); ctx.putImageData(img,0,0);
+ // step 4: bloom from highlights only
+ tctx.drawImage(ctx.canvas,0,0,40,30); const t=tctx.getImageData(0,0,40,30),d=t.data;
+ for(let i=0;i<d.length;i+=4){const l=(d[i]+d[i+1]+d[i+2])/3,f=Math.max(0,(l-150)/105)*1.6; d[i]*=f;d[i+1]*=f;d[i+2]*=f;}
+ tctx.putImageData(t,0,0);
+ ctx.save(); ctx.globalCompositeOperation='screen'; ctx.globalAlpha=Math.min(1,m.bl*(flash?1.6:1)); ctx.drawImage(tiny,0,0,W,H); ctx.restore();
+ // step 5: vignette + flash glare
+ const vg=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,W*.68); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,'+(flash?.55:.38)+')');
+ ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+ if(flash){const fg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.5); fg.addColorStop(0,'rgba(255,255,255,.4)'); fg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.fillStyle=fg; ctx.fillRect(0,0,W,H); ctx.restore();}
+ stamp(ctx,W,H);
+}
+function stamp(ctx,W,H){
+ const d=new Date(),p=n=>String(n).padStart(2,'0');
+ const s=`${p(d.getDate())}.${p(d.getMonth()+1)}.${p(d.getFullYear()%100)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+ ctx.font=`${Math.round(H*.085)}px VT323, monospace`; ctx.textAlign='right'; ctx.textBaseline='alphabetic';
+ ctx.fillStyle='#ffa530'; ctx.shadowColor='rgba(255,120,0,.8)'; ctx.shadowBlur=H*.012; ctx.fillText(s,W-W*.04,H-H*.05); ctx.shadowBlur=0;
+}
+
+/* ---- loop (~15 fps like a cheap LCD) ---- */
+let last=0;
+function loop(t){ requestAnimationFrame(loop); if(frozen||!stream||t-last<66)return; last=t; render(vctx,320,240,false); }
+
+/* ---- HUD ---- */
+function hud(){
+ $('#hMode').textContent=MODES[mode].n; $('#hFlash').textContent='⚡'+(flashMode===2?'✕':FLASH[flashMode][0]);
+ $('#hLeft').textContent='▣ '+(MAX-photos.length); $('#bFlash').textContent='FLASH '+FLASH[flashMode];
+ document.querySelectorAll('#modes button').forEach((b,i)=>b.classList.toggle('on',i===mode));
+}
+MODES.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.n;b.onclick=()=>{mode=i;click();hud();};$('#modes').appendChild(b);});
+$('#bFlash').onclick=()=>{flashMode=(flashMode+1)%3;click();hud();};
+$('#bFlip').onclick=async()=>{facing=facing==='user'?'environment':'user';click();await startCam();};
+
+/* ---- storage ---- */
+function load(){try{photos=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){photos=[];}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(photos));return true;}catch(e){return false;}}
+
+/* ---- shutter ---- */
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function shoot(){
+ if(busy||!stream)return;
+ if(photos.length>=MAX){showMsg('MEMORY FULL','Delete shots in MEMORY STICK.');setTimeout(()=>showMsg(''),1800);return;}
+ busy=true;
+ const fl=MODES[mode].force&&flashMode!==2||flashMode===1||(flashMode===0&&avgLuma<85);
+ if(fl){whine();await wait(250);}
+ render(cctx,640,480,fl);
+ shutterSnd();
+ if(fl){const f=$('#flashfx');f.style.transition='none';f.style.opacity=1;requestAnimationFrame(()=>{f.style.transition='opacity .45s ease-out';f.style.opacity=0;});}
+ frozen=true; vctx.drawImage(cap,0,0,320,240);
+ showMsg('<span class="hg">⌛</span>','SAVING...');
+ await wait(900);
+ const src=cap.toDataURL('image/jpeg',.6);
+ photos.push({id:Date.now(),src});
+ if(!persist()){photos.pop();showMsg('SAVE ERROR','Storage is full.');await wait(1500);}
+ else{showMsg('');const t=$('#thumb');t.src=src;t.style.display='block';t.onclick=openGal;setTimeout(()=>t.style.display='none',2200);}
+ frozen=false;busy=false;hud();
+}
+$('#shutter').onclick=shoot;
+addEventListener('keydown',e=>{if(e.code==='Space'&&$('#splash').style.display==='none'&&$('#gal').style.display!=='flex'){e.preventDefault();shoot();}});
+
+/* ---- gallery ---- */
+let cur=null;
+function openGal(){click();$('#gal').style.display='flex';drawGrid();}
+function drawGrid(){
+ const g=$('#grid');g.innerHTML='';$('#galcount').textContent='MEMORY STICK  '+photos.length+'/'+MAX;
+ if(!photos.length){g.innerHTML='<p>NO IMAGES</p>';return;}
+ photos.forEach(p=>{const i=new Image();i.src=p.src;i.alt='Photo';i.onclick=()=>{cur=p;$('#vimg').src=p.src;$('#viewer').style.display='flex';click();};g.appendChild(i);});
+}
+$('#bGal').onclick=openGal;
+$('#bBack').onclick=()=>{$('#gal').style.display='none';click();hud();};
+$('#vBack').onclick=()=>{$('#viewer').style.display='none';click();};
+$('#vDel').onclick=()=>{photos=photos.filter(p=>p!==cur);persist();$('#viewer').style.display='none';drawGrid();hud();};
+const blobOf=src=>fetch(src).then(r=>r.blob());
+async function save(filename,data){
+ let dl=null; try{dl=await claude.use('downloads');}catch(e){}
+ if(dl){try{await dl.save({filename,data});}catch(e){}}
+ else{const a=document.createElement('a');a.href=URL.createObjectURL(data);a.download=filename;a.click();}
+}
+const dscName=p=>'DSC'+String(photos.indexOf(p)+1).padStart(5,'0')+'.jpg';
+$('#vSave').onclick=async()=>save(dscName(cur),await blobOf(cur.src));
+/* tiny "stored" ZIP writer so the whole roll downloads as one file */
+function crc32(u){let c,t=crc32.t||(crc32.t=Array.from({length:256},(_,n)=>{c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;return c>>>0;}));let r=-1;for(let i=0;i<u.length;i++)r=t[(r^u[i])&255]^(r>>>8);return(r^-1)>>>0;}
+async function zipAll(){
+ const parts=[],cd=[];let off=0;
+ for(const p of photos){
+  const u=new Uint8Array(await (await blobOf(p.src)).arrayBuffer()),nm=new TextEncoder().encode(dscName(p)),c=crc32(u);
+  const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint32(14,c,true);h.setUint32(18,u.length,true);h.setUint32(22,u.length,true);h.setUint16(26,nm.length,true);
+  parts.push(h.buffer,nm,u);
+  const e=new DataView(new ArrayBuffer(46));e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint32(16,c,true);e.setUint32(20,u.length,true);e.setUint32(24,u.length,true);e.setUint16(28,nm.length,true);e.setUint32(42,off,true);
+  cd.push(e.buffer,nm);off+=30+nm.length+u.length;
+ }
+ const cs=cd.reduce((a,b)=>a+(b.byteLength),0),end=new DataView(new ArrayBuffer(22));
+ end.setUint32(0,0x06054b50,true);end.setUint16(8,photos.length,true);end.setUint16(10,photos.length,true);end.setUint32(12,cs,true);end.setUint32(16,off,true);
+ return new Blob([...parts,...cd,end.buffer],{type:'application/zip'});
+}
+$('#bAll').onclick=async()=>{if(!photos.length)return;save('y2k-digicam-roll.zip',await zipAll());};
+
+/* ---- power on ---- */
+$('#splash').onclick=async()=>{
+ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); powerOn();
+ $('#splash').style.display='none'; load(); hud(); showMsg('<span class="hg">⌛</span>','STARTING...');
+ try{await document.fonts.load('20px VT323');}catch(e){}
+ await startCam(); requestAnimationFrame(loop);
+};
+load();hud();
+</script>
+</body>
+</html>

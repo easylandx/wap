@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Y2K Digicam • CyberShot ’03</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #1a1a1a;
+      font-family: 'Share Tech Mono', monospace;
+      color: #e0e0e0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+    }
+
+    /* ===== SPLASH / POWER ON ===== */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(145deg, #2a2a2a, #111);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      transition: opacity 0.6s;
+    }
+
+    #splash.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .splash-box {
+      background: linear-gradient(180deg, #c0c0c0, #888);
+      border: 4px solid #555;
+      border-radius: 12px;
+      padding: 30px 40px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 2px 0 #eee;
+      max-width: 320px;
+    }
+
+    .splash-title {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 18px;
+      color: #222;
+      margin-bottom: 8px;
+      text-shadow: 1px 1px 0 #fff;
+    }
+
+    .splash-sub {
+      font-size: 13px;
+      color: #444;
+      margin-bottom: 20px;
+    }
+
+    .power-btn {
+      background: linear-gradient(180deg, #ff4444, #cc0000);
+      border: 3px solid #800;
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #600, inset 0 2px 0 #ff8888;
+      transition: transform 0.1s;
+    }
+
+    .power-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #600;
+    }
+
+    /* ===== MAIN CAMERA BODY ===== */
+    #app {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+      height: 100%;
+      max-height: 780px;
+      background: linear-gradient(160deg, #b8b8b8, #7a7a7a);
+      border-radius: 24px;
+      border: 6px solid #555;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.7), inset 0 2px 0 #ddd;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #app.active {
+      display: flex;
+    }
+
+    /* Top bar */
+    .top-bar {
+      background: #333;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      border-bottom: 3px solid #222;
+    }
+
+    .status {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .battery {
+      width: 22px;
+      height: 11px;
+      border: 1px solid #aaa;
+      position: relative;
+    }
+    .battery::after {
+      content: '';
+      position: absolute;
+      right: -3px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: #aaa;
+    }
+    .battery-fill {
+      height: 100%;
+      width: 70%;
+      background: #4f4;
+    }
+
+    /* Viewfinder */
+    .viewfinder-wrap {
+      flex: 1;
+      margin: 12px;
+      background: #000;
+      border: 5px solid #222;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px #000;
+    }
+
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* mirror for selfie feel, can toggle */
+    }
+
+    #video.back {
+      transform: scaleX(1);
+    }
+
+    .lcd-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.25) 100%);
+    }
+
+    .date-stamp {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      color: #ffcc00;
+      text-shadow: 1px 1px 0 #000;
+      letter-spacing: 1px;
+      opacity: 0.9;
+    }
+
+    .mode-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.5);
+      padding: 3px 8px;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+
+    .remaining {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.5);
+      padding: 3px 8px;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+
+    /* Flash effect */
+    #flash {
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.08s;
+    }
+
+    /* Controls */
+    .controls {
+      padding: 12px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mode-row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      background: #444;
+      border: 2px solid #222;
+      color: #ccc;
+      padding: 6px 10px;
+      font-size: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .mode-btn.active {
+      background: #ff6600;
+      color: #fff;
+      border-color: #cc4400;
+    }
+
+    .main-buttons {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .btn {
+      background: linear-gradient(180deg, #ddd, #999);
+      border: 3px solid #555;
+      border-radius: 50%;
+      width: 54px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #222;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #444, inset 0 2px 0 #fff;
+      transition: all 0.1s;
+    }
+
+    .btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #444;
+    }
+
+    .shutter {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(180deg, #fff, #ccc);
+      border: 4px solid #333;
+      font-size: 13px;
+    }
+
+    .shutter:active {
+      background: #eee;
+    }
+
+    /* Gallery */
+    #gallery {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: #222;
+      z-index: 50;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #gallery.active {
+      display: flex;
+    }
+
+    .gallery-header {
+      padding: 12px;
+      background: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #111;
+    }
+
+    .gallery-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .thumb {
+      aspect-ratio: 4/3;
+      background: #111;
+      border: 2px solid #444;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .thumb-actions {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: space-around;
+      padding: 4px;
+      font-size: 10px;
+    }
+
+    .thumb-actions span {
+      cursor: pointer;
+      color: #0f0;
+    }
+
+    .empty-msg {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* Processing overlay */
+    #processing {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 40;
+      font-size: 16px;
+      color: #0f0;
+    }
+
+    #processing.show {
+      display: flex;
+    }
+
+    canvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SPLASH -->
+  <div id="splash">
+    <div class="splash-box">
+      <div class="splash-title">Y2K DIGICAM</div>
+      <div class="splash-sub">CyberShot ’03 Series<br>Memory Stick™ Ready</div>
+      <button class="power-btn" id="powerBtn">POWER<br>ON</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app">
+    <div class="top-bar">
+      <div class="status">
+        <span id="modeName">AUTO</span>
+      </div>
+      <div class="status">
+        <div class="battery"><div class="battery-fill"></div></div>
+        <span id="shotCount">27</span>
+      </div>
+    </div>
+
+    <div class="viewfinder-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <div class="lcd-overlay"></div>
+      <div id="flash"></div>
+      <div class="mode-label" id="modeLabel">AUTO</div>
+      <div class="remaining" id="remaining">27 left</div>
+      <div class="date-stamp" id="dateStamp">03.11.26 14:37</div>
+      <div id="processing">Saving to Memory Stick...</div>
+    </div>
+
+    <div class="controls">
+      <div class="mode-row">
+        <button class="mode-btn active" data-mode="auto">AUTO</button>
+        <button class="mode-btn" data-mode="party">PARTY</button>
+        <button class="mode-btn" data-mode="night">NIGHT</button>
+        <button class="mode-btn" data-mode="cyber">CYBER</button>
+      </div>
+
+      <div class="main-buttons">
+        <button class="btn" id="flipBtn">FLIP</button>
+        <button class="btn shutter" id="shutterBtn">SHUTTER</button>
+        <button class="btn" id="galleryBtn">GALLERY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <div id="gallery">
+    <div class="gallery-header">
+      <button class="btn" style="width:auto;padding:0 12px;border-radius:8px;" id="backBtn">← BACK</button>
+      <span>Memory Stick</span>
+      <button class="btn" style="width:auto;padding:0 12px;border-radius:8px;" id="clearBtn">CLR</button>
+    </div>
+    <div class="gallery-grid" id="galleryGrid">
+      <div class="empty-msg">No photos yet.<br>Go take some!</div>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <script>
+    // ===== STATE =====
+    let stream = null;
+    let currentFacing = 'user'; // or 'environment'
+    let currentMode = 'auto';
+    let photos = JSON.parse(localStorage.getItem('y2k_digicam_photos') || '[]');
+    let maxShots = 27;
+    let remaining = maxShots - photos.length;
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const flashEl = document.getElementById('flash');
+    const processing = document.getElementById('processing');
+    const dateStamp = document.getElementById('dateStamp');
+
+    // ===== POWER ON =====
+    document.getElementById('powerBtn').addEventListener('click', async () => {
+      document.getElementById('splash').classList.add('hidden');
+      document.getElementById('app').classList.add('active');
+      await startCamera();
+      updateUI();
+      setInterval(updateDateStamp, 1000);
+      updateDateStamp();
+    });
+
+    // ===== CAMERA =====
+    async function startCamera() {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+      }
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: currentFacing,
+            width: { ideal: 1280 },
+            height: { ideal: 960 }
+          },
+          audio: false
+        });
+        video.srcObject = stream;
+        video.classList.toggle('back', currentFacing === 'environment');
+      } catch (err) {
+        alert('Camera access denied or not available.\nPlease allow camera permission.');
+        console.error(err);
+      }
+    }
+
+    document.getElementById('flipBtn').addEventListener('click', () => {
+      currentFacing = currentFacing === 'user' ? 'environment' : 'user';
+      startCamera();
+    });
+
+    // ===== MODES =====
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMode = btn.dataset.mode;
+        updateUI();
+        applyLiveFilter();
+      });
+    });
+
+    function applyLiveFilter() {
+      // Simple CSS filters for live preview
+      let filter = '';
+      switch (currentMode) {
+        case 'party':
+          filter = 'brightness(1.15) contrast(1.1) saturate(1.3) sepia(0.15)';
+          break;
+        case 'night':
+          filter = 'brightness(0.9) contrast(1.2) saturate(0.8) hue-rotate(-10deg)';
+          break;
+        case 'cyber':
+          filter = 'brightness(1.05) contrast(1.15) saturate(1.4) hue-rotate(160deg) sepia(0.2)';
+          break;
+        default: // auto
+          filter = 'brightness(1.05) contrast(1.05) saturate(1.1)';
+      }
+      video.style.filter = filter;
+    }
+
+    // ===== DATE STAMP =====
+    function updateDateStamp() {
+      const now = new Date();
+      const d = String(now.getDate()).padStart(2, '0');
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const y = String(now.getFullYear()).slice(-2);
+      const h = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      dateStamp.textContent = `${d}.${m}.${y} ${h}:${min}`;
+    }
+
+    function updateUI() {
+      document.getElementById('modeName').textContent = currentMode.toUpperCase();
+      document.getElementById('modeLabel').textContent = currentMode.toUpperCase();
+      remaining = Math.max(0, maxShots - photos.length);
+      document.getElementById('shotCount').textContent = remaining;
+      document.getElementById('remaining').textContent = remaining + ' left';
+      applyLiveFilter();
+    }
+
+    // ===== CAPTURE =====
+    document.getElementById('shutterBtn').addEventListener('click', takePhoto);
+
+    async function takePhoto() {
+      if (remaining <= 0) {
+        alert('Memory Stick full! Clear some photos.');
+        return;
+      }
+      if (!stream) return;
+
+      // Flash effect
+      flashEl.style.opacity = '0.85';
+      setTimeout(() => flashEl.style.opacity = '0', 90);
+
+      processing.classList.add('show');
+
+      // Wait a tiny bit for flash
+      await new Promise(r => setTimeout(r, 100));
+
+      // Capture
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      canvas.width = w;
+      canvas.height = h;
+
+      // Mirror if front camera
+      ctx.save();
+      if (currentFacing === 'user') {
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0, w, h);
+      ctx.restore();
+
+      // Apply digicam processing
+      applyDigicamLook(ctx, w, h, currentMode);
+
+      // Add date stamp
+      ctx.font = 'bold 28px "Share Tech Mono", monospace';
+      ctx.fillStyle = '#ffcc00';
+      ctx.shadowColor = '#000';
+      ctx.shadowBlur = 2;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 1;
+      const stamp = dateStamp.textContent;
+      ctx.fillText(stamp, w - ctx.measureText(stamp).width - 20, h - 20);
+
+      // Soft vignette
+      const gradient = ctx.createRadialGradient(w/2, h/2, h*0.3, w/2, h/2, h*0.8);
+      gradient.addColorStop(0, 'rgba(0,0,0,0)');
+      gradient.addColorStop(1, 'rgba(0,0,0,0.35)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // Convert to data URL
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+      // Save
+      photos.unshift({
+        id: Date.now(),
+        data: dataUrl,
+        mode: currentMode,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('y2k_digicam_photos', JSON.stringify(photos));
+      updateUI();
+
+      setTimeout(() => {
+        processing.classList.remove('show');
+      }, 600);
+    }
+
+    // ===== DIGICAM LOOK PROCESSING =====
+    function applyDigicamLook(ctx, w, h, mode) {
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+
+      // Simple noise + color adjustments
+      for (let i = 0; i < data.length; i += 4) {
+        let r = data[i];
+        let g = data[i + 1];
+        let b = data[i + 2];
+
+        // Mild softness simulation via slight averaging is expensive,
+        // so we add noise and channel shifts instead.
+
+        // Noise
+        const noise = (Math.random() - 0.5) * 18;
+        r += noise;
+        g += noise;
+        b += noise;
+
+        // Mode-specific color cast
+        if (mode === 'party') {
+          r = r * 1.12 + 12;
+          g = g * 1.05 + 5;
+          b = b * 0.92;
+        } else if (mode === 'night') {
+          r = r * 0.95;
+          g = g * 0.98;
+          b = b * 1.08 + 8;
+          // more noise already added
+        } else if (mode === 'cyber') {
+          r = r * 0.85;
+          g = g * 1.15 + 10;
+          b = b * 1.25 + 15;
+        } else {
+          // auto - slight warm
+          r = r * 1.04 + 5;
+          g = g * 1.02;
+          b = b * 0.98;
+        }
+
+        // Mild contrast boost
+        r = (r - 128) * 1.08 + 128;
+        g = (g - 128) * 1.08 + 128;
+        b = (b - 128) * 1.08 + 128;
+
+        data[i]     = Math.max(0, Math.min(255, r));
+        data[i + 1] = Math.max(0, Math.min(255, g));
+        data[i + 2] = Math.max(0, Math.min(255, b));
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      // Slight blur for CCD softness (optional, performance hit)
+      // For better softness you can drawImage scaled down then up, but keep simple
+    }
+
+    // ===== GALLERY =====
+    document.getElementById('galleryBtn').addEventListener('click', () => {
+      renderGallery();
+      document.getElementById('gallery').classList.add('active');
+    });
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+      document.getElementById('gallery').classList.remove('active');
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      if (confirm('Clear all photos from Memory Stick?')) {
+        photos = [];
+        localStorage.setItem('y2k_digicam_photos', '[]');
+        updateUI();
+        renderGallery();
+      }
+    });
+
+    function renderGallery() {
+      const grid = document.getElementById('galleryGrid');
+      grid.innerHTML = '';
+
+      if (photos.length === 0) {
+        grid.innerHTML = '<div class="empty-msg">No photos yet.<br>Go take some!</div>';
+        return;
+      }
+
+      photos.forEach((p, idx) => {
+        const div = document.createElement('div');
+        div.className = 'thumb';
+        div.innerHTML = `
+          <img src="${p.data}" alt="photo">
+          <div class="thumb-actions">
+            <span onclick="downloadPhoto(${idx})">↓</span>
+            <span onclick="deletePhoto(${idx})">✕</span>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    window.downloadPhoto = function(idx) {
+      const a = document.createElement('a');
+      a.href = photos[idx].data;
+      a.download = `y2k_digicam_${photos[idx].id}.jpg`;
+      a.click();
+    };
+
+    window.deletePhoto = function(idx) {
+      photos.splice(idx, 1);
+      localStorage.setItem('y2k_digicam_photos', JSON.stringify(photos));
+      updateUI();
+      renderGallery();
+    };
+
+    // Init remaining count
+    updateUI();
+  </script>
+</body>
+</html>

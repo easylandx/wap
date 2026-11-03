@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CYBER-SHOT '03 - Y2K Digicam</title>
+    <!-- Tailwind CSS for modern layout structure combined with custom Y2K styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Fonts */
+        .font-digital { font-family: 'VT323', monospace; }
+        .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+        .font-cyber { font-family: 'Orbitron', sans-serif; }
+
+        /* Metallic / Retro Plastic Chassis Styling */
+        .digicam-body {
+            background: linear-gradient(135deg, #e6e9ef 0%, #d0d5df 40%, #a2abb9 70%, #c4cbd7 100%);
+            box-shadow: 
+                inset 2px 2px 5px rgba(255, 255, 255, 0.9),
+                inset -3px -3px 8px rgba(0, 0, 0, 0.4),
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                0 2px 0 #8993a4;
+            border-radius: 28px;
+            border: 2px solid #8e97a5;
+            position: relative;
+        }
+
+        /* Decorative Screw Head */
+        .screw {
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #d1d5db 30%, #6b7280 80%, #374151 100%);
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0,0,0,0.4);
+            position: relative;
+        }
+        .screw::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 2px;
+            width: 6px;
+            height: 2px;
+            background: #1f2937;
+            transform: rotate(45deg);
+        }
+
+        /* LCD Screen Bezel Frame */
+        .lcd-frame {
+            background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+            border: 4px solid #374151;
+            box-shadow: 
+                inset 0 0 10px rgba(0,0,0,0.9),
+                0 2px 4px rgba(255,255,255,0.4);
+            border-radius: 12px;
+        }
+
+        .lcd-screen {
+            position: relative;
+            background-color: #050b07;
+            overflow: hidden;
+            border-radius: 6px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Tactile Metallic Buttons */
+        .btn-retro {
+            background: linear-gradient(180deg, #ffffff 0%, #d1d5db 50%, #9ca3af 100%);
+            box-shadow: 
+                0 4px 0 #4b5563,
+                0 5px 8px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+            border: 1px solid #6b7280;
+            transition: all 0.05s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .btn-retro:active, .btn-retro.active {
+            transform: translateY(3px);
+            box-shadow: 
+                0 1px 0 #4b5563,
+                0 2px 4px rgba(0,0,0,0.4),
+                inset 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(180deg, #9ca3af 0%, #d1d5db 100%);
+        }
+
+        /* Large Shutter Button Special */
+        .shutter-btn {
+            background: radial-gradient(circle, #f3f4f6 0%, #9ca3af 70%, #4b5563 100%);
+            box-shadow: 
+                0 6px 0 #374151,
+                0 8px 15px rgba(0,0,0,0.5),
+                inset 0 2px 4px rgba(255,255,255,0.9);
+            border: 2px solid #6b7280;
+        }
+        .shutter-btn:active {
+            transform: translateY(4px);
+            box-shadow: 
+                0 2px 0 #374151,
+                0 3px 6px rgba(0,0,0,0.4),
+                inset 0 3px 6px rgba(0,0,0,0.5);
+        }
+
+        /* Power LED Indicator */
+        .led-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #374151;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        .led-indicator.on {
+            background-color: #10b981;
+            box-shadow: 0 0 8px #10b981, inset 0 1px 1px #a7f3d0;
+        }
+
+        /* Flash Screen Animation */
+        @keyframes flash-burst {
+            0% { opacity: 1; background-color: #ffffff; }
+            100% { opacity: 0; background-color: transparent; }
+        }
+        .flash-active {
+            animation: flash-burst 0.45s ease-out forwards;
+        }
+
+        /* Scanline Overlay for retro LCD feel */
+        .scanlines {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.15) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar for Gallery */
+        .retro-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .retro-scroll::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        .retro-scroll::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex items-center justify-center p-2 sm:p-4 select-none font-mono-tech">
+
+    <!-- MAIN CAMERA SHELL CONTAINER -->
+    <div class="digicam-body w-full max-w-md p-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden">
+        
+        <!-- TOP BRANDING & SCREWS BAR -->
+        <div class="flex items-center justify-between border-b border-gray-400/40 pb-2">
+            <div class="screw"></div>
+            <div class="flex items-center gap-2">
+                <span class="font-cyber font-extrabold text-sm sm:text-base tracking-wider text-slate-800 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">
+                    CYBER-SHOT <span class="text-red-600 text-xs tracking-normal">CCD 3.2MP</span>
+                </span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1.5 bg-gray-400/30 px-2 py-0.5 rounded-full border border-gray-400/50">
+                    <span class="text-[10px] font-bold text-slate-700">POWER</span>
+                    <div id="powerLed" class="led-indicator"></div>
+                </div>
+                <div class="screw"></div>
+            </div>
+        </div>
+
+        <!-- MAIN VIEWPORT DISPLAY FRAME (LCD SCREEN) -->
+        <div class="lcd-frame p-2 relative">
+            <div id="lcdViewport" class="lcd-screen aspect-[4/3] w-full relative flex items-center justify-center">
+                
+                <!-- Splash / Power-Off Screen -->
+                <div id="splashScreen" class="absolute inset-0 z-30 bg-zinc-900 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-500">
+                    <div class="border-2 border-amber-500/60 p-4 rounded-lg bg-zinc-950/80 shadow-lg max-w-xs">
+                        <div class="font-cyber text-amber-500 text-lg font-bold mb-1 tracking-widest">CYBER-SHOT '03</div>
+                        <div class="text-xs text-amber-300/80 mb-4 font-digital tracking-wider">MEMORY STICK COMPACT CCD</div>
+                        <button id="powerBtn" class="btn-retro px-4 py-2 text-xs font-bold text-slate-800 rounded-full flex items-center justify-center gap-2 mx-auto uppercase tracking-wide">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Power On
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Processing Overlay (Hourglass/Saving) -->
+                <div id="processingBadge" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-black/85 text-amber-400 border border-amber-500/50 px-4 py-2 rounded text-xs font-digital tracking-widest flex items-center gap-2">
+                    <span class="animate-spin text-sm">⏳</span> SAVING TO STICK...
+                </div>
+
+                <!-- Screen Flash Layer -->
+                <div id="flashOverlay" class="absolute inset-0 z-20 pointer-events-none"></div>
+
+                <!-- Live Viewfinder Canvas -->
+                <canvas id="cameraCanvas" class="w-full h-full object-cover rounded"></canvas>
+
+                <!-- CRT Scanline Grid Effect -->
+                <div class="scanlines absolute inset-0 pointer-events-none rounded"></div>
+
+                <!-- OSD Overlay (On-Screen Display Icons) -->
+                <div id="osdLayer" class="hidden absolute inset-0 p-3 pointer-events-none flex flex-col justify-between font-digital text-amber-400 text-sm sm:text-base tracking-widest z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                    <!-- Top OSD Bar -->
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col gap-0.5">
+                            <span id="osdMode" class="bg-black/40 px-1.5 py-0.5 rounded border border-amber-500/30 text-xs">MODE: AUTO</span>
+                            <span id="osdFlash" class="bg-black/40 px-1.5 py-0.5 rounded border border-amber-500/30 text-xs">FLASH: AUTO</span>
+                        </div>
+                        <div class="flex flex-col items-end gap-0.5">
+                            <div class="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded border border-amber-500/30 text-xs">
+                                <span>MEM:</span>
+                                <span id="osdShots" class="text-amber-300">24/64</span>
+                            </div>
+                            <span id="osdZoom" class="text-xs text-amber-300/80">1.0x</span>
+                        </div>
+                    </div>
+
+                    <!-- Bottom OSD Bar -->
+                    <div class="flex justify-between items-end">
+                        <div class="flex items-center gap-1">
+                            <div class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div>
+                            <span class="text-xs text-red-500">CCD READY</span>
+                        </div>
+                        <!-- Classic Yellow Digicam Timestamp -->
+                        <div id="osdTimestamp" class="text-amber-400 font-bold text-sm sm:text-base tracking-wider drop-shadow-[0_1px_3px_rgba(0,0,0,1)]">
+                            '03 11 26 14:37
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden video tag for WebRTC feed -->
+                <video id="videoFeed" playsinline autoplay class="hidden"></video>
+            </div>
+        </div>
+
+        <!-- CAMERA HARDWARE CONTROLS PANEL -->
+        <div id="controlsPanel" class="opacity-50 pointer-events-none transition-opacity duration-300 flex flex-col gap-3">
+            
+            <!-- Top Controls Row: Zoom Slider & Flash/Cam Switchers -->
+            <div class="flex items-center justify-between gap-2 px-1">
+                <div class="flex items-center gap-2 bg-gray-300/60 border border-gray-400/60 p-1.5 rounded-xl shadow-inner flex-1">
+                    <span class="text-[10px] font-bold text-slate-700">ZOOM</span>
+                    <input type="range" id="zoomSlider" min="1" max="4" step="0.2" value="1" class="w-full h-1.5 bg-slate-400 rounded-lg appearance-none cursor-pointer accent-slate-700">
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <button id="flashBtn" class="btn-retro px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-slate-800 flex items-center gap-1" title="Toggle Flash Mode">
+                        ⚡ <span id="flashBtnText">AUTO</span>
+                    </button>
+                    <button id="flipCamBtn" class="btn-retro p-1.5 rounded-lg text-slate-800" title="Switch Camera">
+                        🔄
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mode Selector Dial Buttons -->
+            <div class="grid grid-cols-5 gap-1 bg-gray-400/30 p-1.5 rounded-xl border border-gray-400/50">
+                <button data-mode="AUTO" class="mode-btn btn-retro active py-1 rounded text-[10px] font-bold text-slate-800">AUTO</button>
+                <button data-mode="PARTY" class="mode-btn btn-retro py-1 rounded text-[10px] font-bold text-slate-800">PARTY</button>
+                <button data-mode="NIGHT" class="mode-btn btn-retro py-1 rounded text-[10px] font-bold text-slate-800">NIGHT</button>
+                <button data-mode="CYBER" class="mode-btn btn-retro py-1 rounded text-[10px] font-bold text-slate-800">CYBER</button>
+                <button data-mode="BW" class="mode-btn btn-retro py-1 rounded text-[10px] font-bold text-slate-800">B&W</button>
+            </div>
+
+            <!-- Main Trigger Row: Gallery & Big Shutter Button -->
+            <div class="flex items-center justify-between pt-1">
+                <!-- Gallery / Memory Stick Button -->
+                <button id="galleryBtn" class="btn-retro px-3 py-2 rounded-xl text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    💾 <span class="hidden sm:inline">STICK</span>
+                    <span id="galleryCountBadge" class="bg-slate-700 text-amber-300 text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+
+                <!-- Center Main Tactile Shutter Button -->
+                <button id="shutterBtn" class="shutter-btn w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center cursor-pointer transition-transform active:scale-95 shadow-lg">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-slate-400/60 bg-gradient-to-t from-gray-200 to-white shadow-inner"></div>
+                </button>
+
+                <!-- Sound Mute/Unmute Toggle -->
+                <button id="soundBtn" class="btn-retro px-3 py-2 rounded-xl text-xs font-bold text-slate-800">
+                    🔊
+                </button>
+            </div>
+        </div>
+
+        <!-- FOOTER LOGO & SCREWS -->
+        <div class="flex items-center justify-between border-t border-gray-400/40 pt-2 text-[10px] text-slate-600">
+            <div class="screw"></div>
+            <span>DIGITAL STILL CAMERA MVC-Y2K</span>
+            <div class="screw"></div>
+        </div>
+    </div>
+
+    <!-- MEMORY STICK GALLERY MODAL -->
+    <div id="galleryModal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col p-4 sm:p-6 backdrop-blur-md">
+        <div class="max-w-2xl w-full mx-auto bg-zinc-900 border-2 border-gray-600 rounded-2xl flex flex-col h-full overflow-hidden shadow-2xl">
+            <!-- Modal Header -->
+            <div class="bg-zinc-800 px-4 py-3 border-b border-zinc-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-amber-500 font-cyber text-sm">MEMORY STICK PRO</span>
+                    <span id="galleryCapacity" class="text-xs text-zinc-400 font-digital">0 / 64 PHOTOS</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="downloadAllBtn" class="btn-retro text-xs px-2.5 py-1 rounded font-bold text-slate-800">💾 ZIP / ALL</button>
+                    <button id="clearAllBtn" class="btn-retro text-xs px-2.5 py-1 rounded font-bold text-red-700">🗑 CLEAR</button>
+                    <button id="closeGalleryBtn" class="btn-retro text-xs px-2.5 py-1 rounded font-bold text-slate-800">❌ CLOSE</button>
+                </div>
+            </div>
+
+            <!-- Photos Grid -->
+            <div id="galleryGrid" class="flex-1 p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto retro-scroll">
+                <!-- Dynamic photos injected here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyGalleryState" class="flex-1 flex flex-col items-center justify-center text-zinc-500 gap-2">
+                <span class="text-4xl">📷</span>
+                <span class="font-digital text-base">NO PICTURES STORED ON MEMORY STICK</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL PHOTO INSPECTOR MODAL -->
+    <div id="photoViewerModal" class="fixed inset-0 bg-black/95 z-60 hidden flex-col items-center justify-center p-4">
+        <div class="relative max-w-lg w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 flex flex-col gap-3">
+            <div class="flex justify-between items-center text-xs font-digital text-amber-400">
+                <span id="viewerInfo">640x480 CCD CAPTURE</span>
+                <button id="closeViewerBtn" class="text-zinc-400 hover:text-white text-base">✕</button>
+            </div>
+            <img id="viewerImage" src="" class="w-full h-auto rounded border border-zinc-800 bg-black">
+            <div class="flex justify-between items-center pt-1">
+                <button id="deleteSingleBtn" class="btn-retro px-3 py-1 text-xs font-bold text-red-700 rounded">DELETE</button>
+                <a id="downloadSingleBtn" download="Y2K_PHOTO.jpg" class="btn-retro px-4 py-1 text-xs font-bold text-slate-800 rounded">DOWNLOAD</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC & CANVAS FILTER PIPELINE -->
+    <script>
+        /**
+         * Y2K DIGICAM - Core State & Audio Engine Architecture
+         */
+        const AppState = {
+            poweredOn: false,
+            soundEnabled: true,
+            currentMode: 'AUTO', // AUTO, PARTY, NIGHT, CYBER, BW
+            flashMode: 'AUTO',   // AUTO, ON, OFF
+            zoomLevel: 1.0,
+            facingMode: 'user', // 'user' or 'environment'
+            maxShots: 64,
+            photos: [],
+            activePhotoId: null,
+            stream: null
+        };
+
+        // DOM Elements References
+        const elements = {
+            powerBtn: document.getElementById('powerBtn'),
+            powerLed: document.getElementById('powerLed'),
+            splashScreen: document.getElementById('splashScreen'),
+            controlsPanel: document.getElementById('controlsPanel'),
+            osdLayer: document.getElementById('osdLayer'),
+            osdMode: document.getElementById('osdMode'),
+            osdFlash: document.getElementById('osdFlash'),
+            osdShots: document.getElementById('osdShots'),
+            osdZoom: document.getElementById('osdZoom'),
+            osdTimestamp: document.getElementById('osdTimestamp'),
+            videoFeed: document.getElementById('videoFeed'),
+            canvas: document.getElementById('cameraCanvas'),
+            ctx: document.getElementById('cameraCanvas').getContext('2d', { willReadFrequently: true }),
+            shutterBtn: document.getElementById('shutterBtn'),
+            flashBtn: document.getElementById('flashBtn'),
+            flashBtnText: document.getElementById('flashBtnText'),
+            flipCamBtn: document.getElementById('flipCamBtn'),
+            zoomSlider: document.getElementById('zoomSlider'),
+            soundBtn: document.getElementById('soundBtn'),
+            flashOverlay: document.getElementById('flashOverlay'),
+            processingBadge: document.getElementById('processingBadge'),
+            galleryBtn: document.getElementById('galleryBtn'),
+            galleryCountBadge: document.getElementById('galleryCountBadge'),
+            galleryModal: document.getElementById('galleryModal'),
+            closeGalleryBtn: document.getElementById('closeGalleryBtn'),
+            galleryGrid: document.getElementById('galleryGrid'),
+            emptyGalleryState: document.getElementById('emptyGalleryState'),
+            galleryCapacity: document.getElementById('galleryCapacity'),
+            downloadAllBtn: document.getElementById('downloadAllBtn'),
+            clearAllBtn: document.getElementById('clearAllBtn'),
+            photoViewerModal: document.getElementById('photoViewerModal'),
+            viewerImage: document.getElementById('viewerImage'),
+            viewerInfo: document.getElementById('viewerInfo'),
+            closeViewerBtn: document.getElementById('closeViewerBtn'),
+            downloadSingleBtn: document.getElementById('downloadSingleBtn'),
+            deleteSingleBtn: document.getElementById('deleteSingleBtn'),
+            modeBtns: document.querySelectorAll('.mode-btn')
+        };
+
+        // Web Audio API Synthesizer (Zero External Audio Assets Needed)
+        const SoundFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+            },
+            playBeep(freq = 800, type = 'sine', duration = 0.08) {
+                if (!AppState.soundEnabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            playPowerOn() {
+                if (!AppState.soundEnabled || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(now + 0.4);
+            },
+            playShutter() {
+                if (!AppState.soundEnabled || !this.ctx) return;
+                // Mechanical shutter click: Noise burst + low pitch thump
+                const now = this.ctx.currentTime;
+                // Mechanical Click Noise
+                const bufferSize = this.ctx.sampleRate * 0.05;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 1000;
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+                noise.start(now);
+
+                // Low Mechanical Thump
+                const osc = this.ctx.createOscillator();
+                const oscGain = this.ctx.createGain();
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.08);
+                oscGain.gain.setValueAtTime(0.4, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.connect(oscGain);
+                oscGain.connect(this.ctx.destination);
+                osc.start(now);
+            },
+            playFlashWhine() {
+                if (!AppState.soundEnabled || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(4500, now + 0.4);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+        };
+
+        /**
+         * WebRTC Camera Engine & Stream Management
+         */
+        async function startCamera() {
+            if (AppState.stream) {
+                AppState.stream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: {
+                    facingMode: AppState.facingMode,
+                    width: { ideal: 1280 },
+                    height: { ideal: 960 }
+                },
+                audio: false
+            };
+
+            try {
+                AppState.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                elements.videoFeed.srcObject = AppState.stream;
+                await elements.videoFeed.play();
+                requestAnimationFrame(renderLoop);
+            } catch (err) {
+                console.warn("Camera access denied or unavailable, switching to fallback canvas pattern.", err);
+                renderFallbackAnimation();
+            }
+        }
+
+        /**
+         * Canvas Processing Pipeline:
+         * Simulates early 2000s low-res CCD sensor characteristics:
+         * 1. Barrel Distortion & Digital Zoom crop
+         * 2. Chromatic Aberration & Soft Highlight Bloom
+         * 3. Mode Color Grading (Party tungsten, Night cool tone, Cyber green)
+         * 4. CCD High ISO Noise Granulation
+         * 5. Retro Digital Time/Date Stamp Overlay
+         */
+        function renderLoop() {
+            if (!AppState.poweredOn) return;
+
+            const video = elements.videoFeed;
+            const canvas = elements.canvas;
+            const ctx = elements.ctx;
+
+            // Match canvas dimensions to viewport maintaining 4:3 Digicam aspect ratio
+            if (canvas.width !== 640) canvas.width = 640;
+            if (canvas.height !== 480) canvas.height = 480;
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                // Handle Digital Zoom crop mapping
+                const zoom = AppState.zoomLevel;
+                const sw = video.videoWidth / zoom;
+                const sh = video.videoHeight / zoom;
+                const sx = (video.videoWidth - sw) / 2;
+                const sy = (video.videoHeight - sh) / 2;
+
+                // Render Base Video Frame
+                ctx.drawImage(video, sx, sy, sw, sh, 0, 0, w, h);
+            } else {
+                // Canvas fallback if video isn't ready
+                ctx.fillStyle = '#1c1917';
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            // Apply CCD Filter Pipeline on live buffer
+            applyCCDFilterPipeline(ctx, w, h, AppState.currentMode);
+
+            // Draw Digital Timestamp
+            drawTimestamp(ctx, w, h);
+
+            // Continuously loop animation
+            requestAnimationFrame(renderLoop);
+        }
+
+        // Fallback for devices without active camera permissions
+        function renderFallbackAnimation() {
+            const canvas = elements.canvas;
+            const ctx = elements.ctx;
+            canvas.width = 640;
+            canvas.height = 480;
+
+            function animateNoCam() {
+                if (!AppState.poweredOn) return;
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(0, 0, 640, 480);
+                
+                // Draw test pattern circles
+                const time = Date.now() * 0.002;
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(320, 240, 80 + Math.sin(time) * 10, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '20px "Share Tech Mono"';
+                ctx.textAlign = 'center';
+                ctx.fillText('NO CAMERA FEED - SENSOR TEST', 320, 240);
+
+                applyCCDFilterPipeline(ctx, 640, 480, AppState.currentMode);
+                drawTimestamp(ctx, 640, 480);
+
+                requestAnimationFrame(animateNoCam);
+            }
+            animateNoCam();
+        }
+
+        /**
+         * Core Filter Processing Routine
+         */
+        function applyCCDFilterPipeline(ctx, w, h, mode) {
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+
+            // Chromatic Aberration & Color Cast Matrix Tuning
+            let rMult = 1.0, gMult = 1.0, bMult = 1.0;
+            let contrast = 1.0;
+            let noiseLevel = 12;
+
+            switch(mode) {
+                case 'PARTY':
+                    // Hard tungsten warmth + rich glow
+                    rMult = 1.25; gMult = 1.05; bMult = 0.8;
+                    contrast = 1.15;
+                    noiseLevel = 18;
+                    break;
+                case 'NIGHT':
+                    // High ISO noise + cool desaturated tones
+                    rMult = 0.85; gMult = 0.95; bMult = 1.2;
+                    contrast = 1.05;
+                    noiseLevel = 38;
+                    break;
+                case 'CYBER':
+                    // Y2K matrix green/cyan hue shift
+                    rMult = 0.7; gMult = 1.3; bMult = 1.15;
+                    contrast = 1.2;
+                    noiseLevel = 22;
+                    break;
+                case 'BW':
+                    // Retro grainy monochrome
+                    contrast = 1.3;
+                    noiseLevel = 25;
+                    break;
+                case 'AUTO':
+                default:
+                    // Subtle CCD warm vintage default
+                    rMult = 1.05; gMult = 1.02; bMult = 0.95;
+                    noiseLevel = 14;
+                    break;
+            }
+
+            // Pixel-level Manipulation
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i];
+                let g = data[i + 1];
+                let b = data[i + 2];
+
+                if (mode === 'BW') {
+                    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                    r = g = b = gray;
+                }
+
+                // Apply Color Tonal Multipliers
+                r *= rMult;
+                g *= gMult;
+                b *= bMult;
+
+                // Apply Contrast Adjustment
+                r = ((r / 255 - 0.5) * contrast + 0.5) * 255;
+                g = ((g / 255 - 0.5) * contrast + 0.5) * 255;
+                b = ((b / 255 - 0.5) * contrast + 0.5) * 255;
+
+                // Inject Synthetic CCD Sensor Noise
+                if (noiseLevel > 0) {
+                    const noise = (Math.random() - 0.5) * noiseLevel;
+                    r += noise;
+                    g += noise;
+                    b += noise;
+                }
+
+                // Clamp final values
+                data[i]     = Math.min(255, Math.max(0, r));
+                data[i + 1] = Math.min(255, Math.max(0, g));
+                data[i + 2] = Math.min(255, Math.max(0, b));
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+
+            // Vignette Simulation Layer (Corner darkening characteristic of cheap 2000s lenses)
+            const gradient = ctx.createRadialGradient(w/2, h/2, w*0.35, w/2, h/2, w*0.7);
+            gradient.addColorStop(0, 'rgba(0,0,0,0)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0.35)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        /**
+         * Render Classic Digicam Yellow Digital Date/Time Stamp
+         */
+        function drawTimestamp(ctx, w, h) {
+            const now = new Date();
+            const year = String(now.getFullYear()).slice(-2);
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+
+            const dateStr = `'${year} ${month} ${day} ${hours}:${mins}`;
+
+            ctx.save();
+            ctx.font = '24px "VT323", monospace';
+            ctx.fillStyle = '#fbbf24'; // Classic glowing amber-yellow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 1;
+            ctx.shadowOffsetY = 1;
+            ctx.textAlign = 'right';
+            ctx.fillText(dateStr, w - 20, h - 20);
+            ctx.restore();
+
+            // Update live OSD text
+            elements.osdTimestamp.textContent = dateStr;
+        }
+
+        /**
+         * Camera Operation & Trigger Shutter Logic
+         */
+        async function capturePhoto() {
+            if (!AppState.poweredOn || AppState.photos.length >= AppState.maxShots) return;
+
+            // Trigger Flash Effect if enabled or AUTO
+            const isFlashNeeded = AppState.flashMode === 'ON' || (AppState.flashMode === 'AUTO' && Math.random() > 0.4);
+            
+            if (isFlashNeeded) {
+                SoundFX.playFlashWhine();
+                elements.flashOverlay.classList.remove('flash-active');
+                void elements.flashOverlay.offsetWidth; // Trigger reflow for CSS animation reset
+                elements.flashOverlay.classList.add('flash-active');
+            }
+
+            SoundFX.playShutter();
+            elements.processingBadge.classList.remove('hidden');
+
+            // Brief delay to simulate CCD processing and writing to Memory Stick
+            setTimeout(() => {
+                const photoCanvas = document.createElement('canvas');
+                photoCanvas.width = 640;
+                photoCanvas.height = 480;
+                const pCtx = photoCanvas.getContext('2d');
+
+                // Transfer frame from active viewport canvas
+                pCtx.drawImage(elements.canvas, 0, 0);
+
+                const dataUrl = photoCanvas.toDataURL('image/jpeg', 0.88);
+                const newPhoto = {
+                    id: Date.now(),
+                    dataUrl: dataUrl,
+                    date: new Date().toLocaleDateString(),
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    mode: AppState.currentMode
+                };
+
+                AppState.photos.unshift(newPhoto);
+                savePhotosToStorage();
+                updateUIState();
+
+                elements.processingBadge.classList.add('hidden');
+            }, 400);
+        }
+
+        /**
+         * Storage & Local Persistence Logic
+         */
+        function savePhotosToStorage() {
+            try {
+                localStorage.setItem('y2k_digicam_photos', JSON.stringify(AppState.photos));
+            } catch (e) {
+                console.warn("Storage quota exceeded, unable to save to localStorage.", e);
+            }
+        }
+
+        function loadPhotosFromStorage() {
+            const stored = localStorage.getItem('y2k_digicam_photos');
+            if (stored) {
+                try {
+                    AppState.photos = JSON.parse(stored);
+                } catch (e) {
+                    AppState.photos = [];
+                }
+            }
+        }
+
+        /**
+         * UI Updating & Event Handlers
+         */
+        function updateUIState() {
+            // Update OSD texts
+            elements.osdMode.textContent = `MODE: ${AppState.currentMode}`;
+            elements.osdFlash.textContent = `FLASH: ${AppState.flashMode}`;
+            elements.osdShots.textContent = `${AppState.photos.length}/${AppState.maxShots}`;
+            elements.osdZoom.textContent = `${AppState.zoomLevel.toFixed(1)}x`;
+
+            elements.flashBtnText.textContent = AppState.flashMode;
+            elements.galleryCountBadge.textContent = AppState.photos.length;
+
+            // Highlight Active Mode Button
+            elements.modeBtns.forEach(btn => {
+                if (btn.dataset.mode === AppState.currentMode) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function togglePower() {
+            SoundFX.init();
+            AppState.poweredOn = !AppState.poweredOn;
+
+            if (AppState.poweredOn) {
+                SoundFX.playPowerOn();
+                elements.powerLed.classList.add('on');
+                elements.splashScreen.classList.add('opacity-0', 'pointer-events-none');
+                elements.controlsPanel.classList.remove('opacity-50', 'pointer-events-none');
+                elements.osdLayer.classList.remove('hidden');
+                startCamera();
+            } else {
+                elements.powerLed.classList.remove('on');
+                elements.splashScreen.classList.remove('opacity-0', 'pointer-events-none');
+                elements.controlsPanel.classList.add('opacity-50', 'pointer-events-none');
+                elements.osdLayer.classList.add('hidden');
+                if (AppState.stream) {
+                    AppState.stream.getTracks().forEach(track => track.stop());
+                }
+            }
+        }
+
+        // Memory Stick Gallery Rendering
+        function openGallery() {
+            SoundFX.playBeep(600);
+            elements.galleryModal.classList.remove('hidden');
+            elements.galleryModal.classList.add('flex');
+            renderGalleryGrid();
+        }
+
+        function closeGallery() {
+            SoundFX.playBeep(400);
+            elements.galleryModal.classList.add('hidden');
+            elements.galleryModal.classList.remove('flex');
+        }
+
+        function renderGalleryGrid() {
+            elements.galleryGrid.innerHTML = '';
+            elements.galleryCapacity.textContent = `${AppState.photos.length} / ${AppState.maxShots} PHOTOS`;
+
+            if (AppState.photos.length === 0) {
+                elements.emptyGalleryState.classList.remove('hidden');
+                return;
+            }
+
+            elements.emptyGalleryState.classList.add('hidden');
+
+            AppState.photos.forEach(photo => {
+                const card = document.createElement('div');
+                card.className = "relative group aspect-[4/3] bg-black border border-zinc-700 rounded overflow-hidden cursor-pointer hover:border-amber-500 transition-colors";
+                card.innerHTML = `
+                    <img src="${photo.dataUrl}" class="w-full h-full object-cover">
+                    <div class="absolute bottom-0 inset-x-0 bg-black/70 px-2 py-1 text-[10px] font-digital text-amber-400 flex justify-between">
+                        <span>${photo.mode}</span>
+                        <span>${photo.date}</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => openPhotoViewer(photo.id));
+                elements.galleryGrid.appendChild(card);
+            });
+        }
+
+        function openPhotoViewer(photoId) {
+            const photo = AppState.photos.find(p => p.id === photoId);
+            if (!photo) return;
+
+            AppState.activePhotoId = photoId;
+            elements.viewerImage.src = photo.dataUrl;
+            elements.viewerInfo.textContent = `640x480 | MODE: ${photo.mode} | ${photo.date} ${photo.time}`;
+            elements.downloadSingleBtn.href = photo.dataUrl;
+            elements.downloadSingleBtn.download = `Y2K_CAM_${photo.id}.jpg`;
+            
+            elements.photoViewerModal.classList.remove('hidden');
+            elements.photoViewerModal.classList.add('flex');
+        }
+
+        function closePhotoViewer() {
+            elements.photoViewerModal.classList.add('hidden');
+            elements.photoViewerModal.classList.remove('flex');
+        }
+
+        function deleteActivePhoto() {
+            if (!AppState.activePhotoId) return;
+            AppState.photos = AppState.photos.filter(p => p.id !== AppState.activePhotoId);
+            savePhotosToStorage();
+            updateUIState();
+            closePhotoViewer();
+            renderGalleryGrid();
+            SoundFX.playBeep(300);
+        }
+
+        function clearAllPhotos() {
+            if (confirm("FORMAT MEMORY STICK? ALL PHOTOS WILL BE ERASED!")) {
+                AppState.photos = [];
+                savePhotosToStorage();
+                updateUIState();
+                renderGalleryGrid();
+                SoundFX.playBeep(200);
+            }
+        }
+
+        function downloadAllPhotos() {
+            if (AppState.photos.length === 0) return;
+            AppState.photos.forEach((photo, idx) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = photo.dataUrl;
+                    link.download = `Y2K_DIGICAM_${photo.id}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, idx * 250);
+            });
+        }
+
+        // Attach Event Listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPhotosFromStorage();
+            updateUIState();
+
+            // Power button
+            elements.powerBtn.addEventListener('click', togglePower);
+
+            // Shutter
+            elements.shutterBtn.addEventListener('click', capturePhoto);
+
+            // Flash mode toggle
+            elements.flashBtn.addEventListener('click', () => {
+                SoundFX.playBeep(900);
+                const modes = ['AUTO', 'ON', 'OFF'];
+                const nextIdx = (modes.indexOf(AppState.flashMode) + 1) % modes.length;
+                AppState.flashMode = modes[nextIdx];
+                updateUIState();
+            });
+
+            // Camera Flip
+            elements.flipCamBtn.addEventListener('click', () => {
+                SoundFX.playBeep(700);
+                AppState.facingMode = AppState.facingMode === 'user' ? 'environment' : 'user';
+                if (AppState.poweredOn) startCamera();
+            });
+
+            // Zoom Slider
+            elements.zoomSlider.addEventListener('input', (e) => {
+                AppState.zoomLevel = parseFloat(e.target.value);
+                updateUIState();
+            });
+
+            // Filter Mode Selector Buttons
+            elements.modeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    SoundFX.playBeep(850);
+                    AppState.currentMode = btn.dataset.mode;
+                    updateUIState();
+                });
+            });
+
+            // Sound Toggle
+            elements.soundBtn.addEventListener('click', () => {
+                AppState.soundEnabled = !AppState.soundEnabled;
+                elements.soundBtn.textContent = AppState.soundEnabled ? '🔊' : '🔇';
+            });
+
+            // Gallery Listeners
+            elements.galleryBtn.addEventListener('click', openGallery);
+            elements.closeGalleryBtn.addEventListener('click', closeGallery);
+            elements.closeViewerBtn.addEventListener('click', closePhotoViewer);
+            elements.deleteSingleBtn.addEventListener('click', deleteActivePhoto);
+            elements.clearAllBtn.addEventListener('click', clearAllPhotos);
+            elements.downloadAllBtn.addEventListener('click', downloadAllPhotos);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#bfc2c2">
+<title>Y2K Digicam — CyberShot '03</title>
+<style>
+:root{--metal1:#f5f6f4;--metal2:#aeb4b6;--ink:#222a2c;--lcd:#182c2b;--lime:#d8f36b;--orange:#ff9b48}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#252b2e;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+body{display:grid;place-items:center;padding:18px;background:radial-gradient(ellipse at 50% 0%,#596267 0,#252b2e 62%)}
+button{font:inherit;cursor:pointer}
+.camera{width:min(100%,980px);padding:16px;border-radius:30px;background:linear-gradient(145deg,#f3f4f1,#aeb4b7 38%,#e0e2df 62%,#90999d);box-shadow:0 25px 70px #0009,inset 0 2px 2px #fff;position:relative;border:1px solid #ffffff80}
+.brandline{display:flex;align-items:center;justify-content:space-between;padding:2px 8px 13px;color:#454d50;font-size:11px;letter-spacing:2px;font-weight:800;text-transform:uppercase}
+.brand{font-size:18px;letter-spacing:1px}.brand span{color:#3e7d8d}.model{font-size:10px;letter-spacing:1.5px}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:15px;align-items:stretch}
+.screen-shell{background:linear-gradient(145deg,#454c4e,#171d1f);padding:12px;border-radius:17px;box-shadow:inset 0 3px 8px #000b,0 1px 1px #fff8;min-width:0}
+.screen{background:#081412;border:3px solid #58615e;border-radius:9px;overflow:hidden;position:relative;aspect-ratio:4/3;min-height:220px;box-shadow:0 0 0 1px #000}
+#view{width:100%;height:100%;display:block;object-fit:cover}
+.overlay{position:absolute;inset:0;pointer-events:none;color:#e7f4d0;text-shadow:0 1px 3px #000;font-family:monospace;font-size:12px;padding:10px;display:flex;flex-direction:column;justify-content:space-between}
+.overlay-top,.overlay-bottom{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.rec{color:#ff5d50}.rec:before{content:"●";margin-right:5px}.stamp-preview{color:#fff0a5;letter-spacing:1px}
+#flash{position:absolute;inset:0;background:white;opacity:0;pointer-events:none}
+#toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#07100ddd;color:#e8f8ad;padding:9px 13px;border:1px solid #d8f36b;border-radius:4px;font:12px monospace;display:none}
+.side{display:flex;flex-direction:column;gap:10px;justify-content:space-between}
+.status{background:#1c2928;color:#d7f28a;border:2px solid #65716d;border-radius:7px;padding:10px;font:11px monospace;box-shadow:inset 0 0 12px #000}
+.status strong{font-size:15px;display:block;margin-top:5px;color:#fff}
+.lens{width:62px;height:62px;border-radius:50%;margin:2px auto;background:radial-gradient(circle at 40% 35%,#9ed4d7 0 7%,#244b59 12%,#111d27 32%,#657c84 36%,#18232b 53%,#899395 57%,#333 65%);border:5px solid #727a7b;box-shadow:inset 0 0 0 2px #d5d8d5,0 3px 5px #0006}
+.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.control{border:1px solid #727b7e;border-radius:7px;padding:10px 7px;background:linear-gradient(#fff,#c8cdcc);color:#293033;font-weight:800;font-size:10px;letter-spacing:.7px;box-shadow:0 2px 0 #747d80,0 3px 5px #0003;text-transform:uppercase}
+.control:active,.control.active{transform:translateY(2px);box-shadow:0 0 0 #747d80;background:linear-gradient(#dce7e5,#aeb8b8)}
+.shutter{grid-column:span 2;background:linear-gradient(#ffbd70,#e77c31);color:#381c0b;border-color:#a95a27;font-size:12px;padding:14px}
+.bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;padding:0 6px;color:#485154;font-size:10px;font-weight:800;letter-spacing:1.2px}
+.bottom small{font-weight:600;letter-spacing:.3px}
+.modebar{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px;justify-content:center}
+.mode{border:1px solid #596365;background:linear-gradient(#f7f8f5,#c5cbca);border-radius:20px;padding:7px 13px;font-size:10px;font-weight:900;letter-spacing:1px;color:#30393b}
+.mode.active{background:#d8f36b;border-color:#718a32;box-shadow:0 0 10px #d8f36b70}
+.gallery{margin-top:15px;background:#172321;color:#e8f2d6;border:1px solid #6d7771;border-radius:12px;padding:13px;display:none}
+.gallery-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;font:12px monospace}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px}
+.thumb{background:#293632;padding:5px;border:1px solid #60706a;border-radius:5px;position:relative}
+.thumb img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.thumb small{display:block;font:9px monospace;margin-top:5px;color:#d9e8c5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thumb-actions{display:flex;gap:4px;margin-top:5px}
+.thumb-actions button,.gallery-head button{border:1px solid #718077;background:#d9e6c7;color:#1d2b25;border-radius:4px;padding:5px 7px;font-size:9px;font-weight:800}
+.empty{color:#9ba99d;font:12px monospace;padding:20px;text-align:center}
+.hint{color:#c4ceca;text-align:center;font:11px/1.5 Arial;margin:12px auto 0;max-width:650px}
+@media(max-width:650px){body{padding:7px;display:block}.camera{padding:10px;border-radius:20px;margin:8px auto}.main{grid-template-columns:1fr}.screen{min-height:0}.side{display:grid;grid-template-columns:1fr auto;align-items:center}.status{grid-row:span 2}.lens{display:none}.controls{grid-template-columns:repeat(3,1fr)}.shutter{grid-column:span 3}.control{padding:10px 4px}.brandline{padding-bottom:9px}.bottom{font-size:9px}.modebar{gap:5px}.mode{padding:7px 10px}}
+</style>
+</head>
+<body>
+<div class="camera">
+  <div class="brandline"><div class="brand">CYBER<span>SHOT</span></div><div class="model">DIGITAL STILL CAMERA · DSC-03</div><div>3.2 MEGA PIXELS</div></div>
+  <div class="main">
+    <div class="screen-shell">
+      <div class="screen">
+        <canvas id="view" width="640" height="480"></canvas>
+        <div class="overlay">
+          <div class="overlay-top"><span class="rec">REC</span><span id="modeLabel">AUTO</span><span>▰▰▰</span></div>
+          <div class="overlay-bottom"><span id="flashLabel">⚡ AUTO</span><span class="stamp-preview" id="previewStamp"></span></div>
+        </div>
+        <div id="flash"></div><div id="toast"></div>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="status">MEMORY STICK<strong id="remaining">99 / 99</strong><div style="margin-top:8px">BATTERY ▰▰▰▰</div><div id="cameraStatus" style="margin-top:5px;color:#a8b5a6">CAMERA STANDBY</div></div>
+      <div class="lens"></div>
+      <div class="controls">
+        <button class="control shutter" id="shutter">● SHUTTER</button>
+        <button class="control" id="flip">↔ FLIP</button>
+        <button class="control" id="flashMode">⚡ FLASH AUTO</button>
+        <button class="control" id="galleryBtn">▦ REVIEW</button>
+        <button class="control" id="powerBtn">⏻ POWER</button>
+      </div>
+    </aside>
+  </div>
+  <div class="modebar" id="modes">
+    <button class="mode active" data-mode="auto">AUTO</button><button class="mode" data-mode="party">PARTY</button><button class="mode" data-mode="night">NIGHT</button><button class="mode" data-mode="cyber">CYBER</button><button class="mode" data-mode="sepia">SEPIA</button><button class="mode" data-mode="bw">B&W</button>
+  </div>
+  <div class="bottom"><span>SONY STYLE · MADE FOR MEMORIES</span><small>CCD SENSOR SIMULATION · NO UPLOADS</small><span id="clock">03.11.26</span></div>
+  <section class="gallery" id="gallery">
+    <div class="gallery-head"><span>▣ MEMORY STICK — PHOTO REVIEW</span><div><button id="downloadAll">DOWNLOAD ALL</button> <button id="closeGallery">CLOSE ✕</button></div></div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </section>
+</div>
+<p class="hint">Allow camera access when asked. Camera access generally requires HTTPS or localhost. Your photos are processed in this browser and saved on this device only.</p>
+<video id="camera" autoplay playsinline muted style="display:none"></video>
+<script>
+(() => {
+ const video=document.getElementById('camera'), canvas=document.getElementById('view'), ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const W=640,H=480, modes=['auto','party','night','cyber','sepia','bw'];
+ let stream=null, facing='environment', mode='auto', flashMode='auto', powered=false, busy=false, photos=[];
+ const DB='y2k-digicam-db', STORE='photos', MAX=99;
+ const $=id=>document.getElementById(id);
+ const dateStamp=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).slice(-2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+ function clock(){ $('clock').textContent=dateStamp().slice(0,8); $('previewStamp').textContent=dateStamp(); }
+ setInterval(clock,1000);clock();
+ function dbOpen(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+ async function dbAll(){try{const db=await dbOpen();return await new Promise((res,rej)=>{const r=db.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}catch(e){return []}}
+ async function dbAdd(photo){const db=await dbOpen();return new Promise((res,rej)=>{const r=db.transaction(STORE,'readwrite').objectStore(STORE).add(photo);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+ async function dbDelete(id){const db=await dbOpen();return new Promise((res,rej)=>{const r=db.transaction(STORE,'readwrite').objectStore(STORE).delete(id);r.onsuccess=res;r.onerror=()=>rej(r.error)})}
+ async function refresh(){photos=await dbAll();$('remaining').textContent=`${Math.max(0,MAX-photos.length)} / ${MAX}`;renderGallery()}
+ function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',1200)}
+ async function startCamera(){
+  try{if(stream)stream.getTracks().forEach(t=>t.stop());
+   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:960}},audio:false});
+   video.srcObject=stream;await video.play();powered=true;$('cameraStatus').textContent='LIVE VIEW';$('powerBtn').textContent='⏻ POWER OFF';toast('CAMERA READY');
+  }catch(e){powered=false;$('cameraStatus').textContent='CAMERA UNAVAILABLE';toast(e.name==='NotAllowedError'?'ALLOW CAMERA ACCESS':'USE HTTPS OR LOCALHOST');drawStandby()}
+ }
+ function stopCamera(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;powered=false;$('cameraStatus').textContent='POWER OFF';$('powerBtn').textContent='⏻ POWER';drawStandby()}
+ function drawStandby(){ctx.fillStyle='#101d1b';ctx.fillRect(0,0,W,H);ctx.fillStyle='#c9e889';ctx.font='18px monospace';ctx.textAlign='center';ctx.fillText('CYBERSHOT 03',W/2,H/2-10);ctx.font='12px monospace';ctx.fillText('PRESS POWER TO START',W/2,H/2+20)}
+ // CCD pipeline: mirror front camera, downsample/upsample for a softer sensor image,
+ // apply mode-specific color response, restrained grain, vignette, then bake in the date.
+ function render(target=ctx,stamp=false){
+  if(!powered||video.readyState<2){drawStandby();return}
+  target.save();target.clearRect(0,0,W,H);
+  if(facing==='user'){target.translate(W,0);target.scale(-1,1)}
+  target.drawImage(video,0,0,W,H);target.restore();
+  const im=target.getImageData(0,0,W,H),d=im.data;
+  const grain=mode==='night'?17:mode==='cyber'?8:5;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+   const i=(y*W+x)*4, n=(Math.random()-.5)*grain, r=d[i],g=d[i+1],b=d[i+2];
+   let R=r,G=g,B=b;
+   if(mode==='party'){R=r*1.12+12;G=g*1.02+3;B=b*.83-2}
+   if(mode==='night'){R=r*.83;G=g*.98+4;B=b*1.18+10}
+   if(mode==='cyber'){R=r*.78;G=g*1.12+10;B=b*1.2+13}
+   if(mode==='sepia'){R=r*.393+g*.769+b*.189;G=r*.349+g*.686+b*.168;B=r*.272+g*.534+b*.131}
+   if(mode==='bw'){R=G=B=.299*r+.587*g+.114*b}
+   const vignette=1-.20*Math.pow(Math.sqrt(((x-W/2)/(W*.76))**2+((y-H/2)/(H*.76))**2),2);
+   d[i]=Math.max(0,Math.min(255,R*vignette+n));d[i+1]=Math.max(0,Math.min(255,G*vignette+n));d[i+2]=Math.max(0,Math.min(255,B*vignette+n));
+  }
+  target.putImageData(im,0,0);
+  if(stamp){target.fillStyle=mode==='cyber'?'#d8ff85':'#fff0a1';target.font='bold 18px monospace';target.textAlign='right';target.shadowColor='#000';target.shadowBlur=3;target.fillText(dateStamp(),W-14,H-14);target.shadowBlur=0}
+ }
+ function loop(){if(powered&&!busy){try{render()}catch(e){}}requestAnimationFrame(loop)}loop();
+ function setMode(m){mode=m;$('modeLabel').textContent=m.toUpperCase();document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('active',b.dataset.mode===m))}
+ document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);clickSound()}));
+ function clickSound(){try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=mode==='cyber'?880:620;g.gain.setValueAtTime(.035,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.07);o.start();o.stop(a.currentTime+.08);o.onended=()=>a.close()}catch(e){}}
+ async function takePhoto(){
+  if(!powered||busy){toast('POWER ON CAMERA FIRST');return}if(photos.length>=MAX){toast('MEMORY STICK FULL');return}
+  busy=true;const flash=$('flash');flash.style.transition='none';flash.style.opacity='1';
+  setTimeout(()=>{flash.style.transition='opacity .55s';flash.style.opacity='0'},90);
+  clickSound();toast('SAVING…');
+  const out=document.createElement('canvas');out.width=W;out.height=H;const c=out.getContext('2d',{willReadFrequently:true});
+  // Party mode and AUTO flash use a bright white flash exposure boost.
+  render(c,true);
+  const boost=flashMode==='on'||(flashMode==='auto'&&mode==='party');
+  if(boost){const im=c.getImageData(0,0,W,H),d=im.data;for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*1.13+13);d[i+1]=Math.min(255,d[i+1]*1.13+13);d[i+2]=Math.min(255,d[i+2]*1.13+13)}c.putImageData(im,0,0)}
+  out.toBlob(async blob=>{try{await dbAdd({blob,created:Date.now(),mode});await refresh();toast('SAVED TO MEMORY STICK')}catch(e){toast('MEMORY ERROR — STORAGE FULL')}busy=false},'image/jpeg',.88);
+ }
+ $('shutter').addEventListener('click',takePhoto);
+ $('powerBtn').addEventListener('click',()=>powered?stopCamera():startCamera());
+ $('flip').addEventListener('click',async()=>{facing=facing==='environment'?'user':'environment';if(powered)await startCamera();clickSound()});
+ $('flashMode').addEventListener('click',()=>{flashMode=flashMode==='auto'?'on':flashMode==='on'?'off':'auto';$('flashMode').textContent='⚡ FLASH '+flashMode.toUpperCase();$('flashLabel').textContent='⚡ '+flashMode.toUpperCase();clickSound()});
+ function renderGallery(){const grid=$('galleryGrid');grid.innerHTML='';if(!photos.length){grid.innerHTML='<div class="empty">NO PHOTOS YET — YOUR NEXT MEMORY GOES HERE</div>';return}
+  photos.slice().reverse().forEach(p=>{const url=URL.createObjectURL(p.blob),el=document.createElement('div');el.className='thumb';const img=document.createElement('img');img.src=url;const cap=document.createElement('small');cap.textContent=`${p.mode.toUpperCase()} · ${new Date(p.created).toLocaleString()}`;const actions=document.createElement('div');actions.className='thumb-actions';const dl=document.createElement('button');dl.textContent='SAVE';dl.onclick=()=>downloadBlob(p.blob,`cybershot-${p.id}.jpg`);const del=document.createElement('button');del.textContent='DELETE';del.onclick=async()=>{await dbDelete(p.id);await refresh()};actions.append(dl,del);el.append(img,cap,actions);grid.append(el)})}
+ function downloadBlob(blob,name){const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+ $('galleryBtn').addEventListener('click',async()=>{$('gallery').style.display='block';await refresh();$('gallery').scrollIntoView({behavior:'smooth',block:'nearest'})});
+ $('closeGallery').addEventListener('click',()=>$('gallery').style.display='none');
+ $('downloadAll').addEventListener('click',()=>{if(!photos.length){toast('NO PHOTOS TO DOWNLOAD');return}photos.forEach((p,i)=>setTimeout(()=>downloadBlob(p.blob,`cybershot-${p.id||i+1}.jpg`),i*350))});
+ refresh();drawStandby();
+})();
+</script>
+</body></html>
