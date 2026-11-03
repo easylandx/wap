@@ -366,7 +366,9 @@ if(window.visualViewport)visualViewport.addEventListener('resize',fit);
 try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{});}catch(e){}
 fit();hideBar();
 /* ---- WhatsApp: pick a photo from the camera roll, copy it to the clipboard (nothing is saved), open WhatsApp with the message so the photo can be pasted ---- */
-const SHARE_TEXT='Taken with DigiPro https://easylandx.github.io/digipro', WA_URL='https://wa.me/?text='+encodeURIComponent(SHARE_TEXT);
+const SHARE_TEXT='Taken with DigiPro https://easylandx.github.io/digipro', IS_DESKTOP=!(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)),
+ WA_URL=(IS_DESKTOP?'https://web.whatsapp.com/send?text=':'https://wa.me/?text=')+encodeURIComponent(SHARE_TEXT);   // desktop goes straight to WhatsApp Web
+const WA_APP='whatsapp://send?text='+encodeURIComponent(SHARE_TEXT);   // phones open the WhatsApp app itself
 let waBlob=null;
 const pngOf=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;c.getContext('2d').drawImage(i,0,0);c.toBlob(x=>x?ok(x):no(),'image/png');};i.onerror=no;i.src=src;});
 const copyPhoto=()=>navigator.clipboard.write([new ClipboardItem({'image/png':waBlob})]);
@@ -377,8 +379,8 @@ $('#bWa').onclick=async()=>{
  if(!p){noteMsg('NO IMAGES');return;}
  click(); waBlob=pngOf(p.src);        // a promise: the clipboard accepts it while the tap is still fresh
  let ok=true; try{await copyPhoto();}catch(err){ok=false;}
- if(ok){noteMsg('PHOTO COPIED'); if(!window.open(WA_URL,'_blank'))setBtn('OPEN WHATSAPP');}
+ if(ok){noteMsg('PHOTO COPIED'); if(IS_DESKTOP){if(!window.open(WA_URL,'_blank'))setBtn('OPEN WHATSAPP');} else location.href=WA_APP;}
  else setBtn('COPY & OPEN WHATSAPP');
 };
-$('#bSend').onclick=()=>{$('#bSend').style.display='none'; if(waBlob)copyPhoto().catch(()=>noteMsg('COPY FAILED')); window.open(WA_URL,'_blank');};
+$('#bSend').onclick=()=>{$('#bSend').style.display='none'; if(waBlob)copyPhoto().catch(()=>noteMsg('COPY FAILED')); if(IS_DESKTOP)window.open(WA_URL,'_blank'); else location.href=WA_APP;};
 </script></body></html>
