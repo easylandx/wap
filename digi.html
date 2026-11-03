@@ -92,7 +92,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
  <button id="shutter" aria-label="Shutter">Shutter</button>
  <button class="fab" id="bWa" aria-label="Send photos on WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5a9.4 9.4 0 0 0-8 14.3L2.7 21.5l4.8-1.2A9.4 9.4 0 1 0 12 2.5zm0 1.9a7.5 7.5 0 1 1-3.9 13.9l-.3-.2-2.8.7.8-2.7-.2-.3A7.5 7.5 0 0 1 12 4.4z"/><path d="M8.7 7.9c.3-.5.7-.5 1-.4.2.1 1 1.7 1 1.9 0 .3-.5.8-.7 1 .5 1 1.3 1.8 2.5 2.4.2-.3.6-.9.9-.9.3 0 1.7.8 1.8 1 .1.2.1.9-.5 1.4-.7.6-1.700.7-3.100.1-1.900-.8-3.600-2.600-4.200-4.500-.2-.7.1-1.400.5-2z"/></svg></button>
 </div>
-<input type="file" id="waFile" accept="image/*" multiple hidden>
+<input type="file" id="waFile" accept="image/*" hidden>
 <button id="bSend">SEND ON WHATSAPP</button>
 <div class="scr" id="gal"><div id="galin">
   <div id="galtop"><span id="galcount">MEMORY STICK</span><button class="sm" id="bAll">SAVE ALL</button><button class="sm" id="bBack">BACK</button></div>
@@ -197,26 +197,38 @@ function loop(t){ requestAnimationFrame(loop); if(frozen||!stream||t-last<66)ret
 
 /* ---- camera controls: invisible hit zones laid over the photo of the real camera ---- */
 const IW=1448,IH=1086,wait0=ms=>new Promise(r=>setTimeout(r,ms));
-function hud(){
+function hud(){hud0();if(playing){$('#hMode').textContent='PLAY ▶';$('#hFlash').textContent='◀ ▶';$('#hLeft').textContent=(pIdx+1)+'/'+photos.length;$('#hZoom').textContent='DSC'+String(pIdx+1).padStart(5,'0');}}
+function hud0(){
  $('#hudTop').style.display=$('#hudBot').style.display=showHud?'flex':'none';
  $('#hMode').textContent=MODES[mode].n+(facing==='user'?' SELF':'');
  $('#hFlash').textContent='⚡'+(flashMode===2?'✕':FLASH[flashMode][0]);
  $('#hLeft').textContent='▣ '+(MAX-photos.length);
  $('#hZoom').textContent=zoom>1?'ZOOM '+zoom.toFixed(1)+'x':'SIZE 640×480';
 }
-function setMode(i){mode=(i+MODES.length)%MODES.length;hud();}
+function setMode(i){ if(playing){ if(photos.length){pIdx+=i>mode?1:-1;drawPlay();} return;} mode=(i+MODES.length)%MODES.length;hud();}
 function cycleFlash(){flashMode=(flashMode+1)%3;hud();noteMsg('FLASH '+FLASH[flashMode]);}
 function setZoom(d){zoom=Math.min(4,Math.max(1,zoom+d));hud();}
 function noteMsg(a,b){showMsg(a,b);setTimeout(()=>{if(!busy&&stream)showMsg('');},1300);}
 function trashLast(){
+ if(playing){
+  if(delArm>Date.now()){photos.splice(pIdx,1);persist();delArm=0;if(!photos.length){exitPlay();noteMsg('DELETED');return;}drawPlay();noteMsg('DELETED');}
+  else{delArm=Date.now()+2500;noteMsg('DELETE THIS?','Press again');}
+  return;
+ }
  if(!photos.length){noteMsg('NO IMAGES');return;}
  if(delArm>Date.now()){photos.pop();persist();delArm=0;noteMsg('DELETED');hud();}
  else{delArm=Date.now()+2500;noteMsg('DELETE LAST?','Press again');}
 }
+/* playback: the play button shows the saved photos on the LCD; ◀ ▶ browse them, OK opens one, shutter goes back to shooting */
+let playing=false,pIdx=0;
+function playToggle(){ if(busy||flipping)return; if(playing){exitPlay();return;} if(!photos.length){noteMsg('NO IMAGES');return;} playing=true;frozen=true;showMsg('');pIdx=photos.length-1;drawPlay(); }
+function exitPlay(){playing=false;frozen=false;showMsg('');hud();}
+function drawPlay(){pIdx=(pIdx+photos.length)%photos.length;const im=new Image();im.onload=()=>{if(playing)vctx.drawImage(im,0,0,320,240);};im.src=photos[pIdx].src;hud();}
+function okBtn(){ if(playing){cur=photos[pIdx];$('#vimg').src=cur.src;$('#viewer').style.display='flex';} else shoot(); }
 const ZONES=[['Shutter',1095,78,220,60,shoot],['Mode dial',780,80,240,50,()=>setMode(mode+1)],['Menu: next mode',1112,400,90,90,()=>setMode(mode+1)],
  ['Display on/off',1175,488,80,40,()=>{showHud=!showHud;hud();}],['Previous mode',1090,655,70,80,()=>setMode(mode-1)],['Next mode',1280,655,70,80,()=>setMode(mode+1)],
- ['Shutter',1185,655,90,90,shoot],['Flash',1185,745,100,60,cycleFlash],['Photos',1112,848,80,80,()=>openGal()],['Delete last',1275,848,80,80,trashLast],
- ['Zoom in',1340,272,100,80,()=>setZoom(.5)],['Zoom out',1340,352,100,80,()=>setZoom(-.5)]];
+ ['OK',1185,655,90,90,okBtn],['Flash',1185,745,100,60,cycleFlash],['Play',1112,848,80,80,playToggle],['Delete last',1275,848,80,80,trashLast],
+ ['Zoom in',1340,272,100,80,()=>setZoom(.5)],['Zoom out / index',1340,352,100,80,()=>{if(playing)openGal();else setZoom(-.5);}]];
 ZONES.forEach(([n,cx,cy,w,h,fn])=>{
  const z=document.createElement('button'); z.className='zone'; z.setAttribute('aria-label',n);
  z.style.cssText=`left:${(cx-w/2)/IW*100}%;top:${(cy-h/2)/IH*100}%;width:${w/IW*100}%;height:${h/IH*100}%`;
@@ -225,7 +237,7 @@ ZONES.forEach(([n,cx,cy,w,h,fn])=>{
 });
 /* tap the camera body: flip it over, then switch between the rear and front (selfie) camera */
 async function flipCam(){
- if(flipping||busy)return; flipping=true; click();
+ if(flipping||busy||playing)return; flipping=true; click();
  const fl=(MODES[mode].force&&flashMode!==2)||flashMode===1;
  $('#imgFlash').style.display=fl?'block':'none'; $('#imgFront').style.display=fl?'none':'block';
  facing=facing==='user'?'environment':'user'; frozen=true;
@@ -242,7 +254,7 @@ function addUpload(f){return new Promise(done=>{
  const url=URL.createObjectURL(f), im=new Image();
  im.onerror=()=>{done();URL.revokeObjectURL(url);noteMsg('CAN’T OPEN','Try a JPG or PNG.');};
  im.onload=async()=>{
-  busy=true; frozen=true; uploadImg=im; render(cctx,640,480,false); uploadImg=null; URL.revokeObjectURL(url);
+  if(playing)exitPlay(); busy=true; frozen=true; uploadImg=im; render(cctx,640,480,false); uploadImg=null; URL.revokeObjectURL(url);
   vctx.drawImage(cap,0,0,320,240); shutterSnd(); showMsg('<span class="hg">⌛</span>','SAVING...'); await wait0(900);
   const src=cap.toDataURL('image/jpeg',.6); photos.push({id:Date.now(),src});
   if(!persist()){photos.pop();showMsg('SAVE ERROR','Storage is full.');await wait0(1500);}
@@ -265,6 +277,7 @@ function persist(){try{localStorage.setItem(KEY,JSON.stringify(photos));return t
 /* ---- shutter ---- */
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function shoot(){
+ if(playing){exitPlay();return;}
  if(busy||!stream)return;
  if(photos.length>=MAX){showMsg('MEMORY FULL','Delete shots in MEMORY STICK.');setTimeout(()=>showMsg(''),1800);return;}
  busy=true;
@@ -295,8 +308,8 @@ function drawGrid(){
 }
 $('#bGal').onclick=openGal;
 $('#bBack').onclick=()=>{$('#gal').style.display='none';click();hud();};
-$('#vBack').onclick=()=>{$('#viewer').style.display='none';click();};
-$('#vDel').onclick=()=>{photos=photos.filter(p=>p!==cur);persist();$('#viewer').style.display='none';drawGrid();hud();};
+$('#vBack').onclick=()=>{$('#viewer').style.display='none';click();if(playing&&photos.length)drawPlay();};
+$('#vDel').onclick=()=>{photos=photos.filter(p=>p!==cur);persist();$('#viewer').style.display='none';drawGrid();hud();if(playing){if(photos.length)drawPlay();else exitPlay();}};
 const blobOf=src=>fetch(src).then(r=>r.blob());
 async function save(filename,data){
  let dl=null; try{dl=await claude.use('downloads');}catch(e){}
@@ -337,16 +350,22 @@ if(window.visualViewport)visualViewport.addEventListener('resize',fit);
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault()));
 try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{});}catch(e){}
 fit();hideBar();
-/* ---- WhatsApp: choose photos from the camera roll, then share them with the DigiPro message ---- */
-const SHARE_TEXT='Taken with DigiPro https://easylandx.github.io/digipro';
-let waFiles=[];
+/* ---- WhatsApp: pick a photo from the camera roll, copy it to the clipboard (nothing is saved), open WhatsApp with the message so the photo can be pasted ---- */
+const SHARE_TEXT='Taken with DigiPro https://easylandx.github.io/digipro', WA_URL='https://wa.me/?text='+encodeURIComponent(SHARE_TEXT);
+let waBlob=null;
+const toPng=f=>new Promise((ok,no)=>{const u=URL.createObjectURL(f),i=new Image();
+ i.onload=()=>{const s=Math.min(1,2048/Math.max(i.naturalWidth,i.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(i.naturalWidth*s);c.height=Math.round(i.naturalHeight*s);
+  c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?ok(b):no(),'image/png');};
+ i.onerror=no;i.src=u;});
+const copyPhoto=()=>navigator.clipboard.write([new ClipboardItem({'image/png':waBlob})]);
+function setBtn(t){const b=$('#bSend');b.textContent=t;b.style.display='flex';}
 $('#bWa').onclick=()=>{click();$('#waFile').click();};
-$('#waFile').onchange=e=>{waFiles=[...e.target.files];e.target.value='';if(waFiles.length)sendWa();};
-async function sendWa(){
- $('#bSend').style.display='none';
- try{ if(navigator.canShare&&navigator.canShare({files:waFiles})){await navigator.share({files:waFiles,text:SHARE_TEXT});return;} }
- catch(err){ if(err&&err.name==='AbortError')return; $('#bSend').style.display='flex'; return; }
- window.open('https://wa.me/?text='+encodeURIComponent(SHARE_TEXT),'_blank');
-}
-$('#bSend').onclick=sendWa;
+$('#waFile').onchange=async e=>{
+ const f=e.target.files[0]; e.target.value=''; if(!f)return;
+ try{waBlob=await toPng(f);}catch(err){noteMsg('CAN’T OPEN','Try a JPG or PNG.');return;}
+ let ok=true; try{await copyPhoto();}catch(err){ok=false;}
+ if(ok){noteMsg('PHOTO COPIED'); if(!window.open(WA_URL,'_blank'))setBtn('OPEN WHATSAPP');}
+ else setBtn('COPY & OPEN WHATSAPP');
+};
+$('#bSend').onclick=()=>{$('#bSend').style.display='none'; if(waBlob)copyPhoto().catch(()=>noteMsg('COPY FAILED')); window.open(WA_URL,'_blank');};
 </script></body></html>
