@@ -224,14 +224,32 @@ html,body{margin:0;padding:0;background:linear-gradient(to bottom,var(--bg1) 0,v
     if(!photos.length)return;
     var pr=getSlide(idx), text=encodeURIComponent(MSG);
     if(!isMobile()){
-      /* desktop: open WhatsApp Web straight away, slide image is placed on the clipboard */
-      window.open('https://web.whatsapp.com/send?text='+text,'_blank');
-      var done=false;
-      try{
-        navigator.clipboard.write([new ClipboardItem({'image/png':pr})]).then(function(){toast('Slide copied: press Ctrl+V / ⌘V in WhatsApp')}).catch(function(){pr.then(download)});
-        done=true;
-      }catch(e){}
-      if(!done)pr.then(download);
+      /* desktop: copy the slide silently (no permission prompt), then open WhatsApp Web */
+      var openWA=function(){
+        var w=null;try{w=window.open('https://web.whatsapp.com/send?text='+text,'_blank')}catch(e){}
+        if(!w){var a=document.createElement('a');a.href='https://web.whatsapp.com/send?text='+text;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},500)}
+      };
+      var copied=function(){toast('Slide copied: press Ctrl+V / \u2318V in WhatsApp');openWA()};
+      var legacyCopy=function(blob){
+        /* fallback that never asks for permission: select an <img> and execCommand('copy') */
+        var fr=new FileReader();
+        fr.onload=function(){
+          var box=document.createElement('div');box.contentEditable='true';
+          box.style.cssText='position:fixed;left:-9999px;top:0;opacity:0';
+          var im=document.createElement('img');im.src=fr.result;box.appendChild(im);document.body.appendChild(box);
+          var r=document.createRange();r.selectNodeContents(box);
+          var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);
+          var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+          sel.removeAllRanges();box.remove();
+          if(ok)copied();else{download(blob);openWA()}
+        };
+        fr.readAsDataURL(blob);
+      };
+      pr.then(function(blob){
+        if(navigator.clipboard&&window.ClipboardItem){
+          navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(copied).catch(function(){legacyCopy(blob)});
+        }else legacyCopy(blob);
+      });
       return;
     }
     pr.then(function(blob){
