@@ -288,10 +288,15 @@ async function reelBlob(){const d=clips.filter(c=>c.dev);if(!d.length){toast('De
  if(d.length===1)return d[0].dev;toast('Splicing the reel…',60000);return pipe(d.map(c=>c.dev),(x,v)=>x.drawImage(v,0,0,W,H))}
 
 /* ---- downloads + WhatsApp ----
- Save: a normal download link. WhatsApp: opens WhatsApp Web directly with a ready message. No share sheet and no prompts.
+ Save: a normal download link. WhatsApp: on desktop opens WhatsApp Web directly, on a phone opens the WhatsApp app directly, with a ready message. No share sheet and no prompts.
  (A web link can only carry text, so the video itself is attached by hand from the saved file.) */
 function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},4000)}
-function WA(){window.open('https://web.whatsapp.com/send?text='+encodeURIComponent('Filmed on my Super 8 🎞️'),'_blank')}
+const MOB=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform));
+function WA(){const t=encodeURIComponent('Filmed on Super 8 🎞️ https://easylandx.github.io/super');
+ if(MOB){                                   // phone: open the WhatsApp app straight away (no share sheet, no pickers)
+  location.href='whatsapp://send?text='+t;
+  setTimeout(()=>{if(!document.hidden)location.href='https://api.whatsapp.com/send?text='+t},1500)}   // app not installed: fall back to the web link
+ else window.open('https://web.whatsapp.com/send?text='+t,'_blank')}
 const share=WA;
 $('#dlAll').onclick=async()=>{const b=await reelBlob();b&&dl(b,'super8-reel.'+ext())};
 $('#waAll').onclick=WA;
