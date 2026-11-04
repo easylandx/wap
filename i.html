@@ -27,18 +27,44 @@ html,body{margin:0;height:100%;background:#fefefe;overflow:hidden;font-family:sy
 .k.dn{background:rgba(0,0,0,.4);transform:translateY(calc(var(--u)*3)) scale(.93)}
 .k.nv.dn{background:none;transform:none}
 .k.on{background:rgba(255,196,0,.3);box-shadow:inset 0 0 0 calc(var(--u)*3) rgba(255,190,0,.9)}
+
+#aiModal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(20,16,12,.5)}
+#aiModal.on{display:flex}
+#aiCard{width:100%;max-width:480px;max-height:92vh;max-height:92dvh;overflow:auto;background:#fbf9f3;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.4);padding:18px;font-family:system-ui,sans-serif;color:#17171c}
+#aiCard h2{margin:0 0 4px;font:700 21px/1.2 var(--mono)}
+#aiCard .s{margin:0 0 12px;font-size:13px;color:#666}
+#aiTypes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+#aiTypes button{font:600 13.5px/1.25 system-ui,sans-serif;padding:10px 9px;border-radius:10px;border:1px solid #d9d3c6;background:#fff;color:#17171c;cursor:pointer;text-align:left}
+#aiTypes button.sel{background:#17171c;color:#fff;border-color:#17171c}
+.aiF{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;font-size:12px;color:#555}
+.aiF input,.aiF textarea{font:16px system-ui,sans-serif;padding:10px;border:1px solid #d9d3c6;border-radius:10px;background:#fff;color:#17171c;width:100%;resize:none}
+.aiRow{display:flex;gap:10px}.aiRow .aiF{flex:1;min-width:0}
+.aiAct{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.aiAct button{font:600 15px system-ui,sans-serif;padding:11px 18px;border-radius:999px;border:1px solid #d9d3c6;background:#fff;color:#17171c;cursor:pointer}
+.aiAct #aiGo{background:#c4161c;border-color:#c4161c;color:#fff}
+.aiAct #aiGo:disabled{opacity:.4;cursor:default}
+#skip{position:fixed;z-index:85;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);display:none;background:#17171c;color:#fff;border:0;border-radius:999px;padding:11px 18px;font:600 14px system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer}
+#skip.on{display:block}
+#fab2{position:fixed;z-index:60;top:calc(env(safe-area-inset-top,0px) + 66px);right:10px;display:flex;flex-direction:column;gap:10px}
+#fab2 button{width:46px;height:46px;border-radius:50%;border:1px solid #ddd;background:rgba(255,255,255,.94);box-shadow:0 2px 8px rgba(0,0,0,.18);display:grid;place-items:center;padding:0;cursor:pointer}
+#fab2 button:active{transform:scale(.94)}
+#fab2 #bKb{display:none}
+#fab2 #bKb.on{background:#17171c;border-color:#17171c}
+#fab2 #bKb.on svg{stroke:#fff}
+#fab2 #bAI.busy{background:#17171c}
+#fab2 #bAI.busy svg{stroke:#fff}
+
 #ta{position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;font-size:16px;border:0;padding:0;resize:none}
 #fab{position:fixed;z-index:60;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;display:flex;gap:10px}
 #fab button{width:46px;height:46px;border-radius:50%;border:1px solid #ddd;background:rgba(255,255,255,.94);box-shadow:0 2px 8px rgba(0,0,0,.18);display:grid;place-items:center;padding:0;cursor:pointer}
 #fab button:active{transform:scale(.94)}
 #fab #bWA{background:#25D366;border-color:#1fb956}
 #fab #bWA svg{display:block}
-#fab #bKb{display:none;position:absolute;top:calc(100% + 10px);right:0}
-@media (hover:none) and (pointer:coarse){#fab #bKb{display:grid}}
-#fab #bKb.on{background:#17171c;border-color:#17171c}
-#fab #bKb.on svg{stroke:#fff}
-@media (max-width:480px){#title{left:12px;gap:6px;font-size:15px}#title img{width:28px;height:28px;border-radius:7px}#fab{gap:6px;right:8px}#fab button{width:40px;height:40px}#fab button svg{width:22px;height:22px}}
-@media (max-width:360px){#title{left:10px;font-size:14px}#fab{gap:4px;right:6px}#fab button{width:36px;height:36px}#fab button svg{width:20px;height:20px}}
+#fab #bKb-OLD{display:none}
+@media (hover:none) and (pointer:coarse){#fab2 #bKb{display:grid}}
+
+@media (max-width:480px){#title{left:12px;gap:6px;font-size:15px}#title img{width:28px;height:28px;border-radius:7px}#fab{gap:6px;right:8px}#fab button{width:40px;height:40px}#fab button svg{width:22px;height:22px}#fab2{top:calc(env(safe-area-inset-top,0px) + 60px);gap:6px;right:8px}#fab2 button{width:40px;height:40px}#fab2 button svg{width:22px;height:22px}}
+@media (max-width:360px){#title{left:10px;font-size:14px}#fab{gap:4px;right:6px}#fab button{width:36px;height:36px}#fab button svg{width:20px;height:20px}#fab2{top:calc(env(safe-area-inset-top,0px) + 56px);gap:4px;right:6px}#fab2 button{width:36px;height:36px}#fab2 button svg{width:20px;height:20px}}
 #bInk i{width:20px;height:20px;border-radius:50%;background:var(--c,#17171c);box-shadow:0 0 0 3px #fff,0 0 0 4px #bbb}
 #letter{position:fixed;inset:0;z-index:40;display:none;overflow:auto;background:#d8d4cb;padding:calc(env(safe-area-inset-top,0px) + 66px) 12px 28px;touch-action:pan-x pan-y pinch-zoom}
 .page{margin:0 auto 18px;background:radial-gradient(circle at 30% 20%,#fffefb,#fbf9f3 70%,#f6f3ea);box-shadow:0 4px 18px rgba(0,0,0,.28);font-family:var(--mono);white-space:pre;color:#17171c;position:relative;flex:none}
@@ -59,9 +85,21 @@ html,body{margin:0;height:100%;background:#fefefe;overflow:hidden;font-family:sy
 </div>
 <textarea id="ta" inputmode="none" autocorrect="off" autocapitalize="sentences" autocomplete="off" spellcheck="false" aria-label="Type here"></textarea>
 <div id="letter"></div>
+<div id="fab2">
+ <button id="bKb" aria-label="Use the iPhone keyboard"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#17171c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M9.5 16h5"/></svg></button>
+ <button id="bAI" aria-label="Write a letter for me"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#17171c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3l2 5.2L17.2 10 12 12l-2 5.2L8 12 2.8 10 8 8.2z"/><path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9z"/></svg></button>
+</div>
+<div id="aiModal"><div id="aiCard" role="dialog" aria-label="Write a letter">
+ <h2>Write a letter</h2>
+ <p class="s">Pick a type and I’ll type it out for you on the Selectric.</p>
+ <div id="aiTypes"></div>
+ <div class="aiRow"><label class="aiF">To<input id="aiTo" type="text" placeholder="Name (optional)" autocomplete="off"></label><label class="aiF">From<input id="aiFrom" type="text" placeholder="Your name (optional)" autocomplete="off"></label></div>
+ <label class="aiF"><span id="aiHintL">Details (optional)</span><textarea id="aiAbout" rows="2" placeholder="Choose a letter type first" autocomplete="off"></textarea></label>
+ <div class="aiAct"><button id="aiCancel" type="button">Cancel</button><button id="aiGo" type="button" disabled>Write it</button></div>
+</div></div>
+<button id="skip" type="button">Tap to finish typing</button>
 <a id="title" href="https://easylandx.github.io" target="_blank" rel="noopener" aria-label="EasyLandX"><span><b>IBM</b> Selectric</span><img alt="EasyLandX" src="data:image/jpeg;base64,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"></a>
 <div id="fab">
- <button id="bKb" aria-label="Use the iPhone keyboard"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#17171c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M9.5 16h5"/></svg></button>
  <button id="bInk" aria-label="Ribbon colour"><i></i></button>
  <button id="bView" aria-label="Finished letter view"></button>
  <button id="bWA" aria-label="Share on WhatsApp"><svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>
@@ -189,8 +227,8 @@ function buildLetter(){
   h+='</div>'}
  letterEl.innerHTML=h}
 
-function setMode(m){letterMode=m;letterEl.style.display=m?'block':'none';
- $('bInk').style.display=m?'none':'';$('bKb').style.display=m?'none':'';$('bView').innerHTML=m?ICON_TW:ICON_DOC;
+function setMode(m){if(typeof finishAuto==='function')finishAuto();letterMode=m;letterEl.style.display=m?'block':'none';
+ $('bInk').style.display=m?'none':'';$('fab2').style.display=m?'none':'';$('bView').innerHTML=m?ICON_TW:ICON_DOC;
  if(m){ta.blur();lines=wrap(text);buildLetter();letterEl.scrollTop=0}else{ta.focus();}}
 
 ta.addEventListener('input',()=>{const t=ta.value.replace(/\r/g,'');const old=text.length;let p=0;const m=Math.min(t.length,text.length);
@@ -208,7 +246,7 @@ ta.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowUp','Home','PageUp'].inc
  if(e.key==='CapsLock'){sLock();return}
  flashKey(e.key)});
 app.addEventListener('click',()=>{if(!letterMode){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}});
-document.addEventListener('keydown',e=>{if(!letterMode&&document.activeElement!==ta&&$('intro').style.display==='none')ta.focus()});
+document.addEventListener('keydown',e=>{if(!letterMode&&!aiOpen&&document.activeElement!==ta&&$('intro').style.display==='none')ta.focus()});
 $('bView').onclick=()=>{initAudio();sPage();setMode(!letterMode)};
 $('bInk').onclick=()=>{initAudio();sInk();inkIdx=(inkIdx+1)%INKS.length;$('bInk').style.setProperty('--c',INKS[inkIdx]);if(!letterMode)ta.focus()};
 $('intro').onclick=()=>{initAudio();sRustle();ta.focus({preventScroll:true});const i=$('intro');i.style.opacity=0;setTimeout(()=>i.style.display='none',500);
@@ -289,6 +327,167 @@ keysEl.addEventListener('pointerdown',e=>{const k=e.target.closest('.k');if(!k)r
 
 let osKb=false;
 $('bKb').onclick=()=>{initAudio();osKb=!osKb;ta.setAttribute('inputmode',osKb?'text':'none');$('bKb').classList.toggle('on',osKb);ta.blur();if(osKb)ta.focus()};
+
+/* ================= LETTER WRITER ================= */
+const AI_ENDPOINT='';   /* optional: URL of your own AI proxy that answers {letter:"..."} — leave empty to use the built-in writer */
+const LT=[
+ ['love','Love Letters',0,'Something special about them (optional)'],
+ ['thanks','Thank-You Letters',0,'What are you thankful for? e.g. your help with the move'],
+ ['condolence','Condolence Letters',0,'The loss, e.g. the passing of your father'],
+ ['apology','Apology Letters',0,'What are you sorry for? e.g. missing your birthday'],
+ ['getwell','Get-Well Letters',0,'What happened? e.g. your surgery'],
+ ['update','Friendly / Update Letters',0,'Your news, e.g. we moved to a new house'],
+ ['cover','Cover Letters',1,'The job, e.g. the Marketing Assistant role'],
+ ['resign','Resignation Letters',1,'Your job title, e.g. Sales Manager'],
+ ['recommend','Letters of Recommendation',1,'Who is it for? e.g. Maria Lopez'],
+ ['complaint','Complaint Letters',1,'The problem, e.g. a late and damaged delivery'],
+ ['inquiry','Business Inquiry Letters',1,'What you want to know about, e.g. your catering services'],
+ ['invite','Invitation Letters',0,'The event, e.g. my birthday dinner on Saturday at 8'],
+ ['congrats','Congratulatory Letters',0,'The achievement, e.g. your promotion'],
+ ['intent','Letter of Intent',1,'Your intent, e.g. rent the apartment at 12 Oak Street'],
+ ['demand','Demand Letters',1,'What is owed, e.g. the unpaid invoice of the 3rd of May'],
+ ['followup','Follow-Up Letters',0,'What you are following up on, e.g. our meeting last week'],
+ ['farewell','Farewell Letters',0,'Why you are leaving, e.g. I move to Madrid']
+];
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const sentence=s=>{s=(s||'').trim();if(!s)return '';s=cap(s);return /[.!?]$/.test(s)?s:s+'.'};
+const noTo=s=>(s||'').trim().replace(/^to\s+/i,'');
+function writeLocal(id,to,from,about){
+ to=(to||'').trim();from=(from||'').trim();about=(about||'').trim();
+ const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+ const close=c=>c+(from?'\n'+from:'');
+ const dear=d=>'Dear '+(to||d)+',';
+ const P={
+ love:()=>[`My dearest${to?' '+to:''},`,
+  `I have been trying to find the right words, and I keep arriving at the same ones: I love you. ${about?sentence(about)+' It reminds me how lucky I am.':'Every day beside you feels like a small miracle.'}`,
+  `You are the first person I want to tell good news to and the last voice I want to hear at night. Your laughter turns ordinary days golden, and your kindness makes me want to be a better person.`,
+  `Whatever tomorrow brings, I want to face it with you. Thank you for loving me exactly as I am.`,
+  close('Forever yours,')],
+ thanks:()=>[dear('Friend'),
+  `Thank you so much${about?' for '+about:''}. I cannot tell you how much it means to me.`,
+  `Your thoughtfulness and generosity made a real difference, and I will remember it for a long time. It is rare to find someone who gives so freely of their time and heart.`,
+  `I hope I can return the kindness one day. Until then, please know that I am truly grateful.`,
+  close('With heartfelt thanks,')],
+ condolence:()=>[dear('Friend'),
+  `I was deeply saddened to hear of ${about||'your loss'}. Please accept my heartfelt condolences.`,
+  `There are no words that can ease such a loss, but I want you to know that you are in my thoughts. The love, the memories and the stories you shared will stay with you and with everyone whose life was touched.`,
+  `If there is anything I can do, whether a meal, a ride, or simply a listening ear, please do not hesitate to ask. You do not have to go through this alone.`,
+  close('With deepest sympathy,')],
+ apology:()=>[dear('Friend'),
+  `I am writing to apologize${about?' for '+about:''}. I have thought about it a great deal, and I am truly sorry.`,
+  `I was wrong, and I understand how it affected you. There is no excuse, and I do not want to offer one. You deserved better from me.`,
+  `I would like to make it right. If you are willing, I would welcome the chance to talk, and I promise to listen. Whatever you decide, I hope that in time you can forgive me.`,
+  close('Sincerely,')],
+ getwell:()=>[dear('Friend'),
+  `${about?'I was so sorry to hear about '+about+'.':'I was so sorry to hear that you have been unwell.'} I hope you are resting and being well looked after.`,
+  `Please do not worry about anything except getting better. Take all the time you need and let others help you. You are tougher than you think, and I know you will be back on your feet soon.`,
+  `I am thinking of you and sending warm wishes for a speedy recovery. If you need anything at all, just say the word.`,
+  close('Get well soon,')],
+ update:()=>[dear('Friend'),
+  `I hope this letter finds you well. It has been too long since we last spoke, and I wanted to share a little news. ${about?sentence(about):'Life has been busy, but good.'}`,
+  `Things here are moving along. I have been trying to make time for the people and things I care about, and you are always on that list. I often think of the good times we have shared.`,
+  `Please write back and tell me how you are, what you have been up to, and when we might catch up in person.`,
+  close('Warm regards,')],
+ cover:()=>[date,dear('Hiring Manager'),
+  `I am writing to apply for ${about||'the open position at your company'}. With my background, my drive to learn and my genuine interest in your work, I believe I would be a strong addition to your team.`,
+  `In my previous roles I have built a record of reliability, clear communication and getting things done. I enjoy solving problems alongside colleagues, and I take pride in careful work that others can depend on.`,
+  `I would welcome the opportunity to discuss how I can contribute. Thank you for your time and consideration. I look forward to hearing from you.`,
+  close('Sincerely,')],
+ resign:()=>[date,dear('Sir or Madam'),
+  `Please accept this letter as formal notice of my resignation from my position${about?' as '+about:''}, effective two weeks from today.`,
+  `This was not an easy decision. I am grateful for the opportunities, the support and the people I have worked with here. I have learned a great deal and will always value my time with the team.`,
+  `During my remaining time I will do everything I can to ensure a smooth handover of my duties. Please let me know how I can help.`,
+  `Thank you again, and I wish the company continued success.`,
+  close('Sincerely,')],
+ recommend:()=>[date,dear('Sir or Madam'),
+  `It is a pleasure to recommend ${about||'this candidate'} without reservation. I have known and worked with them long enough to speak with confidence about their abilities and character.`,
+  `They are dependable, curious and a pleasure to work with. They take initiative, communicate clearly and consistently deliver careful, thoughtful work. Colleagues trust them, and they rise to every challenge.`,
+  `I am confident they will be a valuable asset to your organization. Please feel free to contact me if you would like any further information.`,
+  close('Sincerely,')],
+ complaint:()=>[date,dear('Sir or Madam'),
+  `I am writing to complain about ${about||'a recent experience with your company'}. I have valued your service, and I expected a better standard.`,
+  `The problem has caused me real inconvenience and so far it has not been resolved. I believe this falls short of what you promise your customers.`,
+  `I would like the matter to be investigated and corrected promptly, with an appropriate remedy. I would appreciate a written reply within fourteen days.`,
+  `Thank you for your attention to this matter.`,
+  close('Sincerely,')],
+ inquiry:()=>[date,dear('Sir or Madam'),
+  `I am writing to inquire about ${about||'your products and services'}. Your company comes highly recommended, and I would like to learn more.`,
+  `Could you please send me details on availability, pricing and any terms or minimum requirements? If possible, I would also welcome a short call or meeting to discuss my needs.`,
+  `Thank you for your time. I look forward to your reply and to the possibility of working together.`,
+  close('Kind regards,')],
+ invite:()=>[dear('Friend'),
+  `You are warmly invited to ${about||'join us for a special occasion'}. It would mean a great deal to have you there.`,
+  `We are planning a relaxed, joyful time with good food and good company, and it simply would not be the same without you.`,
+  `Please let us know by reply whether you can make it. We hope very much to see you.`,
+  close('Warmest wishes,')],
+ congrats:()=>[dear('Friend'),
+  `Congratulations${about?' on '+about:''}! I was delighted to hear the news.`,
+  `This success is the result of your talent, hard work and determination, and you have earned every bit of it. I am so proud of you and so happy for you.`,
+  `I hope you take time to celebrate and enjoy this moment. I cannot wait to see what you do next.`,
+  close('With warmest congratulations,')],
+ intent:()=>[date,dear('Sir or Madam'),
+  `This letter expresses my sincere intent to ${noTo(about)||'pursue the opportunity we have discussed'}. I am writing to confirm my interest and my readiness to move forward.`,
+  `I understand the purpose and expectations involved, and I am prepared to commit the time, effort and resources required. I believe the arrangement would benefit everyone, and I am open to discussing its terms in good faith.`,
+  `Please consider this letter a statement of my intentions, subject to the final agreement of all parties. I look forward to your response.`,
+  close('Respectfully,')],
+ demand:()=>[date,dear('Sir or Madam'),
+  `This letter is a formal demand regarding ${about||'the matter outstanding between us'}. Despite my earlier attempts to resolve it, it remains unsettled.`,
+  `I request that you settle the matter in full within fourteen days of the date of this letter, and confirm in writing how and when you will do so.`,
+  `If I do not receive a satisfactory response by then, I will have no choice but to consider all available remedies, including legal action, without further notice.`,
+  `I would prefer to resolve this directly and amicably, and I hope you will act promptly.`,
+  close('Sincerely,')],
+ followup:()=>[dear('Friend'),
+  `I hope you are doing well. I am following up on ${about||'our recent conversation'}, as I wanted to make sure it had not slipped through the cracks.`,
+  `I understand you are busy, so please do not feel pressured. If you need any more information from me, I would be glad to provide it right away.`,
+  `Could you let me know where things stand when you have a moment? Thank you for your time. I look forward to hearing from you.`,
+  close('Best regards,')],
+ farewell:()=>[dear('Friend'),
+  `The time has come to say goodbye${about?', as '+about:''}, and I find it harder than I expected.`,
+  `Thank you for the laughter, the support and the good memories we have made together. You have made a real difference to my days, and I will carry that with me wherever I go.`,
+  `This is not the end of our connection. Please keep in touch, and know that you will always have a friend in me. Take care of yourself, and may the road ahead be kind.`,
+  close('With affection,')]
+ };
+ return P[id]().join('\n\n')}
+async function makeLetter(id,to,from,about){
+ if(AI_ENDPOINT){try{const r=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:(LT.find(t=>t[0]===id)||[])[1],to,from,about})});
+  const j=await r.json();const t=(j.letter||j.text||'').trim();if(t)return t}catch(e){}}
+ return writeLocal(id,to,from,about)}
+
+/* ---- modal ---- */
+let aiOpen=false,aiSel=null,typing=null;
+const aiModal=$('aiModal'),aiTypes=$('aiTypes'),aiGo=$('aiGo');
+LT.forEach(t=>{const b=document.createElement('button');b.type='button';b.textContent=t[1];b.dataset.id=t[0];aiTypes.appendChild(b)});
+aiTypes.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sInk();
+ aiSel=b.dataset.id;aiTypes.querySelectorAll('button').forEach(x=>x.classList.toggle('sel',x===b));
+ const t=LT.find(x=>x[0]===aiSel);$('aiAbout').placeholder=t[3];$('aiHintL').textContent='Details (optional)';aiGo.disabled=false});
+function openAI(){if(letterMode)return;finishAuto();initAudio();sPop();aiOpen=true;aiModal.classList.add('on');ta.blur()}
+function closeAI(){aiOpen=false;aiModal.classList.remove('on')}
+$('bAI').onclick=openAI;
+$('aiCancel').onclick=closeAI;
+aiModal.addEventListener('pointerdown',e=>{if(e.target===aiModal)closeAI()});
+document.addEventListener('keydown',e=>{if(aiOpen&&e.key==='Escape')closeAI()});
+aiGo.onclick=async()=>{if(!aiSel)return;initAudio();sPop();
+ const to=$('aiTo').value,from=$('aiFrom').value,about=$('aiAbout').value,id=aiSel;
+ aiGo.disabled=true;aiGo.textContent='Writing…';$('bAI').classList.add('busy');
+ let txt;try{txt=await makeLetter(id,to,from,about)}finally{aiGo.textContent='Write it';aiGo.disabled=false;$('bAI').classList.remove('busy')}
+ closeAI();autoType(txt)};
+
+/* ---- the Selectric types it out ---- */
+function autoType(txt){
+ const chars=(text.length?'\n\n':'')+txt;let i=0;
+ $('skip').classList.add('on');
+ const step=()=>{if(!typing)return;
+  if(i>=chars.length){endAuto();return}
+  const c=chars[i++];flashKey(c==='\n'?'Enter':c);typeText(c);
+  const d=c==='\n'?330:c===' '?42:/[.,;:!?]/.test(c)?85:16+Math.random()*16;
+  typing.t=setTimeout(step,d)};
+ typing={t:0,rest:()=>chars.slice(i),stop:()=>{i=chars.length}};
+ setTimeout(step,250)}
+function endAuto(){typing=null;$('skip').classList.remove('on');toast('Letter written — tap the page icon to see it',3200)}
+function finishAuto(){if(!typing)return;clearTimeout(typing.t);const r=typing.rest();typing=null;$('skip').classList.remove('on');
+ if(r){quiet=true;ta.value=ta.value+r;ta.dispatchEvent(new Event('input'));quiet=false;sReturn()}}
+$('skip').onclick=finishAuto;
+document.addEventListener('keydown',e=>{if(typing){e.preventDefault();finishAuto()}},true);
 
 $('bView').innerHTML=ICON_DOC;
 addEventListener('resize',layout);
