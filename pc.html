@@ -22,16 +22,19 @@ body{min-height:125vh;font-family:"Courier New",monospace;color:var(--a);-webkit
 #bar{display:flex;align-items:center;gap:1.2cqw;padding:.8cqw 1.6cqw;border-bottom:1px solid var(--a);text-shadow:0 0 5px var(--a)}
 #url{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--a);font:inherit;caret-color:var(--a);padding:0;-webkit-appearance:none;border-radius:0}
 #st{padding:.3cqw 1.6cqw;font-size:.85em;opacity:.8;border-top:1px solid #5a3d00;text-shadow:0 0 5px var(--a)}
-#fw{flex:1;position:relative;overflow:hidden;background:#000}#fr{position:absolute;left:0;top:0;width:600px;height:100%;transform-origin:0 0;border:0;background:#fff;touch-action:pan-y;filter:grayscale(1) invert(1) sepia(1) saturate(6) hue-rotate(-12deg) brightness(.95) contrast(1.15)}
+#fw{flex:1;position:relative;overflow:hidden;background:#000}#fr{position:absolute;left:0;top:0;width:600px;height:100%;transform-origin:0 0;border:0;background:#fff;touch-action:pan-y;filter:grayscale(1) sepia(1) saturate(6) hue-rotate(-12deg) brightness(.9) contrast(1.1)}
 #kb{inset:0;pointer-events:none!important}.k{pointer-events:auto;position:absolute;border-radius:6px;touch-action:manipulation}.k.on{background:rgba(255,176,0,.38);box-shadow:0 0 8px var(--a)}
-#dock{position:fixed;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;justify-content:center;gap:6px;padding:0 6px}
-#dock button{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid var(--a);background:rgba(18,11,0,.62);color:var(--a);font-size:18px;line-height:1;padding:0;text-shadow:0 0 6px var(--a);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#dock{position:fixed;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;justify-content:center;gap:4px;padding:0 6px}
+#dock button{width:34px;height:34px;flex:none;border-radius:50%;border:1px solid var(--a);background:rgba(18,11,0,.62);color:var(--a);font-size:18px;line-height:1;padding:0;text-shadow:0 0 6px var(--a);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 #dock button:active,#dock button.act{background:rgba(255,176,0,.35)}
 #bm.off{opacity:.45;text-decoration:line-through}
 #dock button{-webkit-touch-callout:none;touch-action:manipulation}
 #tip{position:fixed;z-index:30;max-width:70vw;padding:7px 10px;border:1px solid var(--a);border-radius:8px;background:rgba(18,11,0,.95);color:var(--a);font-size:13px;text-shadow:0 0 6px var(--a);text-align:center;pointer-events:none;opacity:0;transition:opacity .15s}#tip.show{opacity:1}
 #box{position:absolute;inset:0;z-index:4;cursor:pointer;transition:opacity .7s ease}#box img{width:100%;height:100%;display:block;-webkit-user-drag:none}.unbox #box{opacity:0;pointer-events:none}
-#msg{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);padding:2.2cqw 4.5cqw;border:1px solid #ffb000;border-radius:999px;background:rgba(18,11,0,.88);color:#ffb000;font-size:4.2cqw;letter-spacing:.3em;white-space:nowrap;text-shadow:0 0 8px #ffb000;animation:bl 1.4s steps(2,jump-none) infinite}@keyframes bl{50%{opacity:.35}}
+#msg{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);padding:2.2cqw 4.5cqw;border:1px solid #ffb000;border-radius:999px;background:rgba(18,11,0,.88);color:#ffb000;font-size:4.2cqw;letter-spacing:.3em;white-space:nowrap;text-shadow:0 0 8px #ffb000}
+@media (hover:hover) and (pointer:fine){body{min-height:100vh;display:flex;flex-direction:column;justify-content:center}#stage{width:min(calc(100vw - 8px),760px,calc((100vh - 130px)*1102/1427));margin:0 auto}}
+#menu{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(60px + env(safe-area-inset-bottom,0px));width:min(92vw,320px);max-height:55vh;overflow:auto;-webkit-overflow-scrolling:touch;z-index:25;border:1px solid var(--a);border-radius:10px;background:rgba(18,11,0,.96);display:none;font-size:15px}#menu.show{display:block}#menu div{padding:10px 14px;border-bottom:1px solid #3a2800;color:var(--a);text-shadow:0 0 6px var(--a)}#menu div:active{background:rgba(255,176,0,.3)}
+.hide #menu{display:none!important}
 .hide #top,.hide #dock button:not(#bfs){display:none}.hide #dock{justify-content:flex-end}
 </style></head><body>
 <div id="top"><b>PCPro</b><a href="https://easylandx.github.io" target="_blank" rel="noopener" aria-label="EasyLandX"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffb000" stroke-width="1.8"><rect x="4" y="3" width="16" height="12" rx="1.5"/><rect x="7" y="6" width="10" height="6" fill="#ffb000" opacity=".35"/><path d="M2 19h20M9 15v4M15 15v4"/></svg></a></div>
@@ -42,9 +45,9 @@ body{min-height:125vh;font-family:"Courier New",monospace;color:var(--a);-webkit
 <div id="scr"><div id="bar"><span>&gt;</span><input id="url" inputmode="none" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" value="easylandx.github.io/app/"></div><div id="fw"><iframe id="fr" title="screen" referrerpolicy="no-referrer"></iframe></div><div id="st">READY_</div></div>
 <div id="kb"></div>
 </div>
-<div id="tip"></div>
+<div id="tip"></div><div id="menu"></div>
 <div id="dock">
-<button id="bp" aria-label="power" title="Power: open or close the laptop">⏻</button><button id="bn" aria-label="keyboard" title="Keyboard: switch between the on-photo keys and the phone keyboard">⌨</button><button id="bb" aria-label="back" title="Back: go to the previous page">◀</button><button id="bf" aria-label="forward" title="Forward: go to the next page">▶</button><button id="br" aria-label="reload" title="Reload: refresh the current page">↻</button><button id="bh" aria-label="home" title="Home: go to easylandx.github.io/app">⌂</button><button id="bfs" aria-label="fullscreen" title="Fullscreen: hide or show the bars and buttons">⛶</button><button id="bm" aria-label="sound" title="Sound: mute or unmute key clicks">♪</button>
+<button id="bp" aria-label="power" title="Power: open or close the laptop">⏻</button><button id="bn" aria-label="keyboard" title="Keyboard: switch between the on-photo keys and the phone keyboard">⌨</button><button id="bb" aria-label="back" title="Back: go to the previous page">◀</button><button id="bf" aria-label="forward" title="Forward: go to the next page">▶</button><button id="br" aria-label="reload" title="Reload: refresh the current page">↻</button><button id="bh" aria-label="home" title="Home: go to easylandx.github.io/app">⌂</button><button id="bs" aria-label="sites" title="Sites: pick a website from the list">☰</button><button id="bfs" aria-label="fullscreen" title="Fullscreen: hide or show the bars and buttons">⛶</button><button id="bm" aria-label="sound" title="Sound: mute or unmute key clicks">♪</button>
 </div>
 <script>
 const $=id=>document.getElementById(id),W=1102,H=1427,HOME="https://easylandx.github.io/app/";
@@ -97,4 +100,8 @@ dock.addEventListener('click',e=>{if(lp){e.stopPropagation();e.preventDefault();
 dock.addEventListener('contextmenu',e=>e.preventDefault());
 })();
 $("box").addEventListener("click",()=>{audio();click(true);st.classList.add("unbox")});
+const SITES=["wikipedia.org","w3schools.com","archive.org","nasa.gov","gutenberg.org","github.io","ncbi.nlm.nih.gov/pmc/","wordnik.com","openlibrary.org","europeana.eu","usa.gov","opencollective.com"];
+const menu=$("menu");SITES.forEach((s,i)=>{const d=document.createElement("div");d.textContent=(i+1)+". "+s;d.onclick=()=>{menu.classList.remove("show");audio();click();if(!isOpen)setOpen(true);go(s)};menu.appendChild(d)});
+$("bs").onclick=e=>{e.stopPropagation();menu.classList.toggle("show")};
+addEventListener("pointerdown",e=>{if(!e.target.closest("#menu,#bs"))menu.classList.remove("show")});
 </script></body></html>
