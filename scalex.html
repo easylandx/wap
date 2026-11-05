@@ -331,7 +331,7 @@ function aiDrive(t){const k=AI.car;if(!k||NET.role==='guest')return;
  const c=cars[k];
  if(c.wreck)return;
  if(t-AI.t<90)return;AI.t=t;
- let tgt;if(AI.skill==='random'){if(t>AI.rt){AI.tgt=aiMood();AI.rt=t+700+Math.random()*1900}tgt=Math.max(-28,Math.min(28,AI.tgt))}else tgt=AI_LVL[AI.skill];
+ let tgt;if(AI.skill==='random'){if(t>AI.rt){AI.tgt=aiMood();AI.rt=t+8000}tgt=Math.max(-28,Math.min(28,AI.tgt))}else tgt=AI_LVL[AI.skill];
  const d=tgt-c.lvl;if(!d)return;
  applyCmd(k,Math.max(-4,Math.min(3,d)))}
 function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;aiDrive(t);
