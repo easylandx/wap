@@ -5,38 +5,46 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#ffb000"><title>PCPro</title>
 <style>
-:root{--a:#ffb000;--d:#120b00;--bg:#ffb000;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--a:#ffb000;--d:#120b00;--bg:#ffb000;--ink:#120b00;--dim:#5a3d00;--dim2:#3a2800;--hl:rgba(255,176,0,.35);--pn:18,11,0;--ff:grayscale(1) sepia(1) saturate(6) hue-rotate(-12deg) contrast(1.1);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);overscroll-behavior-y:none}
 body{padding:0 56px 0 12px;min-height:125vh;font-family:"Courier New",monospace;color:var(--a);-webkit-user-select:none;user-select:none}
-#top{position:fixed;left:0;right:0;top:0;box-sizing:border-box;z-index:20;display:flex;align-items:center;gap:10px;height:44px;padding:env(safe-area-inset-top,0px) 16px 0;background:#ffb000;color:#120b00;text-shadow:none}
-#top b{color:#120b00;font-size:20px;letter-spacing:2px}#top a{display:flex;align-items:center}
+#top{position:fixed;left:0;right:0;top:0;box-sizing:border-box;z-index:20;display:flex;align-items:center;gap:10px;height:44px;padding:env(safe-area-inset-top,0px) 16px 0;background:var(--bg);color:var(--ink);text-shadow:none}
+#top b{color:var(--ink);font-size:20px;letter-spacing:2px}#top a{display:flex;align-items:center}
 #stage{position:relative;width:calc(100vw - 68px);max-width:760px;margin:calc(56px + env(safe-area-inset-top,0px)) auto 0;aspect-ratio:1102/1427;container-type:inline-size;filter:drop-shadow(0 10px 18px rgba(0,0,0,.25))}
 .ph{position:absolute;inset:0;width:100%;height:100%;transition:opacity .7s ease;-webkit-user-drag:none}
 #closed{z-index:2}.open #closed{opacity:0;pointer-events:none}
 #scr,#kb{position:absolute;opacity:0;pointer-events:none;transition:opacity .7s;z-index:3}
 .open #scr,.open #kb{opacity:1;pointer-events:auto}
-#scr{left:21.2%;top:4.9%;width:58%;height:64.6%;background:var(--d);border-radius:3%/4%;overflow:hidden;display:flex;flex-direction:column;font-size:2.4cqw;box-shadow:inset 0 0 40px #000}
-#scr::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.55))}
-#bar{display:flex;align-items:center;gap:1.2cqw;padding:.8cqw 1.6cqw;border-bottom:1px solid var(--a);text-shadow:0 0 5px var(--a)}
+#scr{left:21.2%;top:4.9%;width:58%;height:64.6%;background:var(--d);border-radius:3%/4%;overflow:hidden;display:flex;flex-direction:column;font-size:2.4cqw}
+#bar{display:flex;align-items:center;gap:1.2cqw;padding:.8cqw 1.6cqw;border-bottom:1px solid var(--a)}
 #url{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--a);font:inherit;caret-color:var(--a);padding:0;-webkit-appearance:none;border-radius:0}
-#st{padding:.3cqw 1.6cqw;font-size:.85em;opacity:.8;border-top:1px solid #5a3d00;text-shadow:0 0 5px var(--a)}
-#fw{flex:1;position:relative;overflow:hidden;background:#000}#fr{position:absolute;left:0;top:0;width:600px;height:100%;transform-origin:0 0;border:0;background:#fff;touch-action:pan-y;filter:grayscale(1) sepia(1) saturate(6) hue-rotate(-12deg) brightness(.9) contrast(1.1)}
-#kb{inset:0;pointer-events:none!important}.k{pointer-events:auto;position:absolute;border-radius:6px;touch-action:manipulation}.k.on{background:rgba(255,176,0,.38);box-shadow:0 0 8px var(--a)}
+#st{padding:.3cqw 1.6cqw;font-size:.85em;opacity:.8;border-top:1px solid var(--dim)}
+#fw{flex:1;position:relative;overflow:hidden;background:#000}#fr{position:absolute;left:0;top:0;width:600px;height:100%;transform-origin:0 0;border:0;background:#fff;touch-action:pan-y;filter:var(--ff)}
+#kb{inset:0;pointer-events:none!important}.k{pointer-events:auto;position:absolute;border-radius:6px;touch-action:manipulation}.k.on{background:var(--hl);box-shadow:0 0 8px var(--a)}
 #dock{position:fixed;right:max(10px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;align-items:center;gap:6px}
-#dock button{width:34px;height:34px;flex:none;border-radius:50%;border:1px solid var(--a);background:rgba(18,11,0,.9);color:var(--a);font-size:18px;line-height:1;padding:0;text-shadow:0 0 6px var(--a);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-#dock button:active,#dock button.act{background:rgba(255,176,0,.35)}
+#dock button{width:34px;height:34px;flex:none;border-radius:50%;border:1px solid var(--a);background:rgba(10,10,10,.92);color:var(--a);font-size:18px;line-height:1;padding:0;text-shadow:0 0 6px var(--a);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#dock button:active,#dock button.act{background:var(--hl)}
 #bm.off{opacity:.45;text-decoration:line-through}
 #dock button{-webkit-touch-callout:none;touch-action:manipulation}
-#tip{position:fixed;z-index:30;max-width:60vw;padding:7px 10px;border:1px solid var(--a);border-radius:8px;background:rgba(18,11,0,.95);color:var(--a);font-size:13px;text-shadow:0 0 6px var(--a);text-align:center;pointer-events:none;opacity:0;transition:opacity .15s}#tip.show{opacity:1}
+#tip{position:fixed;z-index:30;max-width:60vw;padding:7px 10px;border:1px solid var(--a);border-radius:8px;background:rgba(var(--pn),.95);color:var(--a);font-size:13px;text-shadow:0 0 6px var(--a);text-align:center;pointer-events:none;opacity:0;transition:opacity .15s}#tip.show{opacity:1}
 #box{position:absolute;inset:0;z-index:4;cursor:pointer;transition:opacity .7s ease}#box img{width:100%;height:100%;display:block;-webkit-user-drag:none}.unbox #box{opacity:0;pointer-events:none}
-#msg{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);padding:2.2cqw 4.5cqw;border:1px solid #ffb000;border-radius:999px;background:rgba(18,11,0,.88);color:#ffb000;font-size:4.2cqw;letter-spacing:.3em;white-space:nowrap;text-shadow:0 0 8px #ffb000}
+#msg{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);padding:2.2cqw 4.5cqw;border:1px solid var(--a);border-radius:999px;background:rgba(var(--pn),.88);color:var(--a);font-size:4.2cqw;letter-spacing:.3em;white-space:nowrap;text-shadow:0 0 8px var(--a)}
 @media (hover:hover) and (pointer:fine){body{min-height:100vh;display:flex;flex-direction:column;justify-content:center}#stage{width:min(calc(100vw - 80px),760px,calc((100vh - 90px)*1102/1427));margin:0 auto}}
-#menu{position:fixed;right:58px;top:50%;transform:translateY(-50%);width:min(calc(100vw - 80px),300px);max-height:55vh;overflow:auto;-webkit-overflow-scrolling:touch;z-index:25;border:1px solid var(--a);border-radius:10px;background:rgba(18,11,0,.96);display:none;font-size:15px}#menu.show{display:block}#menu .hd{color:#120b00;background:var(--a);text-shadow:none;font-weight:bold;letter-spacing:.15em;padding:6px 14px;position:sticky;top:0}#menu div{padding:10px 14px;border-bottom:1px solid #3a2800;color:var(--a);text-shadow:0 0 6px var(--a)}#menu div:active{background:rgba(255,176,0,.3)}
+#menu{position:fixed;right:58px;top:50%;transform:translateY(-50%);width:min(calc(100vw - 80px),300px);max-height:55vh;overflow:auto;-webkit-overflow-scrolling:touch;z-index:25;border:1px solid var(--a);border-radius:10px;background:rgba(var(--pn),.96);display:none;font-size:15px}#menu.show{display:block}#menu .hd{color:var(--ink);background:var(--a);text-shadow:none;font-weight:bold;letter-spacing:.15em;padding:6px 14px;position:sticky;top:0}#menu div{padding:10px 14px;border-bottom:1px solid var(--dim2);color:var(--a);text-shadow:0 0 6px var(--a)}#menu div:active{background:var(--hl)}
 .hide #menu{display:none!important}
 .hide #top,.hide #dock button:not(#bfs){display:none}.hide #dock{top:auto;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:none}
 @media (hover:none),(pointer:coarse){#stage{--w:min(calc(100vw - 68px),calc((100vh - 110px)*1102/1427));--w:min(calc(100vw - 68px),calc((100svh - 110px)*1102/1427));width:var(--w);margin:max(calc(56px + env(safe-area-inset-top,0px)),calc((100vh - var(--w)*1427/1102)/2)) auto 0;margin-top:max(calc(56px + env(safe-area-inset-top,0px)),calc((100svh - var(--w)*1427/1102)/2))}}
+
+/* screen modes: amber (default) / green phosphor / modern crisp */
+body.m-green{--a:#33ff66;--d:#021204;--bg:#33ff66;--dim:#0f5a25;--dim2:#0a3a18;--hl:rgba(51,255,102,.35);--pn:2,18,6;--ff:grayscale(1) sepia(1) saturate(6) hue-rotate(80deg) contrast(1.1)}
+body.m-modern{--a:#e8eef6;--d:#0f1318;--bg:#d9dde3;--dim:#2a313a;--dim2:#2a313a;--hl:rgba(120,170,255,.35);--pn:15,19,24;--ff:none}
+html:has(body.m-green){--bg:#33ff66}html:has(body.m-modern){--bg:#d9dde3}
+body.m-modern *{text-shadow:none!important}
+body.m-modern #scr{border-radius:2.2%/3%}
+body.m-modern #fr{image-rendering:auto}
+body.m-modern #msg{box-shadow:none}
 #openimg{opacity:0}.open #openimg{opacity:1}
 #closed{opacity:0;pointer-events:none}.unbox:not(.open) #closed{opacity:1;pointer-events:auto}
 </style></head><body>
@@ -50,7 +58,7 @@ body{padding:0 56px 0 12px;min-height:125vh;font-family:"Courier New",monospace;
 </div>
 <div id="tip"></div><div id="menu"></div>
 <div id="dock">
-<button id="bp" aria-label="power" title="Power: open or close the laptop">⏻</button><button id="bn" aria-label="keyboard" title="Keyboard: switch between the on-photo keys and the phone keyboard">⌨</button><button id="bb" aria-label="back" title="Back: go to the previous page">◀</button><button id="bf" aria-label="forward" title="Forward: go to the next page">▶</button><button id="br" aria-label="reload" title="Reload: refresh the current page">↻</button><button id="bh" aria-label="home" title="Home: go to easylandx.github.io/app">⌂</button><button id="bg" aria-label="random game" title="Random game: load a random classic game from playclassic.games">🎲</button><button id="ba" aria-label="archive" title="Archive: pick an Internet Archive video category and play a random video">🎞</button><button id="bs" aria-label="sites" title="Sites: pick a website from the list">☰</button><button id="bfs" aria-label="fullscreen" title="Fullscreen: hide or show the bars and buttons">⛶</button><button id="bm" aria-label="sound" title="Sound: mute or unmute key clicks">♪</button>
+<button id="bp" aria-label="power" title="Power: open or close the laptop">⏻</button><button id="bn" aria-label="keyboard" title="Keyboard: switch between the on-photo keys and the phone keyboard">⌨</button><button id="bb" aria-label="back" title="Back: go to the previous page">◀</button><button id="bf" aria-label="forward" title="Forward: go to the next page">▶</button><button id="br" aria-label="reload" title="Reload: refresh the current page">↻</button><button id="bh" aria-label="home" title="Home: go to easylandx.github.io/app">⌂</button><button id="bg" aria-label="random game" title="Random game: load a random classic game from playclassic.games">🎲</button><button id="ba" aria-label="archive" title="Archive: pick an Internet Archive video category and play a random video">🎞</button><button id="bs" aria-label="sites" title="Sites: pick a website from the list">☰</button><button id="bfs" aria-label="fullscreen" title="Fullscreen: hide or show the bars and buttons">⛶</button><button id="bc" aria-label="screen color" title="Screen: switch between amber, green phosphor and full color">◐</button><button id="bm" aria-label="sound" title="Sound: mute or unmute key clicks">♪</button>
 </div>
 <script>
 const $=id=>document.getElementById(id),W=1102,H=1427,HOME="https://easylandx.github.io/app/";
@@ -75,6 +83,14 @@ $("bb").onclick=()=>{if(hi>0){hi--;load(hist[hi])}};$("bf").onclick=()=>{if(hi<h
 $("br").onclick=()=>{if(hi>=0)load(hist[hi])};$("bh").onclick=()=>go(HOME);
 $("bn").onclick=function(){nat=!nat;this.classList.toggle("act",nat);inp.inputMode=nat?"url":"none";if(nat)inp.focus();else inp.blur()};
 $("bm").onclick=function(){muted=!muted;this.classList.toggle("off",muted)};
+const MODES=[["","AMBER PHOSPHOR","#ffb000"],["m-green","GREEN PHOSPHOR","#33ff66"],["m-modern","MODERN HI-RES COLOR","#d9dde3"]];
+let mode=0;
+function setMode(i){mode=i;const m=MODES[i];document.body.classList.remove("m-green","m-modern");if(m[0])document.body.classList.add(m[0]);
+ const tc=document.querySelector('meta[name="theme-color"]');if(tc)tc.setAttribute("content",m[2]);
+ try{localStorage.setItem("pcpro-mode",i)}catch(e){}}
+$("bc").onclick=()=>{audio();click();setMode((mode+1)%MODES.length);stt.textContent="SCREEN: "+MODES[mode][1]};
+try{const sv=parseInt(localStorage.getItem("pcpro-mode"));if(sv>0&&sv<MODES.length)setMode(sv)}catch(e){}
+
 $("bfs").onclick=()=>{const h=document.body.classList.toggle("hide");try{h?document.documentElement.requestFullscreen?.():document.fullscreenElement&&document.exitFullscreen()}catch(e){}scrollTo(0,h?document.body.scrollHeight:0)};
 inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();click(true);go(inp.value);inp.blur()}});
 inp.addEventListener("focus",()=>inp.select());
