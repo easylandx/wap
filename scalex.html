@@ -72,7 +72,15 @@ body{margin:0;height:calc(100dvh + 2px);background:#07080c;color:#fff;font-famil
 #dot[data-s=live]{background:#3dff8a;box-shadow:0 0 12px #3dff8a}
 #dot[data-s=err]{background:#ff4d4d;box-shadow:0 0 10px #ff4d4d}
 @keyframes blink{50%{opacity:.25}}
-body.guest .inv,body.guest #cp{display:none}
+body.guest .inv,body.guest #cp,body.guest #aib{display:none}
+.aic{display:flex;flex-direction:column;align-items:center;gap:8px;font:700 11px Orbitron,system-ui,sans-serif;letter-spacing:1px}
+.ib.ai{color:#fff}.ib.sel{outline:3px solid #ffd54a;outline-offset:3px}
+.skl{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 12px}
+.skl button{padding:9px 14px;border-radius:999px;border:1px solid #ffffff44;background:#0009;color:#fff;font:700 11px Orbitron,system-ui,sans-serif;letter-spacing:1px;cursor:pointer}
+.skl button.sel{border-color:#ffd54a;color:#ffd54a;box-shadow:0 0 12px #ffd54a66}
+.skl button:active{transform:scale(.94)}
+.aihint{margin:0 0 14px;font-size:12px;opacity:.75}
+.cnt.ai::before{content:"AI";position:absolute;top:3px;left:7px;font:900 10px Orbitron,system-ui,sans-serif;color:#ffd54a}
 .col{left:var(--m);top:calc(max(18px,env(safe-area-inset-top) + 10px) + 66px)}
 button{-webkit-touch-callout:none}
 #tip{position:fixed;z-index:20;pointer-events:none;padding:7px 12px;border-radius:10px;background:#000d;border:1px solid #ffffff33;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font:600 13px system-ui,-apple-system,sans-serif;color:#fff;white-space:nowrap;opacity:0;transform:scale(.95);transition:opacity .15s,transform .15s}
@@ -80,8 +88,8 @@ button{-webkit-touch-callout:none}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
 #flash.go{animation:fl .5s}
 @keyframes fl{20%{opacity:.35}100%{opacity:0}}
-#help,#mp{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:#000a;padding:var(--pad);padding-top:max(var(--pad),env(safe-area-inset-top));padding-bottom:max(var(--pad),env(safe-area-inset-bottom))}
-#help.show,#mp.show{display:flex}
+#help,#mp,#ai{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:#000a;padding:var(--pad);padding-top:max(var(--pad),env(safe-area-inset-top));padding-bottom:max(var(--pad),env(safe-area-inset-bottom))}
+#help.show,#mp.show,#ai.show{display:flex}
 .card{position:relative;max-width:360px;width:100%;padding:24px 22px 20px;border-radius:20px;background:#12141cd0;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid #ffffff30;box-shadow:0 0 40px #2d7bff33,0 0 40px #ff2d3d22;font-size:14px;line-height:1.5}
 .card h3{margin:0 0 10px;font:900 16px Orbitron,system-ui;letter-spacing:2px}
 .card ul{margin:0;padding-left:18px}.card li{margin:4px 0}
@@ -121,6 +129,7 @@ kbd{background:#ffffff22;border-radius:5px;padding:1px 6px;font-family:ui-monosp
 <button class="sb" id="help-b" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.3 2.5c-1 .6-1.5 1.1-1.5 2.2"/><circle cx="12" cy="17.4" r=".6" fill="currentColor"/></svg></button>
 <button class="tog" id="mute" aria-label="Sound on / off"></button>
 <button class="sb" id="nb" aria-label="Night mode and lights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg></button>
+<button class="sb" id="aib" aria-label="AI driver: let the computer race a car by itself"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.6" r="1.1" fill="currentColor"/><circle cx="9" cy="13" r="1.3" fill="currentColor"/><circle cx="15" cy="13" r="1.3" fill="currentColor"/><path d="M9.5 16.3h5M2.5 12.5v2.5M21.5 12.5v2.5"/></svg></button>
 <button class="sb" id="mpb" aria-label="Invite a friend (2 players)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M17 14c2.5 0 4.5 1.8 4.5 5"/></svg></button>
 <button class="sb" id="fs" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
 
@@ -128,13 +137,14 @@ kbd{background:#ffffff22;border-radius:5px;padding:1px 6px;font-family:ui-monosp
 <div class="ui pair rr blue"><button class="btn" id="bu" aria-label="Blue car: accelerate (P)"></button><button class="btn" id="bd" aria-label="Blue car: brake / reverse (L)"></button></div>
 
 <div id="mp"><div class="card" style="max-width:320px;text-align:center"><button class="sb x" id="mpx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><h3>2 PLAYERS</h3><div class="inv"><button class="ib red" id="invr" aria-label="Invite a friend to drive the red car on WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.3c0 3.6 3 6.7 6.6 6.7l1.1-1.3-2-1-.9.7a5 5 0 0 1-2.3-2.4l.7-.9-1-2z" fill="currentColor"/></svg></button><button class="ib blue" id="invb" aria-label="Invite a friend to drive the blue car on WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.3c0 3.6 3 6.7 6.6 6.7l1.1-1.3-2-1-.9.7a5 5 0 0 1-2.3-2.4l.7-.9-1-2z" fill="currentColor"/></svg></button></div><div class="mprow"><span id="dot" data-s="idle"></span><button class="sb" id="cp" aria-label="Copy invite link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button></div></div></div>
+<div id="ai"><div class="card" style="max-width:340px;text-align:center"><button class="sb x" id="aix" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><h3>AI DRIVER</h3><p class="aihint">Pick the car the computer drives. You drive the other one.</p><div class="inv"><div class="aic"><button class="ib red ai" id="aiR" aria-label="AI drives the red car"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.6" r="1.1" fill="currentColor"/><circle cx="9" cy="13" r="1.3" fill="currentColor"/><circle cx="15" cy="13" r="1.3" fill="currentColor"/><path d="M9.5 16.3h5M2.5 12.5v2.5M21.5 12.5v2.5"/></svg></button>RED</div><div class="aic"><button class="ib blue ai" id="aiB" aria-label="AI drives the blue car"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.6" r="1.1" fill="currentColor"/><circle cx="9" cy="13" r="1.3" fill="currentColor"/><circle cx="15" cy="13" r="1.3" fill="currentColor"/><path d="M9.5 16.3h5M2.5 12.5v2.5M21.5 12.5v2.5"/></svg></button>BLUE</div></div><div class="skl" id="aisk"><button data-sk="easy">EASY</button><button data-sk="normal">NORMAL</button><button data-sk="pro">PRO</button></div><div class="skl"><button id="aiOff">TURN AI OFF</button></div></div></div>
 <div id="help"><div class="card"><button class="sb x" id="hx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
 <h3>SCALEX</h3><ul>
 <li><b style="color:#ff6b77">Red</b> buttons (bottom-left) drive the red car.</li>
 <li><b style="color:#76a6ff">Blue</b> buttons (bottom-right) drive the blue car.</li>
 <li>Reverse is as fast as forward and the lap counter counts down (even below zero) while backing.</li><li>Upper button accelerates, lower button decelerates. Keep pressing it after a stop to reverse.</li>
 <li>Keyboard: <kbd>Q</kbd>/<kbd>A</kbd> red, <kbd>P</kbd>/<kbd>L</kbd> blue.</li>
-<li>Reset (left) restarts the race.</li><li>Bulb: night mode with headlights.</li><li>Two people icon: invite a friend on WhatsApp. Pick the car colour your friend will drive; you drive the other one.</li>
+<li>Reset (left) restarts the race.</li><li>Bulb: night mode with headlights.</li><li>Robot icon: choose a car and the AI races it by itself (Easy, Normal or Pro). You drive the other car.</li><li>Two people icon: invite a friend on WhatsApp. Pick the car colour your friend will drive; you drive the other one.</li>
 <li>Sound switch (right) turns the engines on or off.</li><li>There is no top speed. Push too hard and the car breaks.</li></ul></div></div>
 </div>
 
@@ -226,8 +236,9 @@ function setNight(v){night=v;try{localStorage.setItem('scalex-night',v?'1':'0')}
  $('game').classList.toggle('night',v);$('night').style.opacity=v?.88:0;$('beams').style.opacity=v?1:0;$('nb').classList.toggle('on',v)}
 $('nb').onclick=()=>setNight(!night);setNight(night);
 // ---------- two players (WebRTC via PeerJS, invite via WhatsApp) ----------
+const AI={car:null,skill:"normal",t:0},AI_LVL={easy:14,normal:22,pro:28};
 const NET={role:'solo',conn:null,peer:null,code:null,hostCar:'r',guestCar:'b',lock:{r:0,b:0}};
-function canDrive(k){return NET.role==='solo'||(NET.role==='host'&&k===NET.hostCar)||(NET.role==='guest'&&k===NET.guestCar)}
+function canDrive(k){if(AI.car===k)return false;return NET.role==='solo'||(NET.role==='host'&&k===NET.hostCar)||(NET.role==='guest'&&k===NET.guestCar)}
 function refreshPerm(){$('ru').parentElement.classList.toggle('off',!canDrive('r'));$('bu').parentElement.classList.toggle('off',!canDrive('b'))}
 function setStatus(s){$('dot').dataset.s=s;$('mpb').classList.toggle('live',s==='live')}
 function clearWreck(k){const c=cars[k];c.wreck=null;cnt[k].classList.remove('dead');if(smk[k])smk[k].style.display='none'}
@@ -269,6 +280,22 @@ $('invr').onclick=()=>invite('r');$('invb').onclick=()=>invite('b');
 $('cp').onclick=()=>{startHost();try{navigator.clipboard.writeText(inviteLink())}catch(e){}};
 $('mpb').onclick=()=>{if(NET.role!=='guest')startHost();$('mp').classList.add('show')};
 $('mpx').onclick=()=>$('mp').classList.remove('show');
+// ---------- AI driver ----------
+function setAI(k){if(NET.role==='guest')return;const prev=AI.car;AI.car=k;
+ if(prev&&prev!==k&&!cars[prev].wreck){cars[prev].lvl=0;show(prev)}
+ for(const q of['r','b'])cnt[q].classList.toggle('ai',AI.car===q);
+ $('aib').classList.toggle('on',!!k);$('aiR').classList.toggle('sel',k==='r');$('aiB').classList.toggle('sel',k==='b');
+ refreshPerm()}
+function setSkill(v){AI.skill=v;document.querySelectorAll('#aisk button').forEach(b=>b.classList.toggle('sel',b.dataset.sk===v));try{localStorage.setItem('scalex-ai',v)}catch(e){}}
+try{const v=localStorage.getItem('scalex-ai');if(AI_LVL[v])AI.skill=v}catch(e){}
+setSkill(AI.skill);
+$('aib').onclick=()=>{if(NET.role!=='guest')$('ai').classList.add('show')};
+$('aix').onclick=()=>$('ai').classList.remove('show');
+$('ai').addEventListener('pointerdown',e=>{if(e.target===$('ai'))$('ai').classList.remove('show')});
+$('aiR').onclick=()=>{setAI(AI.car==='r'?null:'r');$('ai').classList.remove('show')};
+$('aiB').onclick=()=>{setAI(AI.car==='b'?null:'b');$('ai').classList.remove('show')};
+$('aiOff').onclick=()=>{setAI(null);$('ai').classList.remove('show')};
+document.querySelectorAll('#aisk button').forEach(b=>b.onclick=()=>setSkill(b.dataset.sk));
 $('mp').addEventListener('pointerdown',e=>{if(e.target===$('mp'))$('mp').classList.remove('show')});
 // ---------- tooltips: hover (mouse) or long press (touch) ----------
 const tipEl=document.createElement('div');tipEl.id='tip';document.body.appendChild(tipEl);
@@ -295,7 +322,12 @@ function wreck(k){const c=cars[k];if(c.wreck)return;const p=at(c,c.s0+c.dist);
  c.wreck={x:p.x,y:p.y,r:p.r,v:c.spd*CFG.PX,spin:(Math.random()<.5?-1:1)*(350+Math.random()*350)};
  c.spd=0;c.lvl=0;show(k);cnt[k].classList.add('dead');smokeG(k);const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
 let last=performance.now();
-function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;
+function aiDrive(t){const k=AI.car;if(!k||NET.role==='guest')return;
+ if(NET.role==='host'&&NET.conn&&NET.conn.open&&k===NET.guestCar)return;
+ if(t-AI.t<90)return;AI.t=t;const c=cars[k];if(c.wreck)return;
+ const d=AI_LVL[AI.skill]-c.lvl;if(!d)return;
+ applyCmd(k,Math.max(-4,Math.min(3,d)))}
+function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;aiDrive(t);
  for(const k of['r','b']){const c=cars[k];
   if(c.wreck){const w=c.wreck,a=(w.r-90)*Math.PI/180;w.x+=Math.cos(a)*w.v*dt;w.y+=Math.sin(a)*w.v*dt;w.v*=Math.exp(-dt*1.5);w.spin*=Math.exp(-dt*1.5);w.r+=w.spin*dt;
    setT(k,`translate(${w.x.toFixed(1)} ${w.y.toFixed(1)}) rotate(${w.r.toFixed(1)})`);
