@@ -236,7 +236,7 @@ function setNight(v){night=v;try{localStorage.setItem('scalex-night',v?'1':'0')}
  $('game').classList.toggle('night',v);$('night').style.opacity=v?.88:0;$('beams').style.opacity=v?1:0;$('nb').classList.toggle('on',v)}
 $('nb').onclick=()=>setNight(!night);setNight(night);
 // ---------- two players (WebRTC via PeerJS, invite via WhatsApp) ----------
-const AI={car:null,skill:"random",t:0,rt:0,tgt:12,rec:0},AI_LVL={easy:14,pro:28,random:0};
+const AI={car:null,skill:"random",t:0,rt:0,tgt:12,rec:0},AI_LVL={easy:7,pro:14,random:0};
 const NET={role:'solo',conn:null,peer:null,code:null,hostCar:'r',guestCar:'b',lock:{r:0,b:0}};
 function canDrive(k){if(AI.car===k)return false;return NET.role==='solo'||(NET.role==='host'&&k===NET.hostCar)||(NET.role==='guest'&&k===NET.guestCar)}
 function refreshPerm(){$('ru').parentElement.classList.toggle('off',!canDrive('r'));$('bu').parentElement.classList.toggle('off',!canDrive('b'))}
@@ -324,8 +324,8 @@ function wreck(k){const c=cars[k];if(c.wreck)return;const p=at(c,c.s0+c.dist);
 let last=performance.now();
 // random mood: slow, medium, fast, reverse or coasting (always below the derail speed)
 function aiMood(){const r=Math.random(),u=(a,b)=>Math.round(a+Math.random()*(b-a));
- if(r<.22)return u(3,10);if(r<.45)return u(11,19);if(r<.63)return u(20,28);
- if(r<.78)return -u(4,18);if(r<.88)return 0;return u(24,28)}
+ if(r<.22)return u(2,5);if(r<.45)return u(6,10);if(r<.63)return u(10,14);
+ if(r<.78)return -u(2,9);if(r<.88)return 0;return u(12,14)}
 function aiDrive(t){const k=AI.car;if(!k||NET.role==='guest')return;
  if(NET.role==='host'&&NET.conn&&NET.conn.open&&k===NET.guestCar)return;
  const c=cars[k];
