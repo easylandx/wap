@@ -244,6 +244,30 @@ footer .logo{color:#fff;margin-bottom:10px}
 .instbtn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--blue);color:var(--blue);font-weight:800;font-size:12.5px;padding:8px 12px;border-radius:999px;background:#fff}
 .instbtn:hover{background:var(--blue);color:#fff}
 @media(max-width:520px){.instbtn .tx{display:none}.instbtn{padding:8px 11px}header .wrap{gap:10px}.logo{font-size:23px}}
+/* header fit on phones (ES/EN): keep the brand on one line inside the white bar */
+header .wrap{min-height:64px;height:auto}
+.logo{min-width:0}
+.logo>span{min-width:0;white-space:nowrap}
+.logo small{white-space:nowrap}
+@media(max-width:520px){
+  header .wrap{gap:8px;padding-left:12px;padding-right:12px}
+  .logo{font-size:21px;gap:6px}
+  .logo-img{width:34px;height:34px}
+  .logo small{font-size:clamp(6.5px,2.05vw,8.4px);letter-spacing:.07em;margin-top:-3px}
+  .lang{padding:7px 9px;gap:5px;font-size:12px}
+  .lang svg{width:20px;height:14px}
+  .instbtn{padding:7px 9px}
+}
+@media(max-width:520px){
+  .cartbtn{padding:8px 11px;gap:5px}
+  .cartbtn .cl{display:none}
+}
+@media(max-width:360px){
+  .logo{font-size:19px}
+  .logo-img{width:30px;height:30px}
+  .lang{padding:6px 7px;gap:4px}
+  .lang svg{width:18px;height:12px}
+}
 .ios-tip{background:#fff8e1;color:#5a4300;border-bottom:1px solid #ffe29a;font-size:13px}
 .ios-tip .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:8px;padding-bottom:8px}
 .ios-tip button{font-size:20px;line-height:1;padding:0 6px;color:#5a4300}
@@ -269,7 +293,7 @@ footer .logo{color:#fff;margin-bottom:10px}
   <div class="hr">
     <button class="instbtn" id="inst" hidden><span class="ic">⬇</span><span class="tx">Install App</span></button>
     <button class="lang" id="lang" aria-label="Switch to English"><span id="langflag"></span><span id="langtxt">EN</span></button>
-    <button class="cartbtn" onclick="openCart()" aria-label="Open cart">🛒 Cart <span class="n" id="cn">0</span></button>
+    <button class="cartbtn" onclick="openCart()" aria-label="Open cart">🛒<span class="cl"> Cart</span> <span class="n" id="cn">0</span></button>
   </div>
 </div></header>
 
