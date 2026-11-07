@@ -77,7 +77,20 @@ h1 em{font-style:normal;color:var(--amber)}
 .deal .pr s{font-size:16px;color:var(--mute);font-weight:600;margin-left:6px}
 .badge-save{display:inline-block;background:var(--red);color:#fff;font-size:12px;font-weight:800;padding:3px 9px;border-radius:99px;margin-bottom:4px}
 .hero-card .btn{width:100%;margin-top:16px}
-@media(max-width:860px){.hero .wrap{grid-template-columns:1fr}.hero{padding:48px 0 70px}}
+@media(max-width:860px){.hero .wrap{grid-template-columns:minmax(0,1fr)}.hero{padding:48px 0 70px}}
+/* keep hero content (incl. the featured-deal card) inside the screen on phones */
+.hero .wrap>*{min-width:0}
+.deal>div:last-child{min-width:0}
+.deal b{overflow-wrap:anywhere}
+.deal .pr{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px}
+.deal .pr s{margin-left:0}
+@media(max-width:520px){
+  .deal{gap:12px}
+  .deal .ic.ph{width:96px;height:96px}
+  .deal b{font-size:17px}
+  .deal .pr{font-size:24px}
+  .deal .pr s{font-size:14px}
+}
 
 /* official site banner */
 .sitebar{padding-top:34px}
