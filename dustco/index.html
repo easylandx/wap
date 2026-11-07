@@ -237,7 +237,8 @@ footer .logo{color:#fff;margin-bottom:10px}
 /* PWA: language toggle, install button, iOS tip */
 [hidden]{display:none!important}
 .hr{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.lang{border:1.5px solid var(--line);color:var(--navy2);font-weight:800;font-size:12.5px;padding:8px 11px;border-radius:999px;background:#fff}
+.lang{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);color:var(--navy2);font-weight:800;font-size:12.5px;padding:8px 11px;border-radius:999px;background:#fff}
+.lang svg{width:22px;height:15px;border-radius:2px;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
 .lang:hover{border-color:var(--blue);color:var(--blue)}
 .instbtn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--blue);color:var(--blue);font-weight:800;font-size:12.5px;padding:8px 12px;border-radius:999px;background:#fff}
 .instbtn:hover{background:var(--blue);color:#fff}
@@ -266,7 +267,7 @@ footer .logo{color:#fff;margin-bottom:10px}
   </nav>
   <div class="hr">
     <button class="instbtn" id="inst" hidden><span class="ic">⬇</span><span class="tx">Install App</span></button>
-    <button class="lang" id="lang" aria-label="Switch to English">EN</button>
+    <button class="lang" id="lang" aria-label="Switch to English"><span id="langflag"></span><span id="langtxt">EN</span></button>
     <button class="cartbtn" onclick="openCart()" aria-label="Open cart">🛒 Cart <span class="n" id="cn">0</span></button>
   </div>
 </div></header>
@@ -818,7 +819,9 @@ function hlLoad(){
       const list = rows.map(r=>{ const a = val(r.c&&r.c[0]), b = val(r.c&&r.c[1]); return (a||b) ? {es:a||b, en:b} : null }).filter(Boolean);
       if(list.length){
         try{ localStorage.setItem("dustco_hl", JSON.stringify(list)) }catch(e){}
-        if(!(hlPick && list.some(x=>x.es===hlPick.es))){ hlPick = hlChoose(list); renderHL(); }
+        const same = hlPick && list.find(x=>x.es===hlPick.es);
+        if(same){ hlPick = same; renderHL(); }   /* refresh with latest column A + B text */
+        else { hlPick = hlChoose(list); renderHL(); }
         return;
       }
     }catch(e){}
@@ -831,6 +834,7 @@ function hlLoad(){
   setTimeout(hlFallback, 3000);
 }
 
+const FLAG_US='<svg viewBox="0 0 741 390" aria-hidden="true"><rect width="741" height="390" fill="#fff"/><g fill="#B22234"><rect y="0" width="741" height="30"/><rect y="60" width="741" height="30"/><rect y="120" width="741" height="30"/><rect y="180" width="741" height="30"/><rect y="240" width="741" height="30"/><rect y="300" width="741" height="30"/><rect y="360" width="741" height="30"/></g><rect width="296" height="210" fill="#3C3B6E"/><g fill="#fff"><circle cx="30" cy="25" r="8"/><circle cx="90" cy="25" r="8"/><circle cx="150" cy="25" r="8"/><circle cx="210" cy="25" r="8"/><circle cx="270" cy="25" r="8"/><circle cx="60" cy="60" r="8"/><circle cx="120" cy="60" r="8"/><circle cx="180" cy="60" r="8"/><circle cx="240" cy="60" r="8"/><circle cx="30" cy="95" r="8"/><circle cx="90" cy="95" r="8"/><circle cx="150" cy="95" r="8"/><circle cx="210" cy="95" r="8"/><circle cx="270" cy="95" r="8"/><circle cx="60" cy="130" r="8"/><circle cx="120" cy="130" r="8"/><circle cx="180" cy="130" r="8"/><circle cx="240" cy="130" r="8"/><circle cx="30" cy="165" r="8"/><circle cx="90" cy="165" r="8"/><circle cx="150" cy="165" r="8"/><circle cx="210" cy="165" r="8"/><circle cx="270" cy="165" r="8"/><circle cx="60" cy="195" r="8"/><circle cx="120" cy="195" r="8"/><circle cx="180" cy="195" r="8"/><circle cx="240" cy="195" r="8"/></g></svg>', FLAG_PR='<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><g fill="#ED0000"><rect y="0" width="30" height="4"/><rect y="8" width="30" height="4"/><rect y="16" width="30" height="4"/></g><path d="M0 0L17.32 10L0 20Z" fill="#0050F0"/><polygon fill="#fff" points="5.2,6.4 6.2,9.3 9.2,9.3 6.8,11.1 7.7,14 5.2,12.2 2.7,14 3.6,11.1 1.2,9.3 4.2,9.3"/></svg>';
 /* ---------- language ---------- */
 function applyLang(){
   document.documentElement.lang = lang;
@@ -862,7 +866,8 @@ function applyLang(){
     });
   });
   const lb = $("#lang");
-  lb.textContent = lang==="es" ? "EN" : "ES";
+  lb.querySelector("#langtxt").textContent = lang==="es" ? "EN" : "ES";
+  lb.querySelector("#langflag").innerHTML = lang==="es" ? FLAG_US : FLAG_PR;
   lb.setAttribute("aria-label", lang==="es" ? "Switch to English" : "Cambiar a español");
   render(); drawCart();
 }
@@ -890,6 +895,25 @@ const standalone = window.navigator.standalone === true || (window.matchMedia &&
 let iosDismissed = false; try{ iosDismissed = localStorage.getItem("dustco_ios_tip")==="1" }catch(e){}
 if(isIOS && !standalone && !iosDismissed) $("#ios").hidden = false;
 $("#iosx").addEventListener("click", ()=>{ $("#ios").hidden = true; try{ localStorage.setItem("dustco_ios_tip","1") }catch(e){} });
+
+/* ---------- logo / brand click: hard refresh so the PWA picks up the latest headline ---------- */
+document.querySelector("header a.logo").addEventListener("click", async e=>{
+  e.preventDefault();
+  try{ localStorage.removeItem("dustco_hl") }catch(_){}
+  try{
+    if("serviceWorker" in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r=>r.unregister()));
+    }
+  }catch(_){}
+  try{
+    if(window.caches){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }
+  }catch(_){}
+  location.replace("https://easylandx.github.io/wap/dustco/");
+});
 
 if("serviceWorker" in navigator){
   window.addEventListener("load", ()=>{ navigator.serviceWorker.register("./dustco-sw.js").catch(()=>{}) });
