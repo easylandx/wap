@@ -1,8 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="dustco.webmanifest">
+<meta name="theme-color" content="#0055a5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dustco">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Dustco — Restroom, Cleaning & Dust Control Supplies | Puerto Rico</title>
 <meta name="description" content="Leader since 1962 in restroom solutions, concentrated cleaning products, public areas and dust control in Puerto Rico. Shop dispensers, paper, soaps, warewash and more.">
 <style>
@@ -45,7 +53,7 @@ nav{margin-left:auto;display:flex;gap:22px;font-weight:600;font-size:15px;color:
 nav a:hover{color:var(--blue)}
 .cartbtn{position:relative;display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px}
 .cartbtn .n{background:var(--amber);color:#2a1a00;border-radius:99px;min-width:22px;height:22px;display:grid;place-items:center;font-size:12px;padding:0 6px}
-@media(max-width:820px){nav{display:none}.cartbtn{margin-left:auto}}
+@media(max-width:820px){nav{display:none}.hr{margin-left:auto}}
 
 /* hero */
 .hero{background:radial-gradient(1000px 500px at 85% -10%,rgba(25,181,214,.35),transparent 60%),linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:70px 0 90px;position:relative;overflow:hidden}
@@ -194,6 +202,18 @@ footer .logo{color:#fff;margin-bottom:10px}
 @media(max-width:760px){.mbar{display:flex}}
 .toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,30px);background:var(--navy);color:#fff;padding:11px 20px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:120}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* PWA: language toggle, install button, iOS tip */
+[hidden]{display:none!important}
+.hr{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.lang{border:1.5px solid var(--line);color:var(--navy2);font-weight:800;font-size:12.5px;padding:8px 11px;border-radius:999px;background:#fff}
+.lang:hover{border-color:var(--blue);color:var(--blue)}
+.instbtn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--blue);color:var(--blue);font-weight:800;font-size:12.5px;padding:8px 12px;border-radius:999px;background:#fff}
+.instbtn:hover{background:var(--blue);color:#fff}
+@media(max-width:520px){.instbtn .tx{display:none}.instbtn{padding:8px 11px}header .wrap{gap:10px}.logo{font-size:23px}}
+.ios-tip{background:#fff8e1;color:#5a4300;border-bottom:1px solid #ffe29a;font-size:13px}
+.ios-tip .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:8px;padding-bottom:8px}
+.ios-tip button{font-size:20px;line-height:1;padding:0 6px;color:#5a4300}
 </style>
 </head>
 <body>
@@ -203,6 +223,8 @@ footer .logo{color:#fff;margin-bottom:10px}
   <span>Questions? Call <a href="tel:7877557700"><b>787-755-7700</b></a></span>
 </div></div>
 
+<div class="ios-tip" id="ios" hidden><div class="wrap"><span>📲 To install: tap Share ⎙ then “Add to Home Screen”.</span><button id="iosx" aria-label="Close">×</button></div></div>
+
 <header><div class="wrap">
   <a href="#top" class="logo"><i>✦</i><span>Dustco<small>DUST CONTROL SERVICES OF PR</small></span></a>
   <nav>
@@ -211,7 +233,11 @@ footer .logo{color:#fff;margin-bottom:10px}
     <a href="#about">About</a>
     <a href="#contact">Contact</a>
   </nav>
-  <button class="cartbtn" onclick="openCart()" aria-label="Open cart">🛒 Cart <span class="n" id="cn">0</span></button>
+  <div class="hr">
+    <button class="instbtn" id="inst" hidden><span class="ic">⬇</span><span class="tx">Install App</span></button>
+    <button class="lang" id="lang" aria-label="Switch to English">EN</button>
+    <button class="cartbtn" onclick="openCart()" aria-label="Open cart">🛒 Cart <span class="n" id="cn">0</span></button>
+  </div>
 </div></header>
 
 <main id="top">
@@ -342,7 +368,7 @@ footer .logo{color:#fff;margin-bottom:10px}
       <p>The leader since 1962 in solutions for bathrooms, concentrated cleaning products, public areas and dust control.</p>
     </div>
     <div><h5>Contact</h5>
-      <p>Dust Control Services<br>of Puerto Rico, Inc.<br>PO Box 261900<br>San Juan, PR 00926</p>
+      <p class="nt">Dust Control Services<br>of Puerto Rico, Inc.<br>PO Box 261900<br>San Juan, PR 00926</p>
       <a href="tel:7877557700">787-755-7700</a>
     </div>
     <div><h5>Explore</h5>
@@ -384,7 +410,184 @@ const WA = "17874448278";      // WhatsApp number for orders & quotes (digits on
 const CURRENCY = "$";
 /* ================================================ */
 
+/* ---------- i18n (Spanish default, EN/ES toggle, no reload) ---------- */
+const ES = {
+ "🇵🇷 Puerto Rican company ·":"🇵🇷 Empresa puertorriqueña ·",
+ "Serving businesses since 1962":"Sirviendo a negocios desde 1962",
+ "Questions? Call":"¿Preguntas? Llama al",
+ "Shop":"Tienda","Services":"Servicios","About":"Nosotros","Contact":"Contacto",
+ "🛒 Cart":"🛒 Carrito",
+ "Open cart":"Abrir carrito",
+ "Install App":"Instalar app",
+ "📲 To install: tap Share ⎙ then “Add to Home Screen”.":"📲 Para instalar: toca Compartir ⎙ y luego “Añadir a pantalla de inicio”.",
+ "The leader in restroom & dust control solutions":"El líder en soluciones para baños y control de polvo",
+ "Cleaner facilities.":"Instalaciones más limpias.",
+ "Fewer headaches.":"Menos dolores de cabeza.",
+ "Delivered.":"A domicilio.",
+ "Restroom dispensers, paper, soaps, warewash chemicals and ready-to-use cleaners — everything your business needs to stay spotless, from the company Puerto Rico has trusted for over 60 years.":"Dispensadores, papel, jabones, químicos para lavado de vajilla y limpiadores listos para usar — todo lo que tu negocio necesita para mantenerse impecable, de la empresa en la que Puerto Rico confía desde hace más de 60 años.",
+ "Shop supplies →":"Comprar suministros →",
+ "Get a free quote":"Pide una cotización gratis",
+ "🔥 Featured deal":"🔥 Oferta destacada",
+ "SAVE $200":"AHORRA $200",
+ "Dustco High Speed Hand Dryer":"Secador de manos de alta velocidad Dustco",
+ "Add to cart":"Agregar al carrito",
+ "Founded in Puerto Rico":"Fundada en Puerto Rico",
+ "60+ yrs":"60+ años",
+ "Of customer satisfaction":"De satisfacción de clientes",
+ "Of dust & moisture trapped by our mats":"Del polvo y la humedad que atrapan nuestras alfombras",
+ "Products ready to order":"Productos listos para ordenar",
+ "Shop by need":"Compra por necesidad",
+ "Everything your facility runs on":"Todo lo que tu instalación necesita",
+ "Pick a category and order in minutes — no accounts, no waiting.":"Elige una categoría y ordena en minutos — sin cuentas, sin esperas.",
+ "Restroom":"Baños",
+ "Dispensers, soap, sanitizer, paper, towels, hand dryer & urinal parts.":"Dispensadores, jabón, desinfectante, papel, toallas, secador de manos y piezas para urinales.",
+ "Shop restroom →":"Ver baños →",
+ "Ready-to-Use Cleaning":"Limpieza lista para usar",
+ "All-purpose, glass, degreaser and disinfectant — open and spray.":"Multiuso, vidrios, desengrasante y desinfectante — abre y rocía.",
+ "Shop cleaners →":"Ver limpiadores →",
+ "Warewash":"Lavado de vajilla",
+ "Dish machine detergent, sanitizer, rinse aid and delimers for kitchens.":"Detergente para máquina lavaplatos, sanitizante, enjuague y desincrustantes para cocinas.",
+ "Shop warewash →":"Ver lavado de vajilla →",
+ "Dust Control Services":"Servicios de control de polvo",
+ "Entrance mats, treated dust mops and Kaivac cleaning systems.":"Alfombras de entrada, mopas tratadas para polvo y sistemas de limpieza Kaivac.",
+ "See services →":"Ver servicios →",
+ "Store":"Tienda",
+ "Shop all products":"Todos los productos",
+ "Order online and send it straight to our team on WhatsApp — we confirm stock, delivery and payment with you.":"Ordena en línea y envíalo directo a nuestro equipo por WhatsApp — confirmamos inventario, entrega y pago contigo.",
+ "Search products…":"Buscar productos…",
+ "Search products":"Buscar productos",
+ "Sort":"Ordenar",
+ "Featured":"Destacados",
+ "Price: low to high":"Precio: menor a mayor",
+ "Price: high to low":"Precio: mayor a menor",
+ "Buying for a hotel, restaurant, school or hospital?":"¿Compras para un hotel, restaurante, escuela u hospital?",
+ "Ask about volume pricing, scheduled deliveries and custom programs.":"Pregunta por precios por volumen, entregas programadas y programas a la medida.",
+ "Ask for volume pricing":"Pide precios por volumen",
+ "We don't just sell it. We run the program.":"No solo lo vendemos. Manejamos el programa.",
+ "Our team installs, services and restocks so your staff can focus on the business.":"Nuestro equipo instala, da servicio y repone para que tu personal se enfoque en el negocio.",
+ "Entrance Mats & Mop Rental":"Alfombras de entrada y alquiler de mopas",
+ "Floor Maintenance Program. Attractive, long-lasting mats pick up 90% of the humidity and dust from shoes, and never fade thanks to Solution-Dye color.":"Programa de mantenimiento de pisos. Alfombras atractivas y duraderas que recogen el 90% de la humedad y el polvo de los zapatos, y no se destiñen gracias al color Solution-Dye.",
+ "Custom logo mats, indoor & outdoor":"Alfombras con tu logo, interior y exterior",
+ "Corporate image, ads & messages":"Imagen corporativa, anuncios y mensajes",
+ "Request a quote":"Solicitar cotización",
+ "Treated Dust Mop":"Mopa tratada para polvo",
+ "Sweeps, cleans, disinfects and polishes floors — without water. Lasts 3× longer than other mops, covers more area, raises no dust. We swap in clean ones when full.":"Barre, limpia, desinfecta y pule pisos — sin agua. Dura 3× más que otras mopas, cubre más área y no levanta polvo. Cambiamos las limpias cuando se llenan.",
+ "Lightweight & easy to use":"Liviana y fácil de usar",
+ "Replaced by Dustco personnel":"Reemplazada por personal de Dustco",
+ "SaniScent":"SaniScent",
+ "Automated dispenser for toilets and urinals. Timed sprays sanitize and remove limescale, tartar and rust from the siphon — and kill foul odors at the source.":"Dispensador automático para inodoros y urinales. Rociadas programadas sanitizan y eliminan sarro, cal y óxido del sifón — y acaban con los malos olores desde la fuente.",
+ "Cleaning, fragrance & hygiene":"Limpieza, fragancia e higiene",
+ "Bacteriostatic solution":"Solución bacteriostática",
+ "Schedule a quote":"Programar cotización",
+ "Housekeeping":"Housekeeping",
+ "Chemicals that safely handle dirt, germs and contaminants, help prevent infectious disease and control allergens like dust and mold.":"Químicos que manejan con seguridad suciedad, gérmenes y contaminantes, ayudan a prevenir enfermedades infecciosas y controlan alérgenos como el polvo y el moho.",
+ "Talk to us":"Habla con nosotros",
+ "A full line of chemicals for commercial kitchens that cuts your staff's labor time in dishwashing and glass care.":"Una línea completa de químicos para cocinas comerciales que reduce el tiempo de trabajo de tu personal al lavar platos y cristalería.",
+ "Shop warewash":"Ver lavado de vajilla",
+ "Industrial Laundry":"Lavandería industrial",
+ "Detergents, conditioners, boosters and bleach for bed and table linen. Works with electronic dispensing systems for accurate, sanitizing washes.":"Detergentes, suavizantes, reforzadores y cloro para ropa de cama y mantelería. Funciona con sistemas electrónicos de dosificación para lavados precisos y sanitizantes.",
+ "SMART CLEANING MACHINES · SINCE 2005":"MÁQUINAS DE LIMPIEZA INTELIGENTES · DESDE 2005",
+ "Kaivac: industrial cleaning, made easy and safe":"Kaivac: limpieza industrial, fácil y segura",
+ "Four machines in one light, practical unit — ideal for bathrooms, kitchens, stairs or any hard-to-clean area. Gets the job done in a fraction of the time, saves on chemicals and protects employee health.":"Cuatro máquinas en una unidad liviana y práctica — ideal para baños, cocinas, escaleras o cualquier área difícil de limpiar. Hace el trabajo en una fracción del tiempo, ahorra químicos y protege la salud de los empleados.",
+ "Free consultation":"Consulta gratis",
+ "💨 Blower":"💨 Soplador",
+ "Removes dust from ceilings, surfaces and corners.":"Quita el polvo de techos, superficies y esquinas.",
+ "💧 Low-pressure pump":"💧 Bomba de baja presión",
+ "Injects chemicals where hands can't reach.":"Aplica químicos donde las manos no llegan.",
+ "🚿 High-pressure pump":"🚿 Bomba de alta presión",
+ "Rinses residue for immaculate surfaces.":"Enjuaga residuos para superficies impecables.",
+ "🌀 Suction":"🌀 Succión",
+ "Collects water and dries floors fast.":"Recoge el agua y seca los pisos rápido.",
+ "ABOUT DUSTCO":"SOBRE DUSTCO",
+ "A Puerto Rican company with a vision for cleaning":"Una empresa puertorriqueña con visión para la limpieza",
+ "Dustco was founded in 1962 by a group of local businessmen with an extraordinary vision of the future of cleaning. Today we are the leader in sanitizing bathrooms, public areas and dust control.":"Dustco fue fundada en 1962 por un grupo de empresarios locales con una visión extraordinaria del futuro de la limpieza. Hoy somos líderes en sanitización de baños, áreas públicas y control de polvo.",
+ "We offer products and services that cost-effectively simplify maintenance for businesses — and we're proud of the customers who trust us.":"Ofrecemos productos y servicios que simplifican el mantenimiento de los negocios de forma costo-efectiva — y estamos orgullosos de los clientes que confían en nosotros.",
+ "Contact us":"Contáctanos",
+ "Industry leader since 1962":"Líder de la industria desde 1962",
+ "Over 60 years of customer satisfaction.":"Más de 60 años de satisfacción de clientes.",
+ "Lower cleaning costs":"Menores costos de limpieza",
+ "Mats and mops that trap dust and last longer.":"Alfombras y mopas que atrapan el polvo y duran más.",
+ "Hygiene you can count on":"Higiene con la que puedes contar",
+ "Patented dispenser, sanitizers and disinfectants.":"Dispensador patentado, sanitizantes y desinfectantes.",
+ "Real people, local support":"Personas reales, apoyo local",
+ "Call, WhatsApp or schedule a visit.":"Llama, escribe por WhatsApp o programa una visita.",
+ "Ready for a cleaner, easier facility?":"¿Listo para unas instalaciones más limpias y fáciles?",
+ "Order today, or talk to our team for a free consultation.":"Ordena hoy, o habla con nuestro equipo para una consulta gratis.",
+ "💬 WhatsApp us":"💬 Escríbenos por WhatsApp",
+ "📞 Call 787-755-7700":"📞 Llama al 787-755-7700",
+ "The leader since 1962 in solutions for bathrooms, concentrated cleaning products, public areas and dust control.":"El líder desde 1962 en soluciones para baños, productos de limpieza concentrados, áreas públicas y control de polvo.",
+ "Explore":"Explorar",
+ "Dust Control":"Control de polvo",
+ "Restroom Services / Kaivac":"Servicios de baño / Kaivac",
+ "Cleaning Products":"Productos de limpieza",
+ "Follow":"Síguenos",
+ "Dust Control Services of Puerto Rico, Inc. All rights reserved.":"Dust Control Services of Puerto Rico, Inc. Todos los derechos reservados.",
+ "Prices in USD · Final availability confirmed on order.":"Precios en USD · Disponibilidad final confirmada al ordenar.",
+ "📞 Call":"📞 Llamar",
+ "🛒 Shop":"🛒 Tienda",
+ "🛒 Your order":"🛒 Tu pedido",
+ "Cart":"Carrito",
+ "Close":"Cerrar",
+ "Total":"Total",
+ "Your name / business":"Tu nombre / negocio",
+ "Delivery address or notes (optional)":"Dirección de entrega o notas (opcional)",
+ "💬 Send order on WhatsApp":"💬 Enviar pedido por WhatsApp",
+ "We'll confirm stock, delivery and payment with you. No payment is taken online.":"Confirmaremos inventario, entrega y pago contigo. No se cobra nada en línea."
+};
+/* dynamic strings */
+const ESD = {
+ "All":"Todos","Ready-to-Use":"Listos para usar","SALE":"OFERTA","+ Add":"+ Agregar","Remove":"Quitar",
+ "No products match your search.":"Ningún producto coincide con tu búsqueda.",
+ "Your cart is empty.":"Tu carrito está vacío.","Browse products":"Ver productos","Added to cart ✓":"Agregado al carrito ✓",
+ "Stainless Steel":"Acero inoxidable","White Ceramic":"Cerámica blanca","Color":"Color"
+};
+const PES = {
+ 1:["Dispensador de manos Dustco","Dispensador de pared de 1000 ml. Una unidad para espuma, spray, sanitizantes y desinfectantes."],
+ 2:["Jabón de manos Dustco, 6/caja","Caja de 6 repuestos para el dispensador de manos Dustco."],
+ 3:["Sanitizante de manos Dustco, 6/caja","Caja de 6 repuestos de sanitizante para el dispensador de manos Dustco."],
+ 4:["Dispensador Centrefeed / Centerpull Dustco","Dispensador para rollos de papel centerpull / centerfeed."],
+ 5:["Papel Centerpull / Centerfeed Dustco","Caja de 6 rollos · 600 pies cada uno."],
+ 6:["Dispensador Mini Jumbo Dustco (9\" de diámetro)","Dispensador de papel higiénico mini jumbo, 9\" de diámetro."],
+ 7:["Papel Mini Jumbo Dustco","Caja de 12 rollos mini jumbo."],
+ 8:["Dispensador Jumbo Grande Dustco (12\" de diámetro)","Dispensador de papel higiénico jumbo grande, 12\" de diámetro."],
+ 9:["Toalla en rollo Dustco (blanqueada)","Toalla en rollo hardwound · caja de 6 · 800 pies cada uno."],
+ 10:["Toalla en rollo Dustco Natural","Toalla en rollo hardwound natural · 800 pies · 6 por caja."],
+ 11:["Secador de manos de alta velocidad Dustco","Secador de manos de alta velocidad. Elige tu acabado."],
+ 12:["Cartucho para urinal sin agua Sloan","Cartucho de repuesto para urinales sin agua."],
+ 13:["Herramienta para remover cartuchos de urinal sin agua","Herramienta para remover cartuchos de urinales sin agua."],
+ 14:["Limpiador cítrico multiuso Basics","Listo para usar · 8 × 32 oz."],
+ 15:["Limpiador de vidrios Basics","Listo para usar · 8 × 32 oz."],
+ 16:["Shurguard Plus™","Listo para usar · 8 × 32 oz."],
+ 17:["Limpiador desengrasante Terrifico","Listo para usar · 4 galones."],
+ 18:["MicroTECH Quickline™ TKO™","Listo para usar · 6 × 32 oz."],
+ 19:["Detergente concentrado para platos Dustco LavaPro","Detergente concentrado para lavar platos · 5 galones."],
+ 20:["Detergente para máquina lavaplatos EcoClean","4 galones por caja."],
+ 21:["Sanitizante USC E.S.","Sanitizante para lavado de vajilla."],
+ 22:["Enjuague de temperatura US Chemical","Aditivo de enjuague · 4 × 1 galón."],
+ 23:["Desincrustante Microtech Lime Out","Desincrustante · 4 galones por caja."],
+ 24:["Detergente sólido mecánico para vajilla MicroTECH™","Detergente sólido para vajilla · Safer Choice."],
+ 25:["Desincrustante Surety™ MicroTECH™ SB","Desincrustante · 4 × 1 galón."]
+};
+const TQ = {
+ "a free consultation":"una consulta gratuita","volume pricing":"precios por volumen","entrance mats":"alfombras de entrada",
+ "treated dust mops":"mopas tratadas para polvo","SaniScent":"SaniScent","housekeeping programs":"programas de housekeeping",
+ "industrial laundry":"lavandería industrial","a Kaivac demo / complimentary consultation":"una demostración de Kaivac / consulta gratuita",
+ "your products":"sus productos"
+};
+const META = {
+ en:{t:"Dustco — Restroom, Cleaning & Dust Control Supplies | Puerto Rico", d:"Leader since 1962 in restroom solutions, concentrated cleaning products, public areas and dust control in Puerto Rico. Shop dispensers, paper, soaps, warewash and more."},
+ es:{t:"Dustco — Suministros para Baños, Limpieza y Control de Polvo | Puerto Rico", d:"Líder desde 1962 en soluciones para baños, productos de limpieza concentrados, áreas públicas y control de polvo en Puerto Rico. Compra dispensadores, papel, jabones, lavado de vajilla y más."}
+};
+
+const norm = s => s.replace(/\s+/g," ").trim();
+let lang = "es";
+try{ const sv = localStorage.getItem("dustco_lang"); if(sv==="en"||sv==="es") lang = sv }catch(e){}
+const T  = s => (lang==="es" && ESD[s]) ? ESD[s] : s;
+const pn = x => lang==="es" ? PES[x.id][0] : x.n;
+const pd = x => lang==="es" ? PES[x.id][1] : x.d;
+
 const CATS = {restroom:"Restroom", rtu:"Ready-to-Use", warewash:"Warewash"};
+const CATN = k => lang==="es" ? ({restroom:"Baños", rtu:"Listos para usar", warewash:"Lavado de vajilla"})[k] : CATS[k];
 const EMO  = {restroom:"🧻", rtu:"🧴", warewash:"🍽️"};
 
 const P = [
@@ -424,7 +627,7 @@ const save = () => { try{ localStorage.setItem("dustco_cart", JSON.stringify(car
 
 /* ---------- shop ---------- */
 function chips(){
-  const all = [["all","All ("+P.length+")"], ...Object.entries(CATS).map(([k,v])=>[k, v+" ("+P.filter(x=>x.c===k).length+")"])];
+  const all = [["all",T("All")+" ("+P.length+")"], ...Object.keys(CATS).map(k=>[k, CATN(k)+" ("+P.filter(x=>x.c===k).length+")"])];
   $("#chips").innerHTML = all.map(([k,v])=>`<button class="chip ${cat===k?"on":""}" onclick="setCat('${k}')">${v}</button>`).join("");
 }
 function setCat(k){ cat = k; render() }
@@ -433,22 +636,22 @@ function goCat(k){ cat = k; render(); $("#shop").scrollIntoView({behavior:"smoot
 function render(){
   chips();
   const q = $("#q").value.trim().toLowerCase(), s = $("#sort").value;
-  let list = P.filter(x => (cat==="all"||x.c===cat) && (!q || (x.n+" "+x.d+" "+CATS[x.c]).toLowerCase().includes(q)));
+  let list = P.filter(x => (cat==="all"||x.c===cat) && (!q || (x.n+" "+x.d+" "+CATS[x.c]+" "+PES[x.id][0]+" "+PES[x.id][1]+" "+CATN(x.c)).toLowerCase().includes(q)));
   if(s==="lo") list.sort((a,b)=>a.p-b.p);
   if(s==="hi") list.sort((a,b)=>b.p-a.p);
-  if(s==="az") list.sort((a,b)=>a.n.localeCompare(b.n));
+  if(s==="az") list.sort((a,b)=>pn(a).localeCompare(pn(b)));
   $("#grid").innerHTML = list.length ? list.map(x=>`
     <div class="p">
-      ${x.was?`<span class="sale">SALE −${Math.round((1-x.p/x.was)*100)}%</span>`:""}
+      ${x.was?`<span class="sale">${T("SALE")} −${Math.round((1-x.p/x.was)*100)}%</span>`:""}
       <div class="im">${x.e||EMO[x.c]}</div>
       <div class="bd">
-        <span class="cn">${CATS[x.c]}</span>
-        <h4>${x.n}</h4>
-        <div class="ds">${x.d}</div>
-        ${x.opts?`<select id="o${x.id}" aria-label="${x.label}">${x.opts.map(o=>`<option>${o}</option>`).join("")}</select>`:""}
-        <div class="ft"><div class="pr">${money(x.p)}${x.was?`<s>${money(x.was)}</s>`:""}</div><button class="add" onclick="addById(${x.id})">+ Add</button></div>
+        <span class="cn">${CATN(x.c)}</span>
+        <h4>${pn(x)}</h4>
+        <div class="ds">${pd(x)}</div>
+        ${x.opts?`<select id="o${x.id}" aria-label="${T(x.label)}">${x.opts.map(o=>`<option value="${o}">${T(o)}</option>`).join("")}</select>`:""}
+        <div class="ft"><div class="pr">${money(x.p)}${x.was?`<s>${money(x.was)}</s>`:""}</div><button class="add" onclick="addById(${x.id})">${T("+ Add")}</button></div>
       </div>
-    </div>`).join("") : `<div class="empty">No products match your search.</div>`;
+    </div>`).join("") : `<div class="empty">${T("No products match your search.")}</div>`;
 }
 
 /* ---------- cart ---------- */
@@ -459,7 +662,7 @@ function addById(id){
   const key = id+"|"+opt;
   const f = cart.find(i=>i.key===key);
   if(f) f.q++; else cart.push({key, id, opt, q:1});
-  save(); drawCart(); toast("Added to cart ✓");
+  save(); drawCart(); toast(T("Added to cart ✓"));
 }
 function chg(key,d){ const i = cart.find(i=>i.key===key); if(!i) return; i.q+=d; if(i.q<=0) cart = cart.filter(c=>c.key!==key); save(); drawCart() }
 function rm(key){ cart = cart.filter(c=>c.key!==key); save(); drawCart() }
@@ -473,10 +676,10 @@ function drawCart(){
   $("#items").innerHTML = n ? cart.map(i=>{
     const x = P.find(p=>p.id===i.id);
     return `<div class="it"><div class="e">${x.e}</div>
-      <div><b>${x.n}</b>${i.opt?`<small>${i.opt}</small>`:""}
+      <div><b>${pn(x)}</b>${i.opt?`<small>${T(i.opt)}</small>`:""}
         <div class="qty"><button onclick="chg('${i.key}',-1)">−</button><span>${i.q}</span><button onclick="chg('${i.key}',1)">+</button></div></div>
-      <div class="ip">${money(x.p*i.q)}<button class="rm" onclick="rm('${i.key}')">Remove</button></div></div>`;
-  }).join("") : `<div class="noitems">Your cart is empty.<br><br><a class="btn btn-amber" href="#shop" onclick="closeCart()">Browse products</a></div>`;
+      <div class="ip">${money(x.p*i.q)}<button class="rm" onclick="rm('${i.key}')">${T("Remove")}</button></div></div>`;
+  }).join("") : `<div class="noitems">${T("Your cart is empty.")}<br><br><a class="btn btn-amber" href="#shop" onclick="closeCart()">${T("Browse products")}</a></div>`;
 }
 function openCart(){ drawCart(); $("#drawer").classList.add("on"); $("#ov").classList.add("on") }
 function closeCart(){ $("#drawer").classList.remove("on"); $("#ov").classList.remove("on") }
@@ -484,27 +687,92 @@ function closeCart(){ $("#drawer").classList.remove("on"); $("#ov").classList.re
 function sendOrder(){
   if(!cart.length) return;
   const name = $("#cname").value.trim(), note = $("#cnote").value.trim();
-  let m = "Hello Dustco! I'd like to place an order:\n\n";
+  const es = lang==="es";
+  let m = es ? "¡Hola Dustco! Quisiera hacer un pedido:\n\n" : "Hello Dustco! I'd like to place an order:\n\n";
   cart.forEach(i=>{ const x = P.find(p=>p.id===i.id);
-    m += `• ${i.q} × ${x.n}${i.opt?" ("+i.opt+")":""} — ${money(x.p*i.q)}\n`; });
+    m += `• ${i.q} × ${pn(x)}${i.opt?" ("+T(i.opt)+")":""} — ${money(x.p*i.q)}\n`; });
   m += `\nTotal: ${money(total())}`;
-  if(name) m += `\nName: ${name}`;
-  if(note) m += `\nNotes: ${note}`;
+  if(name) m += (es?"\nNombre: ":"\nName: ")+name;
+  if(note) m += (es?"\nNotas: ":"\nNotes: ")+note;
   window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(m), "_blank");
 }
 function quote(topic){
-  const m = "Hello Dustco! I'd like to ask about "+topic+".";
+  const m = lang==="es" ? "¡Hola Dustco! Me gustaría consultar sobre "+(TQ[topic]||topic)+"." : "Hello Dustco! I'd like to ask about "+topic+".";
   window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(m), "_blank");
 }
 
 let tt;
 function toast(t){ const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(tt); tt = setTimeout(()=>e.classList.remove("on"),1400) }
 
+/* ---------- language ---------- */
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.title = META[lang].t;
+  const md = document.querySelector('meta[name="description"]'); if(md) md.setAttribute("content", META[lang].d);
+  /* static text nodes */
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {acceptNode(n){
+    const p = n.parentElement;
+    if(!p || p.closest("script,style,.nt,#grid,#chips,#items,#toast")) return NodeFilter.FILTER_SKIP;
+    return NodeFilter.FILTER_ACCEPT;
+  }});
+  const nodes = []; while(w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach(n=>{
+    if(n._en===undefined) n._en = n.nodeValue;
+    const es = ES[norm(n._en)];
+    if(es===undefined) return;
+    const m = n._en.match(/^(\s*)[\s\S]*?(\s*)$/);
+    n.nodeValue = lang==="es" ? m[1]+es+m[2] : n._en;
+  });
+  /* attributes */
+  document.querySelectorAll("[placeholder],[aria-label]").forEach(e=>{
+    if(e.closest("#grid,#items")) return;
+    ["placeholder","aria-label"].forEach(a=>{
+      if(!e.hasAttribute(a)) return;
+      const k = "_"+a; if(e[k]===undefined) e[k] = e.getAttribute(a);
+      const es = ES[e[k]];
+      e.setAttribute(a, lang==="es" && es ? es : e[k]);
+    });
+  });
+  const lb = $("#lang");
+  lb.textContent = lang==="es" ? "EN" : "ES";
+  lb.setAttribute("aria-label", lang==="es" ? "Switch to English" : "Cambiar a español");
+  render(); drawCart();
+}
+function setLang(l){
+  lang = l;
+  try{ localStorage.setItem("dustco_lang", l) }catch(e){}
+  applyLang();
+}
+$("#lang").addEventListener("click", ()=> setLang(lang==="es" ? "en" : "es"));
+
+/* ---------- PWA: install button + iOS helper ---------- */
+let deferred = null;
+const inst = $("#inst");
+window.addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); deferred = e; inst.hidden = false });
+inst.addEventListener("click", async ()=>{
+  if(!deferred) return;
+  deferred.prompt();
+  try{ await deferred.userChoice }catch(e){}
+  deferred = null; inst.hidden = true;
+});
+window.addEventListener("appinstalled", ()=>{ deferred = null; inst.hidden = true; $("#ios").hidden = true });
+
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+const standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+let iosDismissed = false; try{ iosDismissed = localStorage.getItem("dustco_ios_tip")==="1" }catch(e){}
+if(isIOS && !standalone && !iosDismissed) $("#ios").hidden = false;
+$("#iosx").addEventListener("click", ()=>{ $("#ios").hidden = true; try{ localStorage.setItem("dustco_ios_tip","1") }catch(e){} });
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("./dustco-sw.js").catch(()=>{}) });
+}
+
+/* ---------- init ---------- */
 $("#q").addEventListener("input", render);
 $("#sort").addEventListener("change", render);
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeCart() });
 $("#yr").textContent = new Date().getFullYear();
-render(); drawCart();
+applyLang();
 </script>
 </body>
 </html>
