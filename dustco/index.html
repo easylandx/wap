@@ -302,7 +302,7 @@ footer .logo{color:#fff;margin-bottom:10px}
   <div class="t"><b>1962</b><span>Founded in Puerto Rico</span></div>
   <div class="t"><b>60+ yrs</b><span>Of customer satisfaction</span></div>
   <div class="t"><b>90%</b><span>Of dust &amp; moisture trapped by our mats</span></div>
-  <div class="t"><b>25</b><span>Products ready to order</span></div>
+  <div class="t"><b id="pcount">35</b><span>Products ready to order</span></div>
 </div></div></div>
 
 <div class="sitebar"><div class="wrap">
@@ -737,6 +737,7 @@ const save = () => { try{ localStorage.setItem("dustco_cart", JSON.stringify(car
 
 /* ---------- shop ---------- */
 function chips(){
+  const pc = document.getElementById("pcount"); if(pc) pc.textContent = P.length;   /* always matches the catalog */
   const all = [["all",T("All")+" ("+P.length+")"], ...Object.keys(CATS).map(k=>[k, CATN(k)+" ("+P.filter(x=>x.c===k).length+")"])];
   $("#chips").innerHTML = all.map(([k,v])=>`<button class="chip ${cat===k?"on":""}" onclick="setCat('${k}')">${v}</button>`).join("");
 }
