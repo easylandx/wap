@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dustco — Restroom, Cleaning & Dust Control Supplies | Puerto Rico</title>
+<meta name="description" content="Leader since 1962 in restroom solutions, concentrated cleaning products, public areas and dust control in Puerto Rico. Shop dispensers, paper, soaps, warewash and more.">
+<style>
+:root{
+  --navy:#0a2540; --navy2:#12365c; --blue:#1f6feb; --cyan:#19b5d6;
+  --amber:#ffb703; --amber2:#f59e0b; --bg:#f5f8fb; --card:#fff;
+  --ink:#14233a; --mute:#5b6b80; --line:#e2e8f0; --green:#16a34a; --red:#e11d48;
+  --r:16px; --shadow:0 6px 24px rgba(10,37,64,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding:0 18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:999px;font-weight:700;font-size:15px;transition:.15s transform,.15s box-shadow,.15s background}
+.btn:hover{transform:translateY(-1px)}
+.btn-amber{background:var(--amber);color:#2a1a00;box-shadow:0 6px 18px rgba(255,183,3,.35)}
+.btn-amber:hover{background:var(--amber2)}
+.btn-ghost{border:2px solid rgba(255,255,255,.55);color:#fff}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-wa{background:#25d366;color:#fff;box-shadow:0 6px 18px rgba(37,211,102,.3)}
+.btn-wa:hover{background:#1ebe5a}
+.btn-line{border:2px solid var(--navy);color:var(--navy)}
+.btn-line:hover{background:var(--navy);color:#fff}
+
+/* top strip */
+.strip{background:var(--navy);color:#cfe3f7;font-size:13px}
+.strip .wrap{display:flex;justify-content:space-between;gap:10px;padding-top:7px;padding-bottom:7px;flex-wrap:wrap}
+.strip b{color:var(--amber)}
+
+/* header */
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:18px;height:64px}
+.logo{font-weight:900;font-size:26px;letter-spacing:-.5px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.logo i{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#fff;font-style:normal;font-size:19px}
+.logo small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.14em;color:var(--mute);margin-top:-4px}
+nav{margin-left:auto;display:flex;gap:22px;font-weight:600;font-size:15px;color:var(--navy2)}
+nav a:hover{color:var(--blue)}
+.cartbtn{position:relative;display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px}
+.cartbtn .n{background:var(--amber);color:#2a1a00;border-radius:99px;min-width:22px;height:22px;display:grid;place-items:center;font-size:12px;padding:0 6px}
+@media(max-width:820px){nav{display:none}.cartbtn{margin-left:auto}}
+
+/* hero */
+.hero{background:radial-gradient(1000px 500px at 85% -10%,rgba(25,181,214,.35),transparent 60%),linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:70px 0 90px;position:relative;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+.tag{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:6px 14px;border-radius:99px;font-size:13px;font-weight:600;margin-bottom:18px}
+h1{font-size:clamp(34px,5.4vw,58px);line-height:1.05;letter-spacing:-1.2px;font-weight:900}
+h1 em{font-style:normal;color:var(--amber)}
+.hero p.lead{font-size:18px;color:#cfe3f7;margin:18px 0 28px;max-width:520px}
+.hero .ctas{display:flex;gap:12px;flex-wrap:wrap}
+.hero-card{background:#fff;color:var(--ink);border-radius:22px;padding:24px;box-shadow:0 30px 60px rgba(0,0,0,.3)}
+.hero-card h3{font-size:16px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.deal{display:flex;gap:14px;align-items:center}
+.deal .ic{font-size:54px;width:90px;height:90px;border-radius:18px;background:linear-gradient(135deg,#e0f2fe,#cffafe);display:grid;place-items:center}
+.deal b{font-size:19px;display:block}
+.deal .pr{font-size:28px;font-weight:900;color:var(--navy)}
+.deal .pr s{font-size:16px;color:var(--mute);font-weight:600;margin-left:6px}
+.badge-save{display:inline-block;background:var(--red);color:#fff;font-size:12px;font-weight:800;padding:3px 9px;border-radius:99px;margin-bottom:4px}
+.hero-card .btn{width:100%;margin-top:16px}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr}.hero{padding:48px 0 70px}}
+
+/* trust */
+.trust{margin-top:-44px;position:relative;z-index:5}
+.trust .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.t{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);text-align:center}
+.t b{display:block;font-size:28px;font-weight:900;color:var(--blue);line-height:1.1}
+.t span{font-size:13.5px;color:var(--mute)}
+@media(max-width:760px){.trust .grid{grid-template-columns:repeat(2,1fr)}}
+
+section{padding:64px 0}
+.sec-h{text-align:center;max-width:680px;margin:0 auto 34px}
+.sec-h .k{color:var(--blue);font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.sec-h h2{font-size:clamp(26px,4vw,38px);letter-spacing:-.8px;line-height:1.15;margin:6px 0 10px;color:var(--navy)}
+.sec-h p{color:var(--mute)}
+
+/* categories */
+.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.cat{background:var(--card);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);cursor:pointer;border:2px solid transparent;transition:.15s}
+.cat:hover{border-color:var(--cyan);transform:translateY(-3px)}
+.cat .e{font-size:38px}
+.cat h3{font-size:18px;margin:8px 0 4px;color:var(--navy)}
+.cat p{font-size:14px;color:var(--mute)}
+.cat span{display:inline-block;margin-top:10px;font-weight:700;font-size:14px;color:var(--blue)}
+@media(max-width:900px){.cats{grid-template-columns:repeat(2,1fr)}}
+
+/* shop */
+#shop{background:#fff}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:9px 16px;border-radius:99px;background:var(--bg);border:1px solid var(--line);font-weight:700;font-size:14px;color:var(--navy2)}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tools input,.tools select{padding:10px 14px;border-radius:99px;border:1px solid var(--line);font:inherit;background:var(--bg);outline:none}
+.tools input{flex:1;min-width:160px}
+.tools input:focus,.tools select:focus{border-color:var(--blue)}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1020px){.products{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.products{grid-template-columns:repeat(2,1fr);gap:12px}}
+@media(max-width:420px){.products{grid-template-columns:1fr}}
+.p{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;transition:.15s;position:relative}
+.p:hover{box-shadow:var(--shadow);transform:translateY(-3px)}
+.p .im{height:130px;display:grid;place-items:center;font-size:56px;background:linear-gradient(135deg,#eef6ff,#e6fbff)}
+.p .sale{position:absolute;top:10px;left:10px;background:var(--red);color:#fff;font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px}
+.p .bd{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.p .cn{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue)}
+.p h4{font-size:15px;line-height:1.3;color:var(--navy)}
+.p .ds{font-size:13px;color:var(--mute);flex:1}
+.p select{padding:7px 10px;border-radius:10px;border:1px solid var(--line);font:inherit;font-size:13px;background:#fff}
+.p .ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.pr{font-weight:900;font-size:20px;color:var(--navy)}
+.pr s{font-size:13px;color:var(--mute);font-weight:600;margin-left:4px}
+.add{background:var(--amber);color:#2a1a00;font-weight:800;font-size:13.5px;padding:9px 14px;border-radius:99px}
+.add:hover{background:var(--amber2)}
+.empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:40px}
+.bulk{margin-top:26px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:var(--r);padding:22px 26px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.bulk b{font-size:19px}
+
+/* services */
+.svc{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.svc{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.svc{grid-template-columns:1fr}}
+.s{background:var(--card);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.s .e{font-size:36px}
+.s h3{font-size:19px;margin:8px 0;color:var(--navy)}
+.s p{font-size:14.5px;color:var(--mute);flex:1}
+.s ul{margin:10px 0 0 18px;font-size:14px;color:var(--mute)}
+.s a.btn{margin-top:16px;padding:10px 18px;font-size:14px}
+.kaivac{margin-top:18px;background:var(--navy);color:#fff;border-radius:var(--r);padding:30px;display:grid;grid-template-columns:1.1fr .9fr;gap:26px;align-items:center}
+.kaivac h3{font-size:26px;letter-spacing:-.5px;margin-bottom:8px}
+.kaivac p{color:#cfe3f7}
+.k4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.k4 div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;font-size:14px}
+.k4 b{display:block;color:var(--amber)}
+@media(max-width:800px){.kaivac{grid-template-columns:1fr}}
+
+/* about + cta */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center}
+@media(max-width:800px){.about{grid-template-columns:1fr}}
+.about h2{font-size:clamp(26px,4vw,36px);letter-spacing:-.8px;color:var(--navy);margin:6px 0 12px}
+.about p{color:var(--mute);margin-bottom:12px}
+.why{display:grid;gap:10px}
+.why div{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:flex-start}
+.why .e{font-size:24px}
+.why b{display:block;color:var(--navy)}
+.why span{font-size:14px;color:var(--mute)}
+
+.final{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#fff;text-align:center;padding:60px 0}
+.final h2{font-size:clamp(28px,4.4vw,42px);letter-spacing:-1px;margin-bottom:8px}
+.final p{opacity:.92;margin-bottom:22px}
+.final .ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+footer{background:var(--navy);color:#b7cbe0;padding:46px 0 90px;font-size:14.5px}
+footer .g{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:26px}
+@media(max-width:800px){footer .g{grid-template-columns:1fr 1fr}}
+footer h5{color:#fff;font-size:14px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+footer a{display:block;padding:3px 0}
+footer a:hover{color:var(--amber)}
+footer .logo{color:#fff;margin-bottom:10px}
+.copy{border-top:1px solid rgba(255,255,255,.12);margin-top:28px;padding-top:16px;font-size:13px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+/* cart drawer */
+.ov{position:fixed;inset:0;background:rgba(5,16,30,.55);opacity:0;pointer-events:none;transition:.2s;z-index:90}
+.ov.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:#fff;z-index:100;transform:translateX(105%);transition:.25s;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(0,0,0,.2)}
+.drawer.on{transform:none}
+.dh{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.dh h3{font-size:20px;color:var(--navy)}
+.x{font-size:26px;line-height:1;color:var(--mute);padding:4px 10px}
+.items{flex:1;overflow:auto;padding:14px 20px}
+.it{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.it .e{font-size:30px;width:52px;height:52px;border-radius:12px;background:#eef6ff;display:grid;place-items:center}
+.it b{font-size:14px;line-height:1.3;display:block;color:var(--navy)}
+.it small{color:var(--mute)}
+.qty{display:flex;align-items:center;gap:6px;margin-top:6px}
+.qty button{width:26px;height:26px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-weight:800}
+.it .ip{font-weight:800;text-align:right}
+.it .rm{display:block;font-size:12px;color:var(--red);margin-top:4px}
+.df{padding:16px 20px;border-top:1px solid var(--line);background:var(--bg)}
+.tot{display:flex;justify-content:space-between;font-size:20px;font-weight:900;color:var(--navy);margin-bottom:10px}
+.df input{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;font:inherit;margin-bottom:8px}
+.df .btn{width:100%}
+.df small{display:block;color:var(--mute);margin-top:8px;text-align:center;font-size:12.5px}
+.noitems{text-align:center;color:var(--mute);padding:50px 10px}
+
+/* mobile bar */
+.mbar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;background:#fff;border-top:1px solid var(--line);padding:8px 10px;gap:8px}
+.mbar a{flex:1;text-align:center;padding:11px;border-radius:12px;font-weight:800;font-size:14px}
+@media(max-width:760px){.mbar{display:flex}}
+.toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,30px);background:var(--navy);color:#fff;padding:11px 20px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:120}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<div class="strip"><div class="wrap">
+  <span>🇵🇷 Puerto Rican company · <b>Serving businesses since 1962</b></span>
+  <span>Questions? Call <a href="tel:7877557700"><b>787-755-7700</b></a></span>
+</div></div>
+
+<header><div class="wrap">
+  <a href="#top" class="logo"><i>✦</i><span>Dustco<small>DUST CONTROL SERVICES OF PR</small></span></a>
+  <nav>
+    <a href="#shop">Shop</a>
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <button class="cartbtn" onclick="openCart()" aria-label="Open cart">🛒 Cart <span class="n" id="cn">0</span></button>
+</div></header>
+
+<main id="top">
+<div class="hero"><div class="wrap">
+  <div>
+    <span class="tag">The leader in restroom & dust control solutions</span>
+    <h1>Cleaner facilities. <em>Fewer headaches.</em> Delivered.</h1>
+    <p class="lead">Restroom dispensers, paper, soaps, warewash chemicals and ready-to-use cleaners — everything your business needs to stay spotless, from the company Puerto Rico has trusted for over 60 years.</p>
+    <div class="ctas">
+      <a href="#shop" class="btn btn-amber">Shop supplies →</a>
+      <a href="#" class="btn btn-ghost" onclick="quote('a free consultation');return false">Get a free quote</a>
+    </div>
+  </div>
+  <div class="hero-card">
+    <h3>🔥 Featured deal</h3>
+    <div class="deal">
+      <div class="ic">🌬️</div>
+      <div>
+        <span class="badge-save">SAVE $200</span>
+        <b>Dustco High Speed Hand Dryer</b>
+        <div class="pr">$399.00<s>$599.00</s></div>
+      </div>
+    </div>
+    <button class="btn btn-amber" onclick="addById(11)">Add to cart</button>
+  </div>
+</div></div>
+
+<div class="trust"><div class="wrap"><div class="grid">
+  <div class="t"><b>1962</b><span>Founded in Puerto Rico</span></div>
+  <div class="t"><b>60+ yrs</b><span>Of customer satisfaction</span></div>
+  <div class="t"><b>90%</b><span>Of dust &amp; moisture trapped by our mats</span></div>
+  <div class="t"><b>25</b><span>Products ready to order</span></div>
+</div></div></div>
+
+<section>
+<div class="wrap">
+  <div class="sec-h"><span class="k">Shop by need</span><h2>Everything your facility runs on</h2><p>Pick a category and order in minutes — no accounts, no waiting.</p></div>
+  <div class="cats">
+    <div class="cat" onclick="goCat('restroom')"><div class="e">🚻</div><h3>Restroom</h3><p>Dispensers, soap, sanitizer, paper, towels, hand dryer &amp; urinal parts.</p><span>Shop restroom →</span></div>
+    <div class="cat" onclick="goCat('rtu')"><div class="e">🧴</div><h3>Ready-to-Use Cleaning</h3><p>All-purpose, glass, degreaser and disinfectant — open and spray.</p><span>Shop cleaners →</span></div>
+    <div class="cat" onclick="goCat('warewash')"><div class="e">🍽️</div><h3>Warewash</h3><p>Dish machine detergent, sanitizer, rinse aid and delimers for kitchens.</p><span>Shop warewash →</span></div>
+    <div class="cat" onclick="location.hash='#services'"><div class="e">🧹</div><h3>Dust Control Services</h3><p>Entrance mats, treated dust mops and Kaivac cleaning systems.</p><span>See services →</span></div>
+  </div>
+</div>
+</section>
+
+<section id="shop">
+<div class="wrap">
+  <div class="sec-h"><span class="k">Store</span><h2>Shop all products</h2><p>Order online and send it straight to our team on WhatsApp — we confirm stock, delivery and payment with you.</p></div>
+  <div class="tools">
+    <div class="chips" id="chips"></div>
+    <input id="q" type="search" placeholder="Search products…" aria-label="Search products">
+    <select id="sort" aria-label="Sort">
+      <option value="f">Featured</option>
+      <option value="lo">Price: low to high</option>
+      <option value="hi">Price: high to low</option>
+      <option value="az">A–Z</option>
+    </select>
+  </div>
+  <div class="products" id="grid"></div>
+  <div class="bulk">
+    <div><b>Buying for a hotel, restaurant, school or hospital?</b><br><span style="color:#cfe3f7">Ask about volume pricing, scheduled deliveries and custom programs.</span></div>
+    <a href="#" class="btn btn-amber" onclick="quote('volume pricing');return false">Ask for volume pricing</a>
+  </div>
+</div>
+</section>
+
+<section id="services">
+<div class="wrap">
+  <div class="sec-h"><span class="k">Services</span><h2>We don't just sell it. We run the program.</h2><p>Our team installs, services and restocks so your staff can focus on the business.</p></div>
+  <div class="svc">
+    <div class="s"><div class="e">🪧</div><h3>Entrance Mats &amp; Mop Rental</h3><p>Floor Maintenance Program. Attractive, long-lasting mats pick up 90% of the humidity and dust from shoes, and never fade thanks to Solution-Dye color.</p><ul><li>Custom logo mats, indoor &amp; outdoor</li><li>Corporate image, ads &amp; messages</li></ul><a href="#" class="btn btn-line" onclick="quote('entrance mats');return false">Request a quote</a></div>
+    <div class="s"><div class="e">🧽</div><h3>Treated Dust Mop</h3><p>Sweeps, cleans, disinfects and polishes floors — without water. Lasts 3× longer than other mops, covers more area, raises no dust. We swap in clean ones when full.</p><ul><li>Lightweight &amp; easy to use</li><li>Replaced by Dustco personnel</li></ul><a href="#" class="btn btn-line" onclick="quote('treated dust mops');return false">Request a quote</a></div>
+    <div class="s"><div class="e">🌸</div><h3>SaniScent</h3><p>Automated dispenser for toilets and urinals. Timed sprays sanitize and remove limescale, tartar and rust from the siphon — and kill foul odors at the source.</p><ul><li>Cleaning, fragrance &amp; hygiene</li><li>Bacteriostatic solution</li></ul><a href="#" class="btn btn-line" onclick="quote('SaniScent');return false">Schedule a quote</a></div>
+    <div class="s"><div class="e">🧼</div><h3>Housekeeping</h3><p>Chemicals that safely handle dirt, germs and contaminants, help prevent infectious disease and control allergens like dust and mold.</p><a href="#" class="btn btn-line" onclick="quote('housekeeping programs');return false">Talk to us</a></div>
+    <div class="s"><div class="e">🥂</div><h3>Warewash</h3><p>A full line of chemicals for commercial kitchens that cuts your staff's labor time in dishwashing and glass care.</p><a href="#" class="btn btn-line" onclick="goCat('warewash');return false">Shop warewash</a></div>
+    <div class="s"><div class="e">🛏️</div><h3>Industrial Laundry</h3><p>Detergents, conditioners, boosters and bleach for bed and table linen. Works with electronic dispensing systems for accurate, sanitizing washes.</p><a href="#" class="btn btn-line" onclick="quote('industrial laundry');return false">Talk to us</a></div>
+  </div>
+  <div class="kaivac">
+    <div>
+      <span style="color:var(--amber);font-weight:800;font-size:13px;letter-spacing:.14em">SMART CLEANING MACHINES · SINCE 2005</span>
+      <h3>Kaivac: industrial cleaning, made easy and safe</h3>
+      <p>Four machines in one light, practical unit — ideal for bathrooms, kitchens, stairs or any hard-to-clean area. Gets the job done in a fraction of the time, saves on chemicals and protects employee health.</p>
+      <a href="#" class="btn btn-amber" style="margin-top:16px" onclick="quote('a Kaivac demo / complimentary consultation');return false">Free consultation</a>
+    </div>
+    <div class="k4">
+      <div><b>💨 Blower</b>Removes dust from ceilings, surfaces and corners.</div>
+      <div><b>💧 Low-pressure pump</b>Injects chemicals where hands can't reach.</div>
+      <div><b>🚿 High-pressure pump</b>Rinses residue for immaculate surfaces.</div>
+      <div><b>🌀 Suction</b>Collects water and dries floors fast.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="about" style="background:#fff">
+<div class="wrap about">
+  <div>
+    <span style="color:var(--blue);font-weight:800;font-size:13px;letter-spacing:.14em">ABOUT DUSTCO</span>
+    <h2>A Puerto Rican company with a vision for cleaning</h2>
+    <p>Dustco was founded in 1962 by a group of local businessmen with an extraordinary vision of the future of cleaning. Today we are the leader in sanitizing bathrooms, public areas and dust control.</p>
+    <p>We offer products and services that cost-effectively simplify maintenance for businesses — and we're proud of the customers who trust us.</p>
+    <a href="#contact" class="btn btn-amber">Contact us</a>
+  </div>
+  <div class="why">
+    <div><span class="e">🏆</span><p><b>Industry leader since 1962</b><span>Over 60 years of customer satisfaction.</span></p></div>
+    <div><span class="e">💰</span><p><b>Lower cleaning costs</b><span>Mats and mops that trap dust and last longer.</span></p></div>
+    <div><span class="e">🛡️</span><p><b>Hygiene you can count on</b><span>Patented dispenser, sanitizers and disinfectants.</span></p></div>
+    <div><span class="e">🤝</span><p><b>Real people, local support</b><span>Call, WhatsApp or schedule a visit.</span></p></div>
+  </div>
+</div>
+</section>
+
+<div class="final" id="contact"><div class="wrap">
+  <h2>Ready for a cleaner, easier facility?</h2>
+  <p>Order today, or talk to our team for a free consultation.</p>
+  <div class="ctas">
+    <a class="btn btn-wa" href="#" onclick="quote('a free consultation');return false">💬 WhatsApp us</a>
+    <a class="btn btn-amber" href="tel:7877557700">📞 Call 787-755-7700</a>
+  </div>
+</div></div>
+</main>
+
+<footer><div class="wrap">
+  <div class="g">
+    <div>
+      <div class="logo"><i>✦</i><span>Dustco</span></div>
+      <p>The leader since 1962 in solutions for bathrooms, concentrated cleaning products, public areas and dust control.</p>
+    </div>
+    <div><h5>Contact</h5>
+      <p>Dust Control Services<br>of Puerto Rico, Inc.<br>PO Box 261900<br>San Juan, PR 00926</p>
+      <a href="tel:7877557700">787-755-7700</a>
+    </div>
+    <div><h5>Explore</h5>
+      <a href="#shop">Shop</a><a href="#services">Dust Control</a><a href="#services">Restroom Services / Kaivac</a><a href="#services">Cleaning Products</a><a href="#contact">Contact us</a>
+    </div>
+    <div><h5>Follow</h5>
+      <a href="https://www.facebook.com/dustco" target="_blank" rel="noopener">Facebook</a>
+      <a href="https://www.instagram.com/dustcopr" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.linkedin.com/company/dust-control-services-of-puerto-rico-dustco-" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="#" onclick="quote('your products');return false">WhatsApp</a>
+    </div>
+  </div>
+  <div class="copy"><span>© <span id="yr"></span> Dust Control Services of Puerto Rico, Inc. All rights reserved.</span><span>Prices in USD · Final availability confirmed on order.</span></div>
+</div></footer>
+
+<div class="mbar">
+  <a href="tel:7877557700" style="background:var(--navy);color:#fff">📞 Call</a>
+  <a href="#" onclick="quote('your products');return false" style="background:#25d366;color:#fff">💬 WhatsApp</a>
+  <a href="#shop" style="background:var(--amber);color:#2a1a00">🛒 Shop</a>
+</div>
+
+<div class="ov" id="ov" onclick="closeCart()"></div>
+<aside class="drawer" id="drawer" aria-label="Cart">
+  <div class="dh"><h3>🛒 Your order</h3><button class="x" onclick="closeCart()" aria-label="Close">×</button></div>
+  <div class="items" id="items"></div>
+  <div class="df" id="df">
+    <div class="tot"><span>Total</span><span id="tot">$0.00</span></div>
+    <input id="cname" placeholder="Your name / business" autocomplete="organization">
+    <input id="cnote" placeholder="Delivery address or notes (optional)">
+    <button class="btn btn-wa" onclick="sendOrder()">💬 Send order on WhatsApp</button>
+    <small>We'll confirm stock, delivery and payment with you. No payment is taken online.</small>
+  </div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== CONFIG: change here for each client ===== */
+const WA = "17874448278";      // WhatsApp number for orders & quotes (digits only)
+const CURRENCY = "$";
+/* ================================================ */
+
+const CATS = {restroom:"Restroom", rtu:"Ready-to-Use", warewash:"Warewash"};
+const EMO  = {restroom:"🧻", rtu:"🧴", warewash:"🍽️"};
+
+const P = [
+ {id:1, n:"Dustco Hand Dispenser", c:"restroom", p:30, e:"🧼", d:"Wall-mounted 1000 ml dispenser. One unit for foam, spray, sanitizers and disinfectants."},
+ {id:2, n:"Dustco Hand Soap 6/case", c:"restroom", p:77, e:"🫧", d:"Case of 6 refills for the Dustco hand dispenser."},
+ {id:3, n:"Dustco Hand Sanitizer 6/case", c:"restroom", p:104, e:"🧴", d:"Case of 6 sanitizer refills for the Dustco hand dispenser."},
+ {id:4, n:"Dustco Centrefeed / Centerpull Dispenser", c:"restroom", p:37, e:"🧻", d:"Dispenser for centerpull / centerfeed paper rolls."},
+ {id:5, n:"Dustco Centerpull / Centerfeed Paper", c:"restroom", p:48, e:"🧻", d:"Case of 6 rolls · 600 ft each."},
+ {id:6, n:"Dustco Mini Jumbo Dispenser (9\" Diameter)", c:"restroom", p:35, e:"🧻", d:"Mini jumbo bath tissue dispenser, 9\" diameter."},
+ {id:7, n:"Dustco Mini Jumbo Paper", c:"restroom", p:59.99, e:"🧻", d:"Case of 12 mini jumbo rolls."},
+ {id:8, n:"Dustco Large Jumbo Dispenser (12\" Diameter)", c:"restroom", p:40, e:"🧻", d:"Large jumbo bath tissue dispenser, 12\" diameter."},
+ {id:9, n:"Dustco Roll Towel (Bleached)", c:"restroom", p:57.99, e:"📜", d:"Hardwound roll towel · box of 6 · 800 ft each."},
+ {id:10,n:"Dustco Hand Roll Towel Natural", c:"restroom", p:59.99, e:"📜", d:"Natural hardwound roll towel · 800 ft · 6 per box."},
+ {id:11,n:"Dustco High Speed Hand Dryer", c:"restroom", p:399, was:599, e:"🌬️", d:"High-speed hand dryer. Choose your finish.", opts:["Stainless Steel","White Ceramic"], label:"Color"},
+ {id:12,n:"Sloan Water Free Urinal Cartridge", c:"restroom", p:85, e:"🚽", d:"Replacement cartridge for water-free urinals."},
+ {id:13,n:"Waterfree Urinal Cartridge Removal Tool", c:"restroom", p:30, e:"🔧", d:"Tool for removing water-free urinal cartridges."},
+ {id:14,n:"Basics Citrus All-Purpose Cleaner", c:"rtu", p:65.99, e:"🍋", d:"Ready-to-use · 8 × 32 oz."},
+ {id:15,n:"Basics Glass Cleaner", c:"rtu", p:65.99, e:"🪟", d:"Ready-to-use · 8 × 32 oz."},
+ {id:16,n:"Shurguard Plus™", c:"rtu", p:65.99, e:"🛡️", d:"Ready-to-use · 8 × 32 oz."},
+ {id:17,n:"Terrifico Cleaner Degreaser", c:"rtu", p:65.99, e:"💪", d:"Ready-to-use · 4 gallons."},
+ {id:18,n:"MicroTECH Quickline™ TKO™", c:"rtu", p:48.99, e:"⚡", d:"Ready-to-use · 6 × 32 oz."},
+ {id:19,n:"Dustco LavaPro Concentrated Dishwashing Detergent", c:"warewash", p:50, e:"🫧", d:"Concentrated dishwashing detergent · 5 gallon."},
+ {id:20,n:"EcoClean Dish Machine Detergent", c:"warewash", p:91.99, e:"🍽️", d:"4 gallons per box."},
+ {id:21,n:"USC Sanitizer E.S.", c:"warewash", p:61.99, e:"✨", d:"Warewash sanitizer."},
+ {id:22,n:"US Chemical Temp Rinse", c:"warewash", p:97.99, e:"🌡️", d:"Rinse additive · 4 × 1 gallon."},
+ {id:23,n:"Microtech Lime Out Delimer", c:"warewash", p:89.99, e:"🧪", d:"Delimer · 4 gallons per box."},
+ {id:24,n:"MicroTECH™ Solid Mechanical Warewash Detergent", c:"warewash", p:91.99, e:"🥄", d:"Solid warewash detergent · Safer Choice."},
+ {id:25,n:"Surety™ MicroTECH™ Delimer SB", c:"warewash", p:58.99, e:"🧪", d:"Delimer · 4 × 1 gallon."}
+];
+
+const $ = s => document.querySelector(s);
+const money = v => CURRENCY + v.toFixed(2);
+let cat = "all", cart = [];
+
+try{ cart = JSON.parse(localStorage.getItem("dustco_cart")||"[]") }catch(e){ cart = [] }
+const save = () => { try{ localStorage.setItem("dustco_cart", JSON.stringify(cart)) }catch(e){} };
+
+/* ---------- shop ---------- */
+function chips(){
+  const all = [["all","All ("+P.length+")"], ...Object.entries(CATS).map(([k,v])=>[k, v+" ("+P.filter(x=>x.c===k).length+")"])];
+  $("#chips").innerHTML = all.map(([k,v])=>`<button class="chip ${cat===k?"on":""}" onclick="setCat('${k}')">${v}</button>`).join("");
+}
+function setCat(k){ cat = k; render() }
+function goCat(k){ cat = k; render(); $("#shop").scrollIntoView({behavior:"smooth"}) }
+
+function render(){
+  chips();
+  const q = $("#q").value.trim().toLowerCase(), s = $("#sort").value;
+  let list = P.filter(x => (cat==="all"||x.c===cat) && (!q || (x.n+" "+x.d+" "+CATS[x.c]).toLowerCase().includes(q)));
+  if(s==="lo") list.sort((a,b)=>a.p-b.p);
+  if(s==="hi") list.sort((a,b)=>b.p-a.p);
+  if(s==="az") list.sort((a,b)=>a.n.localeCompare(b.n));
+  $("#grid").innerHTML = list.length ? list.map(x=>`
+    <div class="p">
+      ${x.was?`<span class="sale">SALE −${Math.round((1-x.p/x.was)*100)}%</span>`:""}
+      <div class="im">${x.e||EMO[x.c]}</div>
+      <div class="bd">
+        <span class="cn">${CATS[x.c]}</span>
+        <h4>${x.n}</h4>
+        <div class="ds">${x.d}</div>
+        ${x.opts?`<select id="o${x.id}" aria-label="${x.label}">${x.opts.map(o=>`<option>${o}</option>`).join("")}</select>`:""}
+        <div class="ft"><div class="pr">${money(x.p)}${x.was?`<s>${money(x.was)}</s>`:""}</div><button class="add" onclick="addById(${x.id})">+ Add</button></div>
+      </div>
+    </div>`).join("") : `<div class="empty">No products match your search.</div>`;
+}
+
+/* ---------- cart ---------- */
+function addById(id){
+  const x = P.find(p=>p.id===id); if(!x) return;
+  const sel = document.getElementById("o"+id);
+  const opt = sel ? sel.value : (x.opts ? x.opts[0] : "");
+  const key = id+"|"+opt;
+  const f = cart.find(i=>i.key===key);
+  if(f) f.q++; else cart.push({key, id, opt, q:1});
+  save(); drawCart(); toast("Added to cart ✓");
+}
+function chg(key,d){ const i = cart.find(i=>i.key===key); if(!i) return; i.q+=d; if(i.q<=0) cart = cart.filter(c=>c.key!==key); save(); drawCart() }
+function rm(key){ cart = cart.filter(c=>c.key!==key); save(); drawCart() }
+const total = () => cart.reduce((s,i)=>s+P.find(p=>p.id===i.id).p*i.q,0);
+
+function drawCart(){
+  const n = cart.reduce((s,i)=>s+i.q,0);
+  $("#cn").textContent = n;
+  $("#tot").textContent = money(total());
+  $("#df").style.display = n ? "" : "none";
+  $("#items").innerHTML = n ? cart.map(i=>{
+    const x = P.find(p=>p.id===i.id);
+    return `<div class="it"><div class="e">${x.e}</div>
+      <div><b>${x.n}</b>${i.opt?`<small>${i.opt}</small>`:""}
+        <div class="qty"><button onclick="chg('${i.key}',-1)">−</button><span>${i.q}</span><button onclick="chg('${i.key}',1)">+</button></div></div>
+      <div class="ip">${money(x.p*i.q)}<button class="rm" onclick="rm('${i.key}')">Remove</button></div></div>`;
+  }).join("") : `<div class="noitems">Your cart is empty.<br><br><a class="btn btn-amber" href="#shop" onclick="closeCart()">Browse products</a></div>`;
+}
+function openCart(){ drawCart(); $("#drawer").classList.add("on"); $("#ov").classList.add("on") }
+function closeCart(){ $("#drawer").classList.remove("on"); $("#ov").classList.remove("on") }
+
+function sendOrder(){
+  if(!cart.length) return;
+  const name = $("#cname").value.trim(), note = $("#cnote").value.trim();
+  let m = "Hello Dustco! I'd like to place an order:\n\n";
+  cart.forEach(i=>{ const x = P.find(p=>p.id===i.id);
+    m += `• ${i.q} × ${x.n}${i.opt?" ("+i.opt+")":""} — ${money(x.p*i.q)}\n`; });
+  m += `\nTotal: ${money(total())}`;
+  if(name) m += `\nName: ${name}`;
+  if(note) m += `\nNotes: ${note}`;
+  window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(m), "_blank");
+}
+function quote(topic){
+  const m = "Hello Dustco! I'd like to ask about "+topic+".";
+  window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(m), "_blank");
+}
+
+let tt;
+function toast(t){ const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(tt); tt = setTimeout(()=>e.classList.remove("on"),1400) }
+
+$("#q").addEventListener("input", render);
+$("#sort").addEventListener("change", render);
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeCart() });
+$("#yr").textContent = new Date().getFullYear();
+render(); drawCart();
+</script>
+</body>
+</html>
