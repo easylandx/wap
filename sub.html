@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deep Scan – 1979</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+:root{--bg:#0b0d14;--fg:#e8f6ff;--accent:#00e5ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0b0d14;--fg:#e8f6ff}}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--fg);font-family:'Press Start 2P',monospace;display:flex;flex-direction:column;align-items:center}
+.wrap{width:100%;max-width:560px;padding:16px;text-align:center}
+h1{font-size:16px;margin:8px 0 4px;color:var(--accent);letter-spacing:2px}
+p.s{font-size:8px;line-height:1.8;color:#9ab;margin:0 0 12px}
+canvas{width:100%;max-width:480px;aspect-ratio:240/280;image-rendering:pixelated;background:#000;border:2px solid #223;border-radius:6px;touch-action:none;display:block;margin:0 auto}
+.pad{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.pad button{font-family:inherit;font-size:12px;padding:16px 0;flex:1;max-width:140px;background:#12182a;color:var(--fg);border:2px solid #2a3a66;border-radius:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+.pad button:active{background:#1d2a50}
+.help{font-size:8px;line-height:2;color:#789;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>DEEP SCAN</h1>
+<p class="s">SEGA / GREMLIN · 1979</p>
+<canvas id="c" width="240" height="280"></canvas>
+<div class="pad">
+<button id="bl">◀</button><button id="bf">DROP</button><button id="br">▶</button>
+</div>
+<div class="help">← → MOVE · SPACE DROP DEPTH CHARGE<br>ENTER / TAP SCREEN TO START · 1 OR 2 TO CHOOSE MODE</div>
+</div>
+<script>
+(function(){
+var cv=document.getElementById('c'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;
+var W=240,H=280,SEA=28,FLOOR=198;
+var FONT="8px 'Press Start 2P',monospace";
+var state='title',tick=0,score=0,hi=+(function(){try{return localStorage.getItem('ds_hi')||5000}catch(e){return 5000}})(),
+lives=3,level=1,kills=0,ship,charges,subs,missiles,booms,spawnT,respawn,floats,players=1,keys={},mode='deep';
+var lanes=[62,88,114,140,166];
+var AC=null;
+function snd(f,d,t,v){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),a=AC.createGain();o.type=t||'square';o.frequency.value=f;a.gain.value=v||.04;o.connect(a);a.connect(AC.destination);o.start();a.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+function noise(d){snd(90,d,'sawtooth',.08);snd(60,d,'square',.06)}
+function reset(){score=0;lives=3;level=1;kills=0;charges=[];subs=[];missiles=[];booms=[];floats=[];spawnT=40;respawn=0;ship={x:W/2,dir:0}}
+function start(){reset();state='play';snd(660,.15)}
+function lose(){state='over';if(score>hi){hi=score;try{localStorage.setItem('ds_hi',hi)}catch(e){}}setTimeout(function(){if(state=='over')state='title'},4500)}
+function spawn(){
+ var free=lanes.filter(function(y){return !subs.some(function(s){return s.y==y&&(s.x<30||s.x>W-30)})});
+ if(!free.length)return;
+ var li=Math.floor(Math.random()*free.length),y=free[li],idx=lanes.indexOf(y),d=Math.random()<.5?1:-1;
+ subs.push({x:d>0?-16:W+16,y:y,d:d,sp:(.35+Math.random()*.35+idx*.04)*(1+level*.08),pts:(idx+1)*100,ft:60+Math.random()*120});
+}
+function fire(){
+ if(state=='title'){start();return}
+ if(state!='play'||respawn>0)return;
+ if(charges.length>=3)return;
+ charges.push({x:ship.x,y:SEA+4});snd(300,.08,'triangle',.05)
+}
+function boom(x,y,r,c){booms.push({x:x,y:y,r:0,max:r,c:c||'#ffd400'})}
+function update(){
+ tick++;
+ if(state!='play')return;
+ var mv=0;if(keys.l)mv-=1;if(keys.r)mv+=1;
+ if(respawn>0){respawn--;if(respawn==0&&lives<=0){lose();return}}
+ else{ship.x=Math.max(14,Math.min(W-14,ship.x+mv*1.4))}
+ charges.forEach(function(c){c.y+=1.6});
+ for(var i=charges.length-1;i>=0;i--){
+  var c=charges[i],hit=false;
+  for(var j=subs.length-1;j>=0;j--){var s=subs[j];
+   if(Math.abs(c.x-s.x)<9&&Math.abs(c.y-s.y)<5){
+    hit=true;score+=s.pts;kills++;floats.push({x:s.x,y:s.y,t:40,v:s.pts});
+    boom(s.x,s.y,16,'#ffd400');noise(.3);subs.splice(j,1);
+    if(kills%8==0){level++;score+=0}
+    break}}
+  if(!hit&&c.y>FLOOR){hit=true;boom(c.x,FLOOR,6,'#7af');snd(120,.12,'sawtooth',.04)}
+  if(hit)charges.splice(i,1)}
+ spawnT--;
+ if(spawnT<=0&&subs.length<3+Math.min(3,level)){spawn();spawnT=50+Math.random()*60}
+ for(var k=subs.length-1;k>=0;k--){var u=subs[k];u.x+=u.d*u.sp;u.ft--;
+  if(u.ft<=0&&u.x>12&&u.x<W-12){missiles.push({x:u.x,y:u.y-4,v:1+level*.08});u.ft=70+Math.random()*130/(1+level*.1);snd(520,.1,'sine',.03)}
+  if(u.x<-30||u.x>W+30)subs.splice(k,1)}
+ for(var m=missiles.length-1;m>=0;m--){var q=missiles[m];q.y-=q.v;
+  if(respawn==0&&q.y<SEA+8&&Math.abs(q.x-ship.x)<11){
+   missiles.splice(m,1);lives--;boom(ship.x,SEA-4,18,'#f33');noise(.6);respawn=100;missiles=[];charges=[];continue}
+  if(q.y<SEA)missiles.splice(m,1)}
+ for(var b=booms.length-1;b>=0;b--){var e=booms[b];e.r+=.9;if(e.r>e.max)booms.splice(b,1)}
+ for(var f=floats.length-1;f>=0;f--){floats[f].t--;floats[f].y-=.3;if(floats[f].t<=0)floats.splice(f,1)}
+}
+function pad(n,l){n=String(n);while(n.length<l)n='0'+n;return n}
+function txt(t,x,y,c,al){g.fillStyle=c;g.font=FONT;g.textAlign=al||'left';g.fillText(t,x,y)}
+function drawShip(x,y,c){
+ g.fillStyle=c;g.fillRect(x-14,y-3,28,5);g.fillRect(x-10,y-6,20,3);g.fillRect(x-5,y-9,10,3);g.fillRect(x-1,y-13,2,4);g.fillRect(x-12,y-8,3,2);g.fillRect(x+9,y-8,3,2)}
+function drawSub(s){
+ var x=Math.round(s.x),y=s.y;g.fillStyle='#fff';
+ g.fillRect(x-8,y-2,16,4);g.fillRect(x-5,y-4,8,2);g.fillRect(x+(s.d>0?-1:0),y-6,2,2);g.fillRect(x-9+(s.d>0?0:18),y-1,2,2)}
+function scene(){
+ g.fillStyle='#00e5ff';g.fillRect(0,0,W,SEA);
+ g.fillStyle='#0000ff';g.fillRect(0,SEA,W,FLOOR-SEA+2);
+ g.fillStyle='#fff';g.fillRect(0,FLOOR,W,2);
+ for(var i=0;i<9;i++){g.fillStyle='#e2f';var d=(i*37+tick*0)%W;}
+ for(var j=0;j<14;j++){g.fillStyle='#d22';g.fillRect((j*53+17)%W,SEA+20+((j*71)%170),1,1)}
+}
+function panel(){
+ g.fillStyle='#0000ff';g.fillRect(0,FLOOR+2,W,H-FLOOR-2);
+ txt('SCORE 1',8,214,'#fff');txt(pad(score,5),8,226,'#fff');
+ txt('SCORE 2',W-8,214,'#fff','right');txt(pad(0,5),W-8,226,'#fff','right');
+ txt('RANK',22,252,'#fff');txt(pad(Math.max(1,99-kills),2),30,264,'#fff');
+ txt('RANK',W-58,252,'#fff');txt('99',W-42,264,'#fff');
+ // radar frame
+ g.fillStyle='#e01010';g.fillRect(84,204,72,42);g.fillStyle='#ffe800';g.fillRect(88,208,64,34);g.fillStyle='#000';g.fillRect(90,210,60,30);
+ g.fillStyle='#0f0';
+ var sx=60/W,sy=30/(FLOOR-SEA);
+ if(respawn==0||tick%8<4)g.fillRect(90+ship.x*sx-1,210,3,2);
+ subs.forEach(function(s){g.fillRect(90+s.x*sx-1,210+(s.y-SEA)*sy,3,2)});
+ missiles.forEach(function(m){g.fillRect(90+m.x*sx,210+(m.y-SEA)*sy,1,2)});
+ charges.forEach(function(c){g.fillRect(90+c.x*sx,210+(c.y-SEA)*sy,1,1)});
+ txt('HI '+pad(hi,5),120,258,'#fff','center');
+ for(var i=0;i<Math.max(0,lives-1);i++){g.fillStyle='#ffd400';g.fillRect(8+i*0,236+i*0,0,0);g.fillRect(8,236+i*5-0,10,3)}
+ txt('LV'+level,W-8,246,'#ffe800','right');
+}
+function draw(){
+ scene();
+ if(state=='title'){
+  // sea details
+  drawShip(130+Math.sin(tick/40)*60,SEA,'#d22');
+  txt('© SEGA 1979',W/2,150,'#fff','center');
+  txt('DEEP SCAN',W/2,100,'#00e5ff','center');
+  if(tick%60<40)txt('PRESS ENTER',W/2,172,'#ffe800','center');
+  panel_title();return}
+ subs.forEach(drawSub);
+ missiles.forEach(function(m){g.fillStyle='#f22';g.fillRect(Math.round(m.x)-1,Math.round(m.y),2,4)});
+ charges.forEach(function(c){g.fillStyle='#fff';g.fillRect(Math.round(c.x)-2,Math.round(c.y)-2,4,4);g.fillStyle='#000';g.fillRect(Math.round(c.x)-1,Math.round(c.y)-1,2,2)});
+ if(respawn==0||(respawn>0&&lives>=0&&tick%10<5&&respawn<40))drawShip(Math.round(ship.x),SEA,'#d22');
+ booms.forEach(function(b){g.strokeStyle=b.c;g.lineWidth=2;g.beginPath();g.arc(b.x,b.y,b.r,0,7);g.stroke();g.fillStyle='#fff';g.fillRect(b.x-1,b.y-1,2,2)});
+ floats.forEach(function(f){txt(String(f.v),f.x,f.y,'#fff','center')});
+ panel();
+ if(state=='over'){g.fillStyle='rgba(0,0,0,.6)';g.fillRect(30,100,180,60);txt('GAME OVER',W/2,126,'#f33','center');txt('SCORE '+pad(score,5),W/2,144,'#fff','center')}
+}
+function panel_title(){
+ g.fillStyle='#0000ff';g.fillRect(0,FLOOR+2,W,H-FLOOR-2);
+ txt('SCORE 1',8,214,'#fff');txt('00000',8,226,'#fff');
+ txt('SCORE 2',W-8,214,'#fff','right');txt('00000',W-8,226,'#fff','right');
+ g.fillStyle='#e01010';g.fillRect(84,204,72,42);g.fillStyle='#ffe800';g.fillRect(88,208,64,34);g.fillStyle='#000';g.fillRect(90,210,60,30);
+ txt('RANK',22,252,'#fff');txt('99',30,264,'#fff');txt('RANK',W-58,252,'#fff');txt('99',W-42,264,'#fff');
+ txt('HI '+pad(hi,5),120,258,'#fff','center');
+}
+function loop(){update();draw();requestAnimationFrame(loop)}
+function sel(){return 0}
+addEventListener('keydown',function(e){
+ var k=e.key;
+ if(k=='ArrowLeft'||k=='a'||k=='A'){keys.l=1;e.preventDefault()}
+ if(k=='ArrowRight'||k=='d'||k=='D'){keys.r=1;e.preventDefault()}
+ if(k==' '||k=='ArrowDown'||k=='Enter'){if(!e.repeat)fire();e.preventDefault()}
+ if(k=='1'||k=='2'){players=+k;if(state=='title')start()}
+});
+addEventListener('keyup',function(e){var k=e.key;
+ if(k=='ArrowLeft'||k=='a'||k=='A')keys.l=0;if(k=='ArrowRight'||k=='d'||k=='D')keys.r=0});
+function hold(id,key){var b=document.getElementById(id);
+ b.addEventListener('pointerdown',function(e){e.preventDefault();keys[key]=1});
+ ['pointerup','pointerleave','pointercancel'].forEach(function(n){b.addEventListener(n,function(){keys[key]=0})})}
+hold('bl','l');hold('br','r');
+document.getElementById('bf').addEventListener('pointerdown',function(e){e.preventDefault();fire()});
+cv.addEventListener('pointerdown',function(){if(state!='play')fire()});
+reset();state='title';loop();
+})();
+</script>
+</body>
+</html>
