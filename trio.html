@@ -65,12 +65,22 @@
   .dots::after{content:"";display:inline-block;width:1.2em;animation:d 1s steps(4,end) infinite}
   @keyframes d{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
   @media (prefers-reduced-motion:reduce){.dots::after{animation:none;content:"…"}}
+
+  dialog.help{width:min(640px,calc(100vw - 48px));max-height:calc(100vh - 80px);overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:26px 28px}
+  dialog.help::backdrop{background:rgba(0,0,0,.45)}
+  dialog.help h2{margin:0 0 6px;font-size:22px}
+  dialog.help h3{margin:20px 0 6px;font-size:16px}
+  dialog.help p,dialog.help li{margin:0 0 8px}
+  dialog.help ul,dialog.help ol{margin:0 0 8px;padding-left:1.3em}
+  dialog.help .close{float:right}
+  dialog.help a{color:var(--gemini)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>Trio<span>one prompt, three models</span></h1>
+    <button class="ghost" id="helpBtn" type="button">Help</button>
   </header>
 
   <div class="ask">
@@ -118,6 +128,33 @@
     </section>
   </div>
 </div>
+
+<dialog class="help" id="help">
+  <button class="ghost close" id="helpClose" type="button">Close</button>
+  <h2>How to add your API keys</h2>
+  <p>Each model needs its own API key. Paste the key into its field under “API keys and models”, then click outside the field so it saves.</p>
+
+  <h3>Where to get each key</h3>
+  <ul>
+    <li><strong>Claude:</strong> open the Anthropic Console at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>, go to API Keys and create a key. It starts with <code>sk-ant-</code>. Copy it right away, it is only shown once.</li>
+    <li><strong>Gemini:</strong> open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>, sign in with Google and click “Create API key”. It starts with <code>AIza</code>.</li>
+    <li><strong>Grok:</strong> open <a href="https://console.x.ai" target="_blank" rel="noopener">console.x.ai</a>, go to API Keys and create one. It starts with <code>xai-</code>.</li>
+  </ul>
+
+  <h3>How to use the page</h3>
+  <ol>
+    <li>Paste each key into its field, with no spaces or quotes.</li>
+    <li>Type your prompt and press “Ask all three” (or Ctrl/Cmd + Enter).</li>
+  </ol>
+
+  <h3>Good to know</h3>
+  <ul>
+    <li>API keys are separate from your Claude.ai, Gemini or X/Grok subscription. Each console is billed on its own, and you may need to add a few dollars of credit before a key works. Gemini has a free tier.</li>
+    <li>“invalid x-api-key” means the Claude key is wrong or incomplete. Paste the whole key again.</li>
+    <li>A model-name error means you should change the Model field to one your account has.</li>
+    <li>Keys are saved only in this browser and sent straight to each provider. Don’t share the page with your keys filled in.</li>
+  </ul>
+</dialog>
 
 <script>
 const IDS = ["claude","gemini","grok"];
@@ -242,6 +279,11 @@ async function go(){
 }
 $("go").addEventListener("click",go);
 $("prompt").addEventListener("keydown",e=>{ if((e.ctrlKey||e.metaKey)&&e.key==="Enter") go(); });
+
+const helpD = $("help");
+$("helpBtn").addEventListener("click",()=>helpD.showModal());
+$("helpClose").addEventListener("click",()=>helpD.close());
+helpD.addEventListener("click",e=>{ if(e.target===helpD) helpD.close(); });
 </script>
 </body>
 </html>
