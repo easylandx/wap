@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b0a">
+  <title>Glitch</title>
+  <style>
+    :root { color-scheme: dark; --green:#b8ff6a; --muted:#91a095; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; width:100%; min-height:100%; background:#080b0a; color:#d9e5dc; }
+    body {
+      min-height:100vh; overflow:hidden; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      background: radial-gradient(ellipse at 50% 42%, #142019 0%, #0a100c 42%, #070908 100%);
+      cursor:pointer; user-select:none; -webkit-user-select:none;
+    }
+    #stream {
+      position:absolute; inset:0; overflow:hidden; padding:clamp(22px,5vw,70px);
+      font-size:clamp(17px,2.05vw,27px); line-height:1.72; letter-spacing:.045em;
+      overflow-wrap:anywhere; color:#c9f5d0; opacity:.92;
+      text-shadow:0 0 13px rgba(134,255,150,.12);
+      mask-image:linear-gradient(to bottom,transparent 0%,black 10%,black 90%,transparent 100%);
+    }
+    #stream::after {
+      content:""; display:inline-block; width:9px; height:1.05em; margin-left:5px;
+      vertical-align:-.12em; background:var(--green); animation:blink 1s steps(2,start) infinite;
+      box-shadow:0 0 12px var(--green);
+    }
+    @keyframes blink { to { opacity:0; } }
+    .float {
+      position:fixed; bottom:24px; z-index:5; width:54px; height:54px; border:1px solid #34483a;
+      border-radius:50%; display:grid; place-items:center; background:rgba(14,22,17,.88);
+      color:#e7f5e9; cursor:pointer; backdrop-filter:blur(12px);
+      box-shadow:0 8px 30px rgba(0,0,0,.35); transition:transform .18s,border-color .18s,background .18s;
+    }
+    .float:hover { transform:translateY(-3px); border-color:var(--green); background:#17241a; }
+    .float svg { width:23px; height:23px; }
+    #infoButton { left:24px; font-family:Georgia,serif; font-size:23px; }
+    #whatsappButton { right:24px; background:#102719; border-color:#28643c; color:#8cffaa; }
+    #whatsappButton:hover { background:#153923; border-color:#55d77a; }
+    #status {
+      position:fixed; bottom:41px; left:50%; transform:translateX(-50%);
+      color:#64756a; font:10px/1.4 ui-monospace,monospace; letter-spacing:.2em;
+      text-transform:uppercase; pointer-events:none; opacity:.7;
+    }
+    #modal {
+      position:fixed; inset:0; z-index:10; display:none; place-items:center; padding:24px;
+      background:rgba(2,5,3,.72); backdrop-filter:blur(12px); cursor:default;
+    }
+    #modal.open { display:grid; }
+    .panel {
+      position:relative; width:min(540px,100%); padding:clamp(28px,6vw,48px);
+      border:1px solid #344b39; border-radius:20px; background:linear-gradient(145deg,#121c15,#0b100d);
+      box-shadow:0 24px 90px rgba(0,0,0,.55); color:#dce9df;
+    }
+    .eyebrow { color:var(--green); font-size:10px; letter-spacing:.22em; text-transform:uppercase; margin:0 0 24px; }
+    .panel p:not(.eyebrow) { color:#b5c4b9; font:16px/1.85 Georgia,serif; margin:0 0 17px; }
+    .panel p:last-of-type { margin-bottom:0; }
+    #closeInfo {
+      position:absolute; right:18px; top:16px; border:0; background:transparent; color:#91a095;
+      font:26px/1 sans-serif; cursor:pointer; padding:8px;
+    }
+    #closeInfo:hover { color:white; }
+    @media (max-width:600px) {
+      .float { width:50px;height:50px;bottom:18px; }
+      #infoButton { left:18px; } #whatsappButton { right:18px; }
+      #status { bottom:36px; font-size:9px; }
+      #stream { padding:25px 22px 90px; }
+    }
+    @media (prefers-reduced-motion:reduce) { #stream::after { animation:none; } }
+  </style>
+</head>
+<body>
+  <main id="stream" aria-label="A continuous stream of random keyboard characters"></main>
+
+  <div id="status" aria-live="polite">click anywhere to pause</div>
+
+  <button class="float" id="infoButton" aria-label="About this experience" title="About">i</button>
+  <button class="float" id="whatsappButton" aria-label="Send random characters on WhatsApp" title="Send on WhatsApp">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M20.2 11.8a8.2 8.2 0 0 1-12.1 7.2L3 20l1.1-4.9A8.2 8.2 0 1 1 20.2 11.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      <path d="M8.2 7.8c.2-.4.4-.4.7-.4h.5c.2 0 .3.1.4.4l.7 1.7c.1.2 0 .4-.1.6l-.5.6c-.2.2-.2.4 0 .7.5.9 1.2 1.6 2.1 2.1.3.2.5.2.7-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.2.3.4 0 .3-.2 1.1-.7 1.5-.5.5-1.2.7-1.9.6-1.1-.2-2.4-.9-3.6-2-1.2-1.1-2-2.4-2.2-3.5-.2-1 .3-1.9.7-2.5Z" fill="currentColor"/>
+    </svg>
+  </button>
+
+  <section id="modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="panel">
+      <button id="closeInfo" aria-label="Close">×</button>
+      <p class="eyebrow" id="infoTitle">A small meditation on noise</p>
+      <p>Meaning is often something we search for: a pattern, a message, a destination. But not everything has to mean something.</p>
+      <p>Here, every key is invited to speak. Letters, numbers and symbols tumble together without hierarchy, without a plan, and without the obligation to become a sentence.</p>
+      <p>Perhaps this is not chaos, but possibility before it has chosen a shape. You can stop it, let it flow again, or send a little piece of the beautiful nonsense into someone else's day.</p>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const stream = document.getElementById('stream');
+      const status = document.getElementById('status');
+      const modal = document.getElementById('modal');
+      const infoButton = document.getElementById('infoButton');
+      const closeInfo = document.getElementById('closeInfo');
+      const whatsappButton = document.getElementById('whatsappButton');
+
+      // Printable characters from a broad keyboard-like set.
+      const keys = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[]{}\\|;:\'",<.>/?·€£¥';
+      let running = true;
+      let buffer = '';
+      let lastPaint = 0;
+
+      function randomText(length) {
+        let result = '';
+        for (let i = 0; i < length; i++) result += keys[Math.floor(Math.random() * keys.length)];
+        return result;
+      }
+
+      function tick(now) {
+        if (running) {
+          buffer += randomText(5 + Math.floor(Math.random() * 8));
+          if (buffer.length > 6200) buffer = buffer.slice(-4800);
+          if (now - lastPaint > 55) {
+            stream.textContent = buffer;
+            stream.scrollTop = stream.scrollHeight;
+            lastPaint = now;
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+
+      function toggle() {
+        running = !running;
+        status.textContent = running ? 'click anywhere to pause' : 'paused · click anywhere to continue';
+      }
+
+      document.addEventListener('click', (event) => {
+        if (event.target.closest('button') || modal.classList.contains('open')) return;
+        toggle();
+      });
+
+      infoButton.addEventListener('click', () => modal.classList.add('open'));
+      closeInfo.addEventListener('click', () => modal.classList.remove('open'));
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) modal.classList.remove('open');
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') modal.classList.remove('open');
+        if (event.key === ' ' && !modal.classList.contains('open') && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
+          event.preventDefault(); toggle();
+        }
+      });
+
+      whatsappButton.addEventListener('click', () => {
+        const message = randomText(88);
+        const encoded = encodeURIComponent(message);
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        const url = isMobile
+          ? `https://wa.me/?text=${encoded}`
+          : `https://web.whatsapp.com/send?text=${encoded}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+      });
+    })();
+  </script>
+</body>
+</html>
