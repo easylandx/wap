@@ -2,18 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>3D Walkable Gallery</title>
 <style>
   :root{--bg:#0e0d0c;--fg:#f3ece0;--gold:#c9a45c;}
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif;overflow:hidden}
-  canvas{display:block;width:100%;height:100%;touch-action:none}
+  canvas{position:fixed;left:0;top:0;display:block;width:100%;height:100%;height:100dvh;touch-action:none}
   .wrap{padding:12px 24px 12px 24px}
-  #intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,9,8,.88);z-index:6}
-  #intro .card{max-width:540px;margin:0 24px 0 24px;padding:32px 32px 28px 32px;border:1px solid var(--gold);background:#161412;text-align:center}
+  #intro{position:fixed;left:0;top:0;width:100%;height:100%;height:100dvh;display:flex;background:rgba(10,9,8,.88);z-index:6;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;box-sizing:border-box}
+  #intro .card{max-width:420px;margin:auto;padding:22px 22px 20px 22px;border:1px solid var(--gold);background:#161412;text-align:center}
   #intro h1{margin:0 0 8px 0;font-weight:400;letter-spacing:.08em;color:var(--gold)}
-  #intro p{margin:8px 0;line-height:1.5;color:#d8cfbf;font-size:15px}
+  #intro p{margin:6px 0;line-height:1.45;color:#d8cfbf;font-size:15px}
+  #intro p.kb{font-size:12px;color:#a99f8e}
+  @media (pointer:coarse){#intro p.kb{display:none}}
+  #enter{min-height:48px;touch-action:manipulation}
   button{font:inherit;cursor:pointer;background:var(--gold);color:#1b1610;border:0;padding:12px 28px 12px 28px;margin-top:16px;letter-spacing:.08em}
   #menu{position:fixed;top:0;left:0;right:0;z-index:4;background:linear-gradient(rgba(10,9,8,.94),rgba(10,9,8,.6))}
   #menu .wrap{padding:10px 24px 6px 24px}
@@ -53,8 +59,9 @@
 <body>
 <div id="intro"><div class="card">
   <h1>THE WALKABLE GALLERY</h1>
-  <p>Twenty-one rooms with over 250 famous works: Renaissance, Baroque &amp; Rococo, Modern &amp; 20th Century, Impressionism &amp; Post-Impressionism, Neoclassical, Romantic &amp; Realist, Early Modernism &amp; Avant-Garde, Post-Impressionism &amp; Fauvism, Expressionism, the Spanish Art Wing, Ukiyo-e, Chinese Ink Painting, Persian &amp; Mughal Miniatures, European Romanticism, Neoclassicism &amp; Academic Art, Rococo, Pointillism &amp; Neo-Impressionism, Art Nouveau &amp; Symbolism, Barbizon School &amp; French Realism, Pre-Raphaelite Brotherhood, Russian Realism &amp; Symbolism, and the Hudson River School. Images are fetched live from open-access museum archives (Art Institute of Chicago, The Met, Wikimedia Commons).</p>
-  <p><b>Click or tap</b> the floor or walls to walk that way · a painting to stand in front of it · its white title plate to open the link (or press <b>E</b>) · drag to look · <b>W A S D</b> / arrows also walk · <b>1–21</b> switch rooms (type two digits for 10–21, or use the room menu) · <b>T</b> starts an automatic walk tour of every room and painting (it also starts by itself after 8 s idle; <b>R</b> toggles reading titles aloud, <b>Space</b> pauses, <b>N</b> / <b>P</b> or the Next / Prev buttons step to the next or previous painting, <b>+ / −</b> change speed) · any click or tap stops it. The room menu and Walk tour button above, the tour bar controls and the ▲ / ▼ buttons on touch screens all still work.</p>
+  <p>21 rooms of famous artworks.</p>
+  <p class="how"><b>Tap</b> to walk · <b>drag</b> to look · tap a painting to go to it · tap its plate to open the link.</p>
+  <p class="how kb">Keyboard: W A S D · 1–21 rooms · T tour · R read aloud · Space pause · N / P next / prev</p>
   <button id="enter">ENTER GALLERY</button>
 </div></div>
 <div id="menu"><div class="wrap">
