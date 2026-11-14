@@ -647,7 +647,13 @@
   }
   function hush(){ rd.busy=false; rd.cur=null; if (SS) try{ SS.cancel(); }catch(e){} }
   function toggleRead(){ rd.on=!rd.on; readLabel(); if (!rd.on) hush(); }
-  function spoken(it){ return (it.title? it.title.replace(/\s*\(.*?\)/g,'') : it.t); }
+  // title plus ", by Artist" — the artist is left out when the previous piece read aloud was by the same artist
+  var lastArtist='';
+  function spoken(it){
+    var t=(it.title? it.title.replace(/\s*\(.*?\)/g,'') : it.t);
+    if (it.artist && SS && rd.on){ if (it.artist!==lastArtist) t+=', by '+it.artist; lastArtist=it.artist; }
+    return t;
+  }
   if (!SS) treadBtn.style.display='none'; else { readLabel(); treadBtn.onclick=toggleRead; }
   // manual stepping during the tour: jump to the next / previous painting (crossing into the next / previous room at the ends)
   function tourOrder(){ return stations.slice().sort(function(a,b){ return (b.pos.z-a.pos.z) || (a.pos.x-b.pos.x); }).map(function(q){ return q.it; }); }
