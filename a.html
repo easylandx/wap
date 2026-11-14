@@ -13,7 +13,7 @@
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif;overflow:hidden}
   canvas{position:fixed;left:0;top:0;display:block;width:100%;height:100%;height:100dvh;touch-action:none}
   .wrap{padding:12px 24px 12px 24px}
-  #intro{position:fixed;left:0;top:0;width:100%;height:100%;height:100dvh;display:flex;background:rgba(10,9,8,.88);z-index:6;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;box-sizing:border-box}
+  #intro{position:fixed;left:0;top:0;width:100%;height:100%;height:100dvh;display:flex;background:rgba(10,9,8,.88);z-index:6;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(16px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) calc(16px + env(safe-area-inset-left,0px));box-sizing:border-box}
   #intro .card{max-width:420px;margin:auto;padding:22px 22px 20px 22px;border:1px solid var(--gold);background:#161412;text-align:center}
   #intro h1{margin:0 0 8px 0;font-weight:400;letter-spacing:.08em;color:var(--gold)}
   #intro p{margin:6px 0;line-height:1.45;color:#d8cfbf;font-size:15px}
@@ -22,7 +22,7 @@
   #enter{min-height:48px;touch-action:manipulation}
   button{font:inherit;cursor:pointer;background:var(--gold);color:#1b1610;border:0;padding:12px 28px 12px 28px;margin-top:16px;letter-spacing:.08em}
   #menu{position:fixed;top:0;left:0;right:0;z-index:4;background:linear-gradient(rgba(10,9,8,.94),rgba(10,9,8,.6))}
-  #menu .wrap{padding:10px 24px 6px 24px}
+  #menu .wrap{padding:calc(10px + env(safe-area-inset-top,0px)) calc(24px + env(safe-area-inset-right,0px)) 6px calc(24px + env(safe-area-inset-left,0px))}
   #rooms{display:flex;gap:8px;align-items:center;padding:0 0 6px 0}
   #roomsel{margin:0;padding:8px 12px 8px 12px;font-size:13px;font-family:inherit;letter-spacing:.03em;background:rgba(14,13,12,.72);color:var(--fg);border:1px solid #5c4d30;min-width:0;max-width:62vw;cursor:pointer}
   #roomsel:hover,#roomsel:focus{border-color:var(--gold)}
@@ -32,7 +32,7 @@
   .room:hover{border-color:var(--gold)}
   .room.on{background:var(--gold);color:#1b1610;border-color:var(--gold)}
   #status{font-size:12px;color:#b9ae9b;padding:0 0 2px 0}
-  #tourbar{display:none;position:fixed;top:0;left:0;right:0;z-index:4;padding:12px 24px 12px 24px;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px 10px;pointer-events:none}
+  #tourbar{display:none;position:fixed;top:0;left:0;right:0;z-index:4;padding:calc(12px + env(safe-area-inset-top,0px)) calc(24px + env(safe-area-inset-right,0px)) 12px calc(24px + env(safe-area-inset-left,0px));justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px 10px;pointer-events:none}
   #tourbar .room{background:rgba(14,13,12,.72);padding:7px 12px 7px 12px}
   #tourbar .room:hover{background:var(--gold);color:#1b1610}
   #tspeed{min-width:34px;text-align:center}
@@ -46,14 +46,15 @@
   .touring #cap{display:none !important}
   #cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.7);z-index:3;pointer-events:none}
   #hud{position:fixed;left:0;right:0;bottom:0;z-index:3;pointer-events:none}
-  #cap{display:none;max-width:560px;margin:0 auto 24px auto;padding:14px 22px 14px 22px;background:rgba(14,13,12,.82);border:1px solid var(--gold);text-align:center;pointer-events:auto}
+  #cap{display:none;max-width:560px;margin:0 auto calc(24px + env(safe-area-inset-bottom,0px)) auto;padding:14px 22px 14px 22px;background:rgba(14,13,12,.82);border:1px solid var(--gold);text-align:center;pointer-events:auto}
   #cap b{display:block;font-size:18px;font-weight:400}
   #cap a{color:var(--gold);word-break:break-all;font-size:14px}
   #cap small{color:#a99f8e;display:block;margin-top:4px}
   #pad{position:fixed;right:0;bottom:0;z-index:4;display:none}
-  #pad .wrap{display:flex;flex-direction:column;gap:10px}
+  #pad .wrap{display:flex;flex-direction:column;gap:10px;padding:12px calc(24px + env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) 12px}
   #pad button{margin:0;padding:16px 20px 16px 20px;font-size:20px;opacity:.8}
   @media (pointer:coarse){#pad{display:block}}
+  @media (max-width:600px){#tourbar{gap:6px 6px} #tourbar .room{padding:6px 9px 6px 9px;font-size:12px} #roomsel{max-width:56vw} #menu .wrap{padding-left:calc(14px + env(safe-area-inset-left,0px));padding-right:calc(14px + env(safe-area-inset-right,0px))} #tourbar{padding-left:calc(14px + env(safe-area-inset-left,0px));padding-right:calc(14px + env(safe-area-inset-right,0px))}}
 </style>
 </head>
 <body>
@@ -61,6 +62,7 @@
   <h1>THE WALKABLE GALLERY</h1>
   <p>21 rooms of famous artworks.</p>
   <p class="how"><b>Tap</b> to walk · <b>drag</b> to look · tap a painting to go to it · tap its plate to open the link.</p>
+  <p class="how">🔊 Tap ENTER to switch on the voice.</p>
   <p class="how kb">Keyboard: W A S D · 1–21 rooms · T tour · R read aloud · Space pause · N / P next / prev</p>
   <button id="enter">ENTER GALLERY</button>
 </div></div>
@@ -632,9 +634,16 @@
   function readLabel(){ treadBtn.textContent='🔊 Read aloud: '+(rd.on?'On':'Off'); treadBtn.classList.toggle('on',rd.on); }
   function say(text){
     if (!SS||!rd.on) return;
-    try{ SS.cancel(); var u=new SpeechSynthesisUtterance(text); rd.cur=u; rd.busy=true;
+    try{ var u=new SpeechSynthesisUtterance(text); u.lang='en-US'; rd.cur=u; rd.busy=true;
       u.onend=u.onerror=function(){ if (rd.cur===u) rd.busy=false; };
-      SS.speak(u); }catch(e){ rd.busy=false; }
+      var go=function(){ if (rd.cur!==u) return; try{ if (SS.paused) SS.resume(); SS.speak(u); }catch(e){ rd.busy=false; } };
+      if (SS.speaking||SS.pending){ SS.cancel(); setTimeout(go,120); } else go(); }catch(e){ rd.busy=false; }
+  }
+  // iPhone Safari only allows speech after a tap: speak a silent word during the first tap so later (automatic) speech works
+  var unlocked=false;
+  function unlockSpeech(){
+    if (!SS || unlocked) return; unlocked=true;
+    try{ var u=new SpeechSynthesisUtterance(' '); u.volume=0; u.rate=2; SS.speak(u); if (SS.paused) SS.resume(); }catch(e){}
   }
   function hush(){ rd.busy=false; rd.cur=null; if (SS) try{ SS.cancel(); }catch(e){} }
   function toggleRead(){ rd.on=!rd.on; readLabel(); if (!rd.on) hush(); }
@@ -713,7 +722,8 @@
   // ---------- Controls ----------
   var keys={}, yaw=0, pitch=0, nav=null, numBuf='', numT=null;
   var intro=document.getElementById('intro');
-  document.getElementById('enter').onclick=function(){ intro.style.display='none'; };
+  document.getElementById('enter').onclick=function(){ unlockSpeech(); intro.style.display='none'; };
+  ['touchend','pointerup','click','keydown'].forEach(function(n){ addEventListener(n, unlockSpeech, {passive:true, capture:true}); });
   addEventListener('keydown', function(e){ keys[e.code]=true; if (e.code==='KeyE') openLink(); if (e.code==='KeyT') toggleTour(); if (e.code==='KeyR') toggleRead();
     if (tour){ if (e.code==='Space'){ e.preventDefault(); tourPause(); } if (e.code==='KeyN') tourNext(); if (e.code==='KeyP') tourPrev(); if (e.code==='Equal'||e.code==='NumpadAdd') tourSpeed(1); if (e.code==='Minus'||e.code==='NumpadSubtract') tourSpeed(-1); }
     var m=/^(?:Digit|Numpad)([0-9])$/.exec(e.code); if (m){ clearTimeout(numT); numBuf+=m[1]; if (numBuf.length>2) numBuf=m[1];
