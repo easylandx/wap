@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3D Walkable Gallery</title>
+<style>
+  :root{--bg:#0e0d0c;--fg:#f3ece0;--gold:#c9a45c;}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif;overflow:hidden}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+  .wrap{padding:12px 24px 12px 24px}
+  #intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,9,8,.88);z-index:6}
+  #intro .card{max-width:540px;margin:0 24px 0 24px;padding:32px 32px 28px 32px;border:1px solid var(--gold);background:#161412;text-align:center}
+  #intro h1{margin:0 0 8px 0;font-weight:400;letter-spacing:.08em;color:var(--gold)}
+  #intro p{margin:8px 0;line-height:1.5;color:#d8cfbf;font-size:15px}
+  button{font:inherit;cursor:pointer;background:var(--gold);color:#1b1610;border:0;padding:12px 28px 12px 28px;margin-top:16px;letter-spacing:.08em}
+  #menu{position:fixed;top:0;left:0;right:0;z-index:4;background:linear-gradient(rgba(10,9,8,.94),rgba(10,9,8,.6))}
+  #menu .wrap{padding:10px 24px 6px 24px}
+  #rooms{display:flex;gap:8px;align-items:center;padding:0 0 6px 0}
+  #roomsel{margin:0;padding:8px 12px 8px 12px;font-size:13px;font-family:inherit;letter-spacing:.03em;background:rgba(14,13,12,.72);color:var(--fg);border:1px solid #5c4d30;min-width:0;max-width:62vw;cursor:pointer}
+  #roomsel:hover,#roomsel:focus{border-color:var(--gold)}
+  #roomsel option{background:#161412;color:#d8cfbf}
+  #tour{margin-left:auto}
+  .room{flex:0 0 auto;margin:0;padding:8px 14px 8px 14px;font-size:13px;letter-spacing:.03em;background:transparent;color:var(--fg);border:1px solid #5c4d30;white-space:nowrap}
+  .room:hover{border-color:var(--gold)}
+  .room.on{background:var(--gold);color:#1b1610;border-color:var(--gold)}
+  #status{font-size:12px;color:#b9ae9b;padding:0 0 2px 0}
+  #tourbar{display:none;position:fixed;top:0;left:0;right:0;z-index:4;padding:12px 24px 12px 24px;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px 10px;pointer-events:none}
+  #tourbar .room{background:rgba(14,13,12,.72);padding:7px 12px 7px 12px}
+  #tourbar .room:hover{background:var(--gold);color:#1b1610}
+  #tspeed{min-width:34px;text-align:center}
+  #tourbar span{font-size:12px;color:#d8cfbf;text-shadow:0 1px 3px #000}
+  #tourbar button,#tourbar select{pointer-events:auto}
+  #tourbar select{background:rgba(14,13,12,.72);color:var(--fg);border:1px solid #5c4d30;padding:7px 10px 7px 10px;font-size:13px;font-family:inherit;max-width:60vw}
+  #tourbar select:hover{border-color:var(--gold)}
+  #tourbar select option{background:#161412;color:#d8cfbf}
+  .touring #menu{display:none}
+  .touring #tourbar{display:flex}
+  .touring #cap{display:none !important}
+  #cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.7);z-index:3;pointer-events:none}
+  #hud{position:fixed;left:0;right:0;bottom:0;z-index:3;pointer-events:none}
+  #cap{display:none;max-width:560px;margin:0 auto 24px auto;padding:14px 22px 14px 22px;background:rgba(14,13,12,.82);border:1px solid var(--gold);text-align:center;pointer-events:auto}
+  #cap b{display:block;font-size:18px;font-weight:400}
+  #cap a{color:var(--gold);word-break:break-all;font-size:14px}
+  #cap small{color:#a99f8e;display:block;margin-top:4px}
+  #pad{position:fixed;right:0;bottom:0;z-index:4;display:none}
+  #pad .wrap{display:flex;flex-direction:column;gap:10px}
+  #pad button{margin:0;padding:16px 20px 16px 20px;font-size:20px;opacity:.8}
+  @media (pointer:coarse){#pad{display:block}}
+</style>
+</head>
+<body>
+<div id="intro"><div class="card">
+  <h1>THE WALKABLE GALLERY</h1>
+  <p>Twenty-one rooms with over 250 famous works: Renaissance, Baroque &amp; Rococo, Modern &amp; 20th Century, Impressionism &amp; Post-Impressionism, Neoclassical, Romantic &amp; Realist, Early Modernism &amp; Avant-Garde, Post-Impressionism &amp; Fauvism, Expressionism, the Spanish Art Wing, Ukiyo-e, Chinese Ink Painting, Persian &amp; Mughal Miniatures, European Romanticism, Neoclassicism &amp; Academic Art, Rococo, Pointillism &amp; Neo-Impressionism, Art Nouveau &amp; Symbolism, Barbizon School &amp; French Realism, Pre-Raphaelite Brotherhood, Russian Realism &amp; Symbolism, and the Hudson River School. Images are fetched live from open-access museum archives (Art Institute of Chicago, The Met, Wikimedia Commons).</p>
+  <p><b>Click or tap</b> the floor or walls to walk that way · a painting to stand in front of it · its white title plate to open the link (or press <b>E</b>) · drag to look · <b>W A S D</b> / arrows also walk · <b>1–21</b> switch rooms (type two digits for 10–21, or use the room menu) · <b>T</b> starts an automatic walk tour of every room and painting (it also starts by itself after 8 s idle; <b>R</b> toggles reading titles aloud, <b>Space</b> pauses, <b>N</b> / <b>P</b> or the Next / Prev buttons step to the next or previous painting, <b>+ / −</b> change speed) · any click or tap stops it. The room menu and Walk tour button above, the tour bar controls and the ▲ / ▼ buttons on touch screens all still work.</p>
+  <button id="enter">ENTER GALLERY</button>
+</div></div>
+<div id="menu"><div class="wrap">
+  <div id="rooms"></div>
+  <div id="status">Loading…</div>
+</div></div>
+<div id="tourbar"><span id="tinfo"></span><button id="tprev" class="room" title="Previous painting (P)">◀ Prev</button><button id="tnext" class="room" title="Next painting (N)">Next ▶</button><button id="tslow" class="room" title="Slower (−)">◀◀ Slower</button><span id="tspeed">1×</span><button id="tfast" class="room" title="Faster (+)">Faster ▶▶</button><select id="troom" title="Jump to a room and continue the tour there"></select><button id="tread" class="room" title="Read titles aloud (R)">🔊 Read aloud: On</button><button id="tpause" class="room" title="Pause / resume (Space)">⏸ Pause</button><button id="tstop" class="room" title="Stop (T)">■ Stop</button></div>
+<div id="cross"></div>
+<div id="hud"><div id="cap"></div></div>
+<div id="pad"><div class="wrap"><button id="fw">▲</button><button id="bk">▼</button></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  // ---------- Rooms & paintings (title, artist[, search title]) ----------
+  var ROOMS = [
+    {name:'Ukiyo-e', sub:'Japanese woodblock prints', wall:0x3b4f6b, items:[
+      ['The Great Wave off Kanagawa (Kanagawa-oki Nami Ura)','Katsushika Hokusai','Great Wave off Kanagawa',['Under the Wave off Kanagawa','Kanagawa oki nami ura','Great Wave']],
+      ['Fine Wind, Clear Morning (Gaifū Kaisei)','Katsushika Hokusai','Fine Wind, Clear Morning',['South Wind, Clear Sky','Red Fuji','Gaifu kaisei']],
+      ['Thunderstorm Beneath the Summit (Sanka Hakuu)','Katsushika Hokusai','Thunderstorm Beneath the Summit',['Rainstorm Beneath the Summit','Sanka hakuu','Black Fuji']],
+      ['Kajikazawa in Kai Province (Kōshū Kajikazawa)','Katsushika Hokusai','Kajikazawa',['Koshu Kajikazawa']],
+      ['Chōshi in Shimōsa (Sōshū Chōshi, from Oceans of Wisdom)','Katsushika Hokusai','Choshi in Shimosa',['Soshu Choshi','Oceans of Wisdom Choshi']],
+      ['The Sea at Satta in Suruga Province (Suruga Satta Kaijō)','Utagawa Hiroshige','Sea at Satta',['Satta Peak','Suruga Satta','Satta']],
+      ['Naruto Whirlpools, Awa Province (Awa Naruto no Fūha)','Utagawa Hiroshige','Naruto Whirlpools',['Whirlpools at Naruto','Naruto no fuha','Awa Naruto']],
+      ['Sudden Shower over Shin-Ōhashi Bridge and Atake (Ōhashi Atake no Yūdachi)','Utagawa Hiroshige','Sudden Shower over Shin-Ohashi Bridge',['Sudden Shower Atake','Ohashi Atake no Yudachi','Evening Shower at Atake']],
+      ['Evening Snow at Kambara (Kambara Yoru no Yuki)','Utagawa Hiroshige','Evening Snow at Kambara',['Kanbara Night Snow','Kambara Yoru no Yuki','Night Snow Kambara']],
+      ['Plum Estate, Kameido (Kameido Umeyashiki)','Utagawa Hiroshige','Plum Estate Kameido',['Plum Garden Kameido','Kameido Umeyashiki','Plum Park Kameido']],
+      ['Evening Glow at Seta (Seta Sekishō)','Utagawa Hiroshige','Evening Glow at Seta',['Seta Sekisho','Seta no Sekisho']],
+      ['Moonlight at Matsushima','Kawase Hasui','Matsushima',['Moonlight at Matsushima']]],
+     // used automatically, in this order, to replace a print that cannot be found or loaded
+     reserve:[
+      ['Ejiri in Suruga Province','Katsushika Hokusai','Ejiri in Suruga Province',['Ejiri','Travelers Caught in a Sudden Breeze at Ejiri']],
+      ['Driving Rain at Shōno (Shōno Haku-u)','Utagawa Hiroshige','Shono Driving Rain',['Shono Hakuu','Driving Rain Shono','Shono']],
+      ['Night View of Saruwaka-machi','Utagawa Hiroshige','Saruwaka',['Saruwakacho','Saruwaka-machi']],
+      ['Kinryūzan Temple at Asakusa','Utagawa Hiroshige','Kinryuzan Temple Asakusa',['Kinryuzan','Asakusa Kinryuzan']],
+      ['Fukagawa Susaki and Jūmantsubo','Utagawa Hiroshige','Fukagawa Susaki',['Fukagawa Susaki and Jumantsubo','Jumantsubo']],
+      ['Nihonbashi: Morning Scene','Utagawa Hiroshige','Nihonbashi Morning',['Nihonbashi','Nihon Bridge']]]},
+    {name:'Spanish Art Wing', sub:'Gothic to Sorolla', wall:0xc4994a, items:[
+      ['Saint George and the Dragon','Bernat Martorell','Saint George and the Dragon',['St George and the Dragon','Saint George Killing the Dragon']],
+      ['View of Toledo','El Greco'],['The Burial of the Count of Orgaz','El Greco','Burial of the Count of Orgaz',['Entierro del conde de Orgaz']],
+      ['The Nobleman with his Hand on his Chest','El Greco','Nobleman with his Hand on his Chest',['Caballero de la mano en el pecho']],['Saint Jerome','El Greco'],
+      ['Christ Carrying the Cross','El Greco'],['The Adoration of the Shepherds','El Greco','Adoration of the Shepherds',['Adoracion de los pastores']],
+      ['Cardinal Fernando Niño de Guevara','El Greco','Cardinal Fernando Nino de Guevara',['Cardinal Don Fernando Nino de Guevara','Cardinal Nino de Guevara']],
+      ['Christ Healing the Blind','El Greco'],
+      ['Las Meninas','Diego Velázquez'],['The Surrender of Breda','Diego Velázquez','Surrender of Breda',['La rendición de Breda']],
+      ['Portrait of Juan de Pareja','Diego Velázquez','Juan de Pareja'],['The Rokeby Venus','Diego Velázquez','Rokeby Venus',['Venus at her Mirror']],
+      ['Portrait of a Man, Possibly a Self-Portrait','Diego Velázquez','Portrait of a Man Possibly a Self-Portrait',['Possibly a Self-Portrait','Self-Portrait']],
+      ['Philip IV, King of Spain','Diego Velázquez','Philip IV King of Spain',['Philip IV of Spain','Felipe IV']],
+      ['The Supper at Emmaus','Diego Velázquez','Supper at Emmaus',['Cena de Emaus']],
+      ['María Teresa, Infanta of Spain','Diego Velázquez','Maria Teresa Infanta of Spain',['Infanta Maria Teresa','Maria Teresa']],
+      ['The Immaculate Conception of Los Venerables','Bartolomé Esteban Murillo','Immaculate Conception of Los Venerables',['Inmaculada de los Venerables','Immaculate Conception of Soult']],
+      ['Two Women at a Window','Bartolomé Esteban Murillo'],['Virgin and Child','Bartolomé Esteban Murillo'],
+      ['Don Andrés de Andrade y la Cal','Bartolomé Esteban Murillo','Don Andres de Andrade y la Cal',['Andres de Andrade','Andrade y la Cal']],
+      ['Still Life with Lemons, Oranges and a Rose','Francisco de Zurbarán','Still Life with Lemons Oranges and a Rose',['Bodegón de cidras, naranjas y rosa']],
+      ['Saint Francis in Meditation','Francisco de Zurbarán','Saint Francis in Meditation',['San Francisco en meditación']],
+      ['The Crucifixion','Francisco de Zurbarán','Crucifixion',['Christ Crucified','Crucified Christ']],
+      ['The Martyrdom of Saint Philip','Jusepe de Ribera','Martyrdom of Saint Philip',['Martirio de San Felipe']],
+      ['The Holy Family with Saints Anne and Catherine of Alexandria','Jusepe de Ribera','Holy Family with Saints Anne and Catherine of Alexandria',['Holy Family with Saints Anne and Catherine']],
+      ['The Third of May 1808','Francisco Goya'],['The Second of May 1808','Francisco Goya','Second of May 1808',['El dos de mayo de 1808','Charge of the Mamelukes']],
+      ['Saturn Devouring His Son','Francisco Goya'],['The Clothed Maja (La maja vestida)','Francisco Goya','The Clothed Maja',['La maja vestida','Maja vestida']],
+      ['The Nude Maja (La maja desnuda)','Francisco Goya','The Nude Maja',['La maja desnuda','Maja desnuda']],
+      ["Witches' Sabbath (El aquelarre)",'Francisco Goya',"Witches' Sabbath",['El aquelarre','Aquelarre']],
+      ['Majas on a Balcony','Francisco Goya','Majas on a Balcony',['Majas al balcon']],
+      ['The Sleep of Reason Produces Monsters','Francisco Goya','Sleep of Reason Produces Monsters',['El sueno de la razon produce monstruos']],
+      ['Seated Giant','Francisco Goya'],
+      ['Self-Portrait (ca. 1796)','Francisco Goya','Self-Portrait',['Autorretrato']],
+      ['Manuel Osorio Manrique de Zuñiga ("The Red Boy")','Francisco Goya','Manuel Osorio Manrique de Zuniga',['Red Boy','Manuel Osorio']],
+      ['Condesa de Altamira and Her Daughter, María Agustina','Francisco Goya','Condesa de Altamira and Her Daughter',['Countess of Altamira and Her Daughter','Condesa de Altamira']],
+      ['Walk on the Beach (Paseo a orillas del mar)','Joaquín Sorolla','Walk on the Beach',['Paseo a orillas del mar','Paseo a la orilla del mar']],
+      ['Children on the Beach (Chicos en la playa)','Joaquín Sorolla','Children on the Beach',['Chicos en la playa']],
+      ['Sewing the Sail (Cosiendo la vela)','Joaquín Sorolla','Sewing the Sail',['Cosiendo la vela']],
+      ['Sad Inheritance (¡Triste herencia!)','Joaquín Sorolla','Sad Inheritance',['Triste herencia']],
+      ['Two Sisters, Valencia','Joaquín Sorolla','Two Sisters Valencia',['Two Sisters','Dos hermanas Valencia']]]},
+    {name:'Modern & 20th Century', sub:'1890s–1960s', wall:0xf0efec, items:[
+      ['The Scream','Edvard Munch'],['The Kiss','Gustav Klimt'],['Portrait of Adele Bloch-Bauer I','Gustav Klimt'],
+      ['The Sleeping Gypsy','Henri Rousseau'],["Les Demoiselles d'Avignon",'Pablo Picasso'],['Guernica','Pablo Picasso'],
+      ['The Dance','Henri Matisse'],['Composition VIII','Wassily Kandinsky'],['Composition with Red, Blue and Yellow','Piet Mondrian'],
+      ['American Gothic','Grant Wood'],['The Persistence of Memory','Salvador Dalí'],['The Two Fridas','Frida Kahlo'],
+      ['Nighthawks','Edward Hopper'],['Autumn Rhythm (Number 30)','Jackson Pollock','Autumn Rhythm'],['Marilyn Diptych','Andy Warhol'],
+      ['Automat','Edward Hopper'],['Early Sunday Morning','Edward Hopper'],["Christina's World",'Andrew Wyeth',"Christina's World",['Christinas World']]]},
+    {name:'Impressionism & Post-Impressionism', sub:'Late 19th century', wall:0xdde5e8, items:[
+      ["Le Déjeuner sur l'herbe",'Édouard Manet',"Déjeuner sur l'herbe"],['Olympia','Édouard Manet'],['A Bar at the Folies-Bergère','Édouard Manet'],
+      ['Impression, Sunrise','Claude Monet'],['Water Lilies','Claude Monet'],['Bal du moulin de la Galette','Pierre-Auguste Renoir'],
+      ['Luncheon of the Boating Party','Pierre-Auguste Renoir'],['The Dance Class','Edgar Degas'],['A Sunday Afternoon on the Island of La Grande Jatte','Georges Seurat','La Grande Jatte'],
+      ['The Starry Night','Vincent van Gogh'],['Sunflowers','Vincent van Gogh'],['Café Terrace at Night','Vincent van Gogh'],
+      ['The Card Players','Paul Cézanne'],['Mont Sainte-Victoire','Paul Cézanne'],['Where Do We Come From? What Are We? Where Are We Going?','Paul Gauguin','Where Do We Come From'],
+      ['Woman with a Parasol - Madame Monet and Her Son','Claude Monet','Woman with a Parasol',['Madame Monet and Her Son','La Promenade']],
+      ['Rouen Cathedral, West Façade','Claude Monet','Rouen Cathedral West Facade',['Rouen Cathedral','Cathedrale de Rouen']],
+      ['Two Sisters (On the Terrace)','Pierre-Auguste Renoir','Two Sisters On the Terrace',['Two Sisters','On the Terrace']],
+      ["L'Absinthe",'Edgar Degas','Absinthe',['In a Cafe','The Absinthe Drinker']],
+      ['Paris Street; Rainy Day','Gustave Caillebotte','Paris Street Rainy Day',['Paris Street, Rain Effect','Rue de Paris temps de pluie']],
+      ['The Floor Scrapers','Gustave Caillebotte','Floor Scrapers',['Les raboteurs de parquet','The Floor Planers']],
+      ['The Cradle','Berthe Morisot','Cradle',['Le Berceau']],
+      ["Summer's Day",'Berthe Morisot',"Summer's Day",['Summer Day']],
+      ['The Boulevard Montmartre on a Winter Morning','Camille Pissarro','Boulevard Montmartre on a Winter Morning',['Boulevard Montmartre Winter Morning','Boulevard Montmartre']],
+      ['Flood at Port-Marly','Alfred Sisley','Flood at Port Marly',['Inondation a Port-Marly']]]},
+    {name:'Neoclassical, Romantic & Realist', sub:'Late 18th–19th century', wall:0x65786a, items:[
+      ['Oath of the Horatii','Jacques-Louis David'],['The Death of Marat','Jacques-Louis David'],['La Grande Odalisque','Jean-Auguste-Dominique Ingres'],
+      ['The Third of May 1808','Francisco Goya'],['Saturn Devouring His Son','Francisco Goya'],['Wanderer above the Sea of Fog','Caspar David Friedrich'],
+      ['The Raft of the Medusa','Théodore Géricault'],['Liberty Leading the People','Eugène Delacroix'],['The Fighting Temeraire','J.M.W. Turner'],
+      ['Rain, Steam and Speed','J.M.W. Turner'],['The Hay Wain','John Constable'],['The Great Wave off Kanagawa','Katsushika Hokusai'],
+      ['A Burial at Ornans','Gustave Courbet'],['The Gleaners','Jean-François Millet'],["Arrangement in Grey and Black No. 1 (Whistler's Mother)",'James Abbott McNeill Whistler','Arrangement in Grey and Black'],
+      ['The Gross Clinic','Thomas Eakins','Gross Clinic'],['The Agnew Clinic','Thomas Eakins','Agnew Clinic',['Portrait of Dr. D. Hayes Agnew']],
+      ['Max Schmitt in a Single Scull','Thomas Eakins','Max Schmitt in a Single Scull',['Champion Single Sculls']],
+      ['Breezing Up (A Fair Wind)','Winslow Homer','Breezing Up',['A Fair Wind']],['The Gulf Stream','Winslow Homer','Gulf Stream'],['Snap the Whip','Winslow Homer','Snap the Whip'],
+      ['Nocturne in Black and Gold – The Falling Rocket','James Abbott McNeill Whistler','Nocturne in Black and Gold The Falling Rocket',['Falling Rocket','Nocturne in Black and Gold']],
+      ['Portrait of Madame X','John Singer Sargent','Portrait of Madame X',['Madame X','Madame Pierre Gautreau']],
+      ['Carnation, Lily, Lily, Rose','John Singer Sargent','Carnation Lily Lily Rose']]},
+    {name:'Baroque & Rococo', sub:'17th–18th century', wall:0x8a3f39, items:[
+      ['The Calling of Saint Matthew','Caravaggio'],['Judith Beheading Holofernes','Caravaggio'],['Judith Slaying Holofernes','Artemisia Gentileschi'],
+      ['The Elevation of the Cross','Peter Paul Rubens'],['Las Meninas','Diego Velázquez'],['The Surrender of Breda','Diego Velázquez'],
+      ['The Night Watch','Rembrandt van Rijn'],['The Anatomy Lesson of Dr. Nicolaes Tulp','Rembrandt van Rijn'],['The Storm on the Sea of Galilee','Rembrandt van Rijn'],
+      ['Girl with a Pearl Earring','Johannes Vermeer'],['The Milkmaid','Johannes Vermeer'],['The Art of Painting','Johannes Vermeer'],
+      ['The Laughing Cavalier','Frans Hals'],['Pilgrimage to Cythera','Jean-Antoine Watteau'],['The Swing','Jean-Honoré Fragonard'],
+      ['The Jewish Bride','Rembrandt van Rijn','Jewish Bride',['Isaac and Rebecca']],
+      ['Self-Portrait with Two Circles','Rembrandt van Rijn','Self-Portrait with Two Circles',['Portrait with Two Circles']],
+      ['View of Delft','Johannes Vermeer','View of Delft',['Gezicht op Delft']],
+      ['Malle Babbe','Frans Hals'],
+      ['The Windmill at Wijk bij Duurstede','Jacob van Ruisdael','Windmill at Wijk bij Duurstede',['Windmill Wijk bij Duurstede','De molen bij Wijk bij Duurstede']],
+      ['The Avenue at Middelharnis','Meindert Hobbema','Avenue at Middelharnis',['Avenue Middelharnis','Middelharnis']],
+      ['The Merry Family','Jan Steen','Merry Family',['Vrolijk huisgezin']],
+      ['The Goldfinch','Carel Fabritius','Goldfinch',['Het puttertje','Puttertje']],
+      ['Still Life with Flowers in a Glass Vase','Rachel Ruysch','Still Life with Flowers in a Glass Vase',['Flowers in a Glass Vase','Flower Still Life']]]},
+    {name:'Renaissance', sub:'Early & High Renaissance', wall:0xd6c7a4, items:[
+      ['The Lamentation of Christ','Giotto di Bondone'],['The Arnolfini Portrait','Jan van Eyck'],['The Garden of Earthly Delights','Hieronymus Bosch'],
+      ['Primavera','Sandro Botticelli'],['The Birth of Venus','Sandro Botticelli'],['The Last Supper','Leonardo da Vinci'],
+      ['Mona Lisa','Leonardo da Vinci'],['Lady with an Ermine','Leonardo da Vinci'],['The Creation of Adam','Michelangelo'],
+      ['The School of Athens','Raphael'],['The Sistine Madonna','Raphael'],['The Tempest','Giorgione'],
+      ['Venus of Urbino','Titian'],['Bacchus and Ariadne','Titian'],['Self-Portrait at Twenty-Eight','Albrecht Dürer'],
+      ['The Ambassadors','Hans Holbein the Younger'],['The Hunters in the Snow','Pieter Bruegel the Elder'],['The Tower of Babel','Pieter Bruegel the Elder'],
+      ['The Wedding at Cana','Paolo Veronese'],['View of Toledo','El Greco'],
+      ['Assumption of the Virgin','Titian','Assumption of the Virgin',['Assunta','Assumption']],
+      ['The Flagellation of Christ','Piero della Francesca','Flagellation of Christ',['Flagellation','Flagellazione di Cristo']],
+      ['Lamentation of Christ','Andrea Mantegna','Lamentation of Christ',['Lamentation over the Dead Christ','Dead Christ','Cristo morto']],
+      ['Ghent Altarpiece','Jan van Eyck and Hubert van Eyck','Ghent Altarpiece',['Adoration of the Mystic Lamb','Mystic Lamb']],
+      ['Portrait of a Man (Self Portrait?)','Jan van Eyck','Portrait of a Man',['Man in a Red Turban','Leal Souvenir']],
+      ['The Haywain Triptych','Hieronymus Bosch','Haywain Triptych',['Hay Wain','The Haywain']],
+      ['Netherlandish Proverbs','Pieter Bruegel the Elder','Netherlandish Proverbs',['Dutch Proverbs','The Blue Cloak']],
+      ['The Peasant Wedding','Pieter Bruegel the Elder','Peasant Wedding',['Peasant Wedding Feast','Boerenbruiloft']],
+      ['Portrait of Henry VIII','Hans Holbein the Younger','Portrait of Henry VIII',['Henry VIII']],
+      ['Young Hare','Albrecht Dürer','Young Hare',['Feldhase']],
+      ['The Descent from the Cross','Rogier van der Weyden','Descent from the Cross',['Deposition','Deposition of Christ']],
+      ['The Moneylender and His Wife','Quentin Matsys','Moneylender and His Wife',['Money Changer and His Wife','The Moneychanger and His Wife']]]},
+    {name:'Pre-Raphaelite Brotherhood', sub:'Victorian England', wall:0x9bb59a, items:[
+      ['Ophelia','John Everett Millais'],
+      ['The Lady of Shalott','John William Waterhouse','Lady of Shalott'],
+      ['Proserpine','Dante Gabriel Rossetti','Proserpine',['Proserpina']],
+      ['Flaming June','Frederic Leighton'],
+      ['The Hireling Shepherd','William Holman Hunt','Hireling Shepherd'],
+      ['The Accolade','Edmund Leighton','Accolade']]},
+    {name:'Art Nouveau & Symbolism', sub:'Fin de siècle', wall:0xe3c07a, items:[
+      ['The Kiss','Gustav Klimt'],['Portrait of Adele Bloch-Bauer I','Gustav Klimt'],
+      ['The Scream','Edvard Munch'],['Madonna','Edvard Munch'],
+      ['The Sleeping Gypsy','Henri Rousseau'],['The Dream','Henri Rousseau','Dream',['Le Reve']],
+      ['The Cyclops','Odilon Redon','Cyclops'],
+      ['Salome','Gustave Moreau','Salome',['Salome Dancing before Herod','The Apparition']]]},
+    {name:'Post-Impressionism & Fauvism', sub:'1880s–1900s', wall:0xf2c9a0, items:[
+      ['The Starry Night','Vincent van Gogh'],['Café Terrace at Night','Vincent van Gogh'],
+      ['A Sunday on La Grande Jatte','Georges Seurat','La Grande Jatte'],
+      ['The Card Players','Paul Cézanne'],['The Yellow Christ','Paul Gauguin','Yellow Christ'],
+      ['At the Moulin Rouge','Henri de Toulouse-Lautrec','At the Moulin Rouge'],
+      ['Woman with a Hat','Henri Matisse','Woman with a Hat',['La femme au chapeau']],
+      ['Charing Cross Bridge','André Derain']]},
+    {name:'Expressionism', sub:'Early 20th century Germany & Austria', wall:0xc9dfe9, items:[
+      ['The Large Blue Horses','Franz Marc','Large Blue Horses',['Die grossen blauen Pferde']],
+      ['Fate of the Animals','Franz Marc','Fate of the Animals',['Tierschicksale']],
+      ['Composition VII','Wassily Kandinsky'],['Improvisation 28','Wassily Kandinsky'],
+      ['Street, Berlin','Ernst Ludwig Kirchner','Street Berlin'],
+      ['Self-Portrait with Chinese Lantern Plant','Egon Schiele','Self-Portrait with Chinese Lantern Plant',['Self-Portrait with Physalis','Selbstbildnis mit Lampionfruechten']]]},
+    {name:'Hudson River School', sub:'American landscape', wall:0xd9b98a, items:[
+      ['The Oxbow','Thomas Cole','Oxbow',['View from Mount Holyoke']],
+      ['The Course of Empire: Destruction','Thomas Cole','Course of Empire Destruction',['Destruction Course of Empire']],
+      ['Heart of the Andes','Frederic Edwin Church'],['Niagara','Frederic Edwin Church'],
+      ['Among the Sierra Nevada, California','Albert Bierstadt','Among the Sierra Nevada California'],
+      ['Kindred Spirits','Asher Brown Durand','Kindred Spirits']]},
+    {name:'Neoclassicism & Academic Art', sub:'Late 18th–19th century', wall:0xe8d4c4, items:[
+      ['Oath of the Horatii','Jacques-Louis David'],['The Death of Marat','Jacques-Louis David'],
+      ['La Grande Odalisque','Jean-Auguste-Dominique Ingres'],
+      ['The Birth of Venus','Alexandre Cabanel'],
+      ['Nymphs and Satyr','William-Adolphe Bouguereau'],
+      ['The Death of Sardanapalus','Eugène Delacroix']]},
+    {name:'Rococo', sub:'18th century France & England', wall:0xf4c6d0, items:[
+      ['The Swing','Jean-Honoré Fragonard'],
+      ['The Progress of Love: The Meeting','Jean-Honoré Fragonard','Progress of Love The Meeting',['The Meeting','Progress of Love']],
+      ['Pilgrimage to Cythera','Jean-Antoine Watteau',null,['Embarkation for Cythera']],
+      ['Pierrot','Jean-Antoine Watteau','Pierrot',['Gilles','Pierrot Gilles']],
+      ['Diana Leaving her Bath','François Boucher','Diana Leaving her Bath',['Diana Resting after her Bath','Diane sortant du bain']],
+      ['Portrait of Madame de Pompadour','François Boucher','Madame de Pompadour',['Marquise de Pompadour']],
+      ['The Marriage Contract','William Hogarth','Marriage Contract',['Marriage A-la-Mode The Marriage Settlement','The Marriage Settlement']]]},
+    {name:'Romanticism (European)', sub:'Early 19th century', wall:0xb9d3c2, items:[
+      ['Wanderer above the Sea of Fog','Caspar David Friedrich'],
+      ['Chalk Cliffs on Rügen','Caspar David Friedrich','Chalk Cliffs on Rugen',['Chalk Cliffs','Kreidefelsen auf Rugen']],
+      ['The Raft of the Méduse','Théodore Géricault','Raft of the Medusa',['Raft of the Meduse','Le Radeau de la Meduse']],
+      ['Liberty Leading the People','Eugène Delacroix'],
+      ['The Fighting Temeraire','J.M.W. Turner'],
+      ['Rain, Steam and Speed – The Great Western Railway','J.M.W. Turner','Rain Steam and Speed',['Rain Steam and Speed The Great Western Railway']],
+      ['The Hay Wain','John Constable']]},
+    {name:'Barbizon School & French Realism', sub:'Mid-19th century France', wall:0xe6d3a3, items:[
+      ['The Gleaners','Jean-François Millet'],['The Angelus','Jean-François Millet'],
+      ['A Burial at Ornans','Gustave Courbet'],['The Desperate Man','Gustave Courbet','Desperate Man',['Le Desespere']],
+      ["Ville-d'Avray",'Jean-Baptiste-Camille Corot',"Ville d'Avray",['Ville-d Avray','Ville d Avray']],
+      ['The Horse Fair','Rosa Bonheur'],['Plowing in the Nivernais','Rosa Bonheur','Plowing in the Nivernais',['Ploughing in the Nivernais','Labourage nivernais','The Dressing of the Vines']]]},
+    {name:'Russian Realism & Symbolism', sub:'Peredvizhniki and beyond', wall:0xc8dbe8, items:[
+      ['Barge Haulers on the Volga','Ilya Repin','Barge Haulers on the Volga',['Volga Boatmen','Burlaki na Volge']],
+      ['Ivan the Terrible and His Son Ivan','Ilya Repin','Ivan the Terrible and His Son',['Ivan the Terrible Kills His Son']],
+      ['Reply of the Zaporozhian Cossacks','Ilya Repin','Reply of the Zaporozhian Cossacks',['Zaporozhian Cossacks','Cossacks Writing a Letter to the Turkish Sultan']],
+      ['The Ninth Wave','Ivan Aivazovsky','Ninth Wave',['Deviaty Val']],
+      ['Bogatyrs','Viktor Vasnetsov','Bogatyrs',['Three Bogatyrs','Bogatyri']],
+      ['The Demon Seated','Mikhail Vrubel','Demon Seated',['Seated Demon']],
+      ['Morning in a Pine Forest','Ivan Shishkin','Morning in a Pine Forest',['Morning in a Pine Wood','Utro v sosnovom lesu']]]},
+    {name:'Early Modernism & Avant-Garde', sub:'1907–1920s', wall:0xf0d9a8, items:[
+      ['Nude Descending a Staircase, No. 2','Marcel Duchamp','Nude Descending a Staircase',['Nude Descending a Staircase No 2']],
+      ['Portrait of Ambroise Vollard','Pablo Picasso','Ambroise Vollard'],
+      ["Les Demoiselles d'Avignon",'Pablo Picasso'],
+      ['Black Square','Kazimir Malevich'],
+      ['Suprematist Composition','Kazimir Malevich','Suprematist Composition',['Suprematism','Suprematist']],
+      ['I and the Village','Marc Chagall','I and the Village',['Moi et le village']],
+      ['Unique Forms of Continuity in Space','Umberto Boccioni','Unique Forms of Continuity in Space',['Forme uniche della continuita nello spazio']]]},
+    {name:'Chinese Ink Painting (Shan Shui)', sub:'Landscapes of the Song, Yuan & Ming', wall:0xe9e1c8, items:[
+      ['Travelers Among Mountains and Streams','Fan Kuan','Travelers Among Mountains and Streams',['Travelling among Mountains and Streams','Travelers among Streams and Mountains']],
+      ['Early Spring','Guo Xi','Early Spring'],
+      ['Dwelling in the Fuchun Mountains','Huang Gongwang','Dwelling in the Fuchun Mountains',['Fuchun Mountains','Fuchun Shan Ju Tu']],
+      ['Along the River During the Qingming Festival','Zhang Zeduan','Along the River During the Qingming Festival',['Qingming Festival','Qingming Shanghe Tu']],
+      ['A Thousand Li of Rivers and Mountains','Wang Ximeng','Thousand Li of Rivers and Mountains',['Thousand Li of Rivers','Qianli Jiangshan Tu']]]},
+    {name:'Persian & Mughal Miniatures', sub:'Illuminated courts of Iran and India', wall:0xf3d58a, items:[
+      ['The Court of Gayumars','Sultan Muhammad','Court of Gayumars',['Gayumars Court','Court of Gayumars Shahnameh']],
+      ['Layla and Majnun in School','Bihzad','Layla and Majnun in School',['Layla and Majnun at School','Majnun and Layla at School']],
+      ['The Feast of Sada','Sultan Muhammad','Feast of Sada',['Feast of Sadeh','Sadeh Feast']],
+      ['Akbar Tames the Savage Elephant Hawai','Basawan and Chatar Muni','Akbar Tames the Savage Elephant Hawai',['Akbar Taming the Elephant Hawai','Akbar and the Elephant Hawai','Akbar Taming Elephant']],
+      ['Jahangir Preferring a Sufi Shaikh to Kings','Bichitr','Jahangir Preferring a Sufi Shaikh to Kings',['Jahangir Preferring a Sufi Shaikh','Jahangir Preferring a Sufi']],
+      ['A Chameleon','Ustad Mansur','Chameleon']]},
+    {name:'Pointillism & Neo-Impressionism', sub:'Seurat, Signac and Cross', wall:0xfbe3b4, items:[
+      ['A Sunday on La Grande Jatte','Georges Seurat','La Grande Jatte'],
+      ['Bathers at Asnières','Georges Seurat','Bathers at Asnieres',['Une baignade a Asnieres','Bathers']],
+      ['The Circus','Georges Seurat','Circus',['Le Cirque']],
+      ['The Papal Palace, Avignon','Paul Signac','Papal Palace Avignon',['Le Palais des Papes','Palais des Papes']],
+      ['The Pine Tree at Saint-Tropez','Paul Signac','Pine Tree at Saint-Tropez',['Pine Tree at Saint Tropez','Le Pin de Bertaud','Pine Tree']],
+      ['The Red Buoy','Paul Signac','Red Buoy',['La Bouee rouge']],
+      ['Evening, Harmony in Silver','Henri-Edmond Cross','Evening Harmony in Silver',['Harmony in Silver','Evening Air']]]},
+    {name:'Orientalism', sub:'19th-century Academic painting', wall:0xeab98a, items:[
+      ['The Snake Charmer','Jean-Léon Gérôme','Snake Charmer'],
+      ['Pollice Verso (Thumbs Down)','Jean-Léon Gérôme','Pollice Verso',['Thumbs Down']],
+      ['Pygmalion and Galatea','Jean-Léon Gérôme','Pygmalion and Galatea'],
+      ['Women of Algiers in their Apartment','Eugène Delacroix','Women of Algiers',['Femmes d Alger dans leur appartement','Women of Algiers in their Apartment']],
+      ['The Turkish Bath','Jean-Auguste-Dominique Ingres','Turkish Bath',['Le Bain turc']],
+      ['The Roses of Heliogabalus','Lawrence Alma-Tadema','Roses of Heliogabalus']]},
+    {name:'Macchiaioli', sub:'Italian pre-Impressionism', wall:0xd8e6b8, items:[
+      ['The Palm Tree','Giovanni Fattori','Palm Tree',['La Palma','Palma']],
+      ['In Vedetta (The Lookout)','Giovanni Fattori','In Vedetta',['The Lookout','Lookout']],
+      ['The Rotonda of Palmieri','Giovanni Fattori','Rotonda of Palmieri',['Rotonda di Palmieri','La Rotonda dei Bagni Palmieri']],
+      ['The Singing of the Stornello','Silvestro Lega','Singing of the Stornello',['Il canto dello stornello','Canto dello stornello']],
+      ['The Pergola','Silvestro Lega','Pergola',['Il pergolato']],
+      ['Sunlight on the Piazza','Telemaco Signorini','Sunlight on the Piazza',['Piazza Santa Croce Sunlight','La Piazza di Settignano']]]},
+    {name:'Ashcan School', sub:'Early 20th-century urban realism', wall:0xf1cfa0, items:[
+      ["Stag at Sharkey's",'George Bellows',"Stag at Sharkey's",['Stag at Sharkeys']],
+      ['Both Members of This Club','George Bellows','Both Members of This Club'],
+      ['Cliff Dwellers','George Bellows','Cliff Dwellers'],
+      ["McSorley's Bar",'John Sloan',"McSorley's Bar",['McSorleys Bar']],
+      ['Sixth Avenue and Thirtieth Street','John Sloan','Sixth Avenue and Thirtieth Street',['Sixth Avenue Thirtieth Street']],
+      ['Washington Square','William Glackens','Washington Square']]},
+    {name:'Classical Sculpture & Antiquities', sub:'Marble, bronze and stone', wall:0xeeeae0, items:[
+      ['Winged Victory of Samothrace','Hellenistic Greek','Winged Victory of Samothrace',['Nike of Samothrace','Victoire de Samothrace']],
+      ['Laocoön and His Sons','Agesander, Athenodoros, and Polydorus','Laocoon and His Sons',['Laocoon Group','Laocoon']],
+      ['David','Michelangelo','David Michelangelo',['Michelangelo s David','David']],
+      ['Apollo and Daphne','Gian Lorenzo Bernini','Apollo and Daphne'],
+      ['The Thinker','Auguste Rodin','Thinker',['Le Penseur']],
+      ['The Great Sphinx of Tanis','Ancient Egyptian','Great Sphinx of Tanis',['Sphinx of Tanis']]]}
+  ];
+  // rooms shown, in this order (any room not listed here is left out)
+  (function(){ var ORDER=["Renaissance", "Baroque & Rococo", "Modern & 20th Century", "Impressionism & Post-Impressionism", "Neoclassical, Romantic & Realist", "Early Modernism & Avant-Garde", "Post-Impressionism & Fauvism", "Expressionism", "Spanish Art Wing", "Ukiyo-e", "Chinese Ink Painting (Shan Shui)", "Persian & Mughal Miniatures", "Romanticism (European)", "Neoclassicism & Academic Art", "Rococo", "Pointillism & Neo-Impressionism", "Art Nouveau & Symbolism", "Barbizon School & French Realism", "Pre-Raphaelite Brotherhood", "Russian Realism & Symbolism", "Hudson River School"];
+    ROOMS=ORDER.map(function(n){ return ROOMS.filter(function(R){ return R.name===n; })[0]; }).filter(Boolean); })();
+  var ANON={'Winged Victory of Samothrace':1,'The Great Sphinx of Tanis':1,'Laocoön and His Sons':1};
+  function mk(R,e){ return {t:e[0]+' — '+e[1], title:e[0], artist:e[1], qt:e[2]||e[0].replace(/\s*\(.*\)/,''), alts:e[3]||[], anon:!!ANON[e[0]], emb:false, room:R}; }
+  ROOMS.forEach(function(R){
+    R.list = (R.emb||[]).map(function(e,i){ return {t:e[0], kind:e[1], link:e[2], emb:true, seed:i+3}; })
+      .concat((R.items||[]).map(function(e){ return mk(R,e); }));
+    R.reserve = (R.reserve||[]).map(function(e){ return mk(R,e); });
+  });
+
+  // ---------- Renderer / scene ----------
+  var renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth, innerHeight);
+  document.body.appendChild(renderer.domElement);
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0e0d0c);
+  scene.fog = new THREE.Fog(0x0e0d0c, 18, 48);
+  var camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, .1, 100);
+  camera.rotation.order = 'YXZ';
+
+  function woodTex(){
+    var c=document.createElement('canvas'); c.width=c.height=512; var x=c.getContext('2d');
+    for (var i=0;i<8;i++){ x.fillStyle=['#6b4a2e','#7a5535','#5f4129','#74502f'][i%4]; x.fillRect(0,i*64,512,64);
+      x.fillStyle='rgba(0,0,0,.25)'; x.fillRect(0,i*64,512,2);
+      for (var k=0;k<30;k++){ x.fillStyle='rgba(0,0,0,.06)'; x.fillRect(Math.random()*512,i*64+Math.random()*64,Math.random()*120,1);} }
+    var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t;
+  }
+  var wood = woodTex();
+  var frameMat = new THREE.MeshStandardMaterial({color:0x8b6a2b, metalness:.5, roughness:.4});
+  var matMat = new THREE.MeshBasicMaterial({color:0xf2ede2});
+  var skirt = new THREE.MeshStandardMaterial({color:0x3b2f25});
+  var benchMat = new THREE.MeshStandardMaterial({color:0x2a2420,roughness:.7});
+
+  // ---------- Procedural paintings ----------
+  function rnd(seed){ var s=seed*97+13; return function(){ s=(s*16807)%2147483647; return (s-1)/2147483646; }; }
+  function paint(kind, seed){
+    var W=512, c=document.createElement('canvas'); c.width=c.height=W; var x=c.getContext('2d'), r=rnd(seed), g;
+    function rc(a){ return 'hsl('+Math.floor(r()*360)+','+(50+r()*40)+'%,'+(a||55)+'%)'; }
+    if (kind==='waves'){
+      g=x.createLinearGradient(0,0,0,W); g.addColorStop(0,'#2b1a4d'); g.addColorStop(.45,'#e0603a'); g.addColorStop(.55,'#f5c26b'); g.addColorStop(1,'#16304f');
+      x.fillStyle=g; x.fillRect(0,0,W,W); x.fillStyle='#fde9a8'; x.beginPath(); x.arc(256,230,50,0,7); x.fill();
+      for (var i=0;i<14;i++){ x.strokeStyle='hsla('+(200+i*5)+',60%,'+(20+i*2)+'%,.9)'; x.lineWidth=14; x.beginPath();
+        for (var px=0;px<=W;px+=8){ var py=280+i*18+Math.sin(px/40+i)*10; px?x.lineTo(px,py):x.moveTo(px,py);} x.stroke(); }
+    } else if (kind==='grid'){
+      x.fillStyle='#f3eee2'; x.fillRect(0,0,W,W); var cols=['#d12a22','#1f4fa8','#f2c316','#f3eee2','#f3eee2'];
+      for (var a=0;a<4;a++) for (var b=0;b<4;b++){ if (r()>.45){ x.fillStyle=cols[Math.floor(r()*5)]; x.fillRect(a*128+6,b*128+6,116,116);} }
+      x.fillStyle='#111'; for (var k=0;k<=4;k++){ x.fillRect(k*128-4,0,8,W); x.fillRect(0,k*128-4,W,8); }
+    } else if (kind==='moons'){
+      g=x.createRadialGradient(256,256,10,256,256,360); g.addColorStop(0,'#1c2a4a'); g.addColorStop(1,'#07080f'); x.fillStyle=g; x.fillRect(0,0,W,W);
+      for (var m=0;m<7;m++){ var cx=60+r()*390, cy=60+r()*390, rad=30+r()*80;
+        for (var q=5;q>0;q--){ x.fillStyle=rc(30+q*8); x.globalAlpha=.85; x.beginPath(); x.arc(cx,cy,rad*q/5,0,7); x.fill(); } }
+      x.globalAlpha=1;
+    } else if (kind==='hills'){
+      g=x.createLinearGradient(0,0,0,W); g.addColorStop(0,'#0b1030'); g.addColorStop(1,'#5b4a8a'); x.fillStyle=g; x.fillRect(0,0,W,W);
+      for (var s=0;s<90;s++){ x.fillStyle='rgba(255,255,230,'+r()*.9+')'; x.fillRect(r()*W,r()*220,2,2); }
+      for (var h=0;h<5;h++){ x.fillStyle='hsl('+(250-h*8)+',35%,'+(28-h*4)+'%)'; x.beginPath(); x.moveTo(0,W);
+        for (var p2=0;p2<=W;p2+=16) x.lineTo(p2,230+h*55+Math.sin(p2/70+h*2)*40+r()*10); x.lineTo(W,W); x.fill(); }
+    } else if (kind==='fields'){
+      var cl=[rc(40),rc(55),rc(35)]; x.fillStyle=rc(25); x.fillRect(0,0,W,W);
+      for (var f=0;f<3;f++){ x.fillStyle=cl[f]; x.globalAlpha=.9; x.fillRect(50,40+f*155,412,140); }
+      x.globalAlpha=1; x.fillStyle='rgba(0,0,0,.12)'; for (var n=0;n<600;n++) x.fillRect(r()*W,r()*W,2,2);
+    } else {
+      x.fillStyle=rc(15); x.fillRect(0,0,W,W);
+      for (var t=0;t<90;t++){ x.strokeStyle=rc(40+r()*35); x.lineWidth=3+r()*14; x.lineCap='round'; x.beginPath();
+        var sx=r()*W, sy=r()*W; x.moveTo(sx,sy); x.bezierCurveTo(sx+r()*200-100,sy+r()*200-100,sx+r()*200-100,sy+r()*200-100,sx+r()*260-130,sy+r()*260-130); x.stroke(); }
+    }
+    return c;
+  }
+
+  // ---------- Per-painting textures (created once, reused across room visits) ----------
+  function wrapText(x,text,cx,y,maxW,lh,maxLines){
+    var words=text.split(' '), line='', lines=[];
+    words.forEach(function(w){ var t=line?line+' '+w:w; if (x.measureText(t).width>maxW && line){ lines.push(line); line=w; } else line=t; });
+    lines.push(line); lines.slice(0,maxLines).forEach(function(l,i){ x.fillText(l,cx,y+i*lh); });
+  }
+  function drawLabel(it){
+    var c=it.labelCanvas, x=c.getContext('2d'), W=c.width, H=c.height;
+    x.fillStyle='#f6f0e2'; x.fillRect(0,0,W,H); x.strokeStyle='#c9a45c'; x.lineWidth=4; x.strokeRect(6,6,W-12,H-12);
+    x.fillStyle='#1b1610'; x.textAlign='center'; x.font='bold 40px Georgia'; wrapText(x,it.t,W/2,58,W-70,44,2);
+    x.fillStyle='#8a5a12'; x.font='26px Georgia';
+    var l = it.link ? it.link.replace('https://','') : 'searching open archives…';
+    x.fillText((l.length>58 ? l.slice(0,57)+'…' : l)+(it.link?' ↗':''), W/2, H-48);
+    var src=(it.srcName?'Source: '+it.srcName:'')+(it.archTitle?(it.srcName?' · ':'')+it.archTitle:'');
+    if (src){ x.fillStyle='#6d655a'; x.font='italic 22px Georgia'; x.fillText(src.length>72?src.slice(0,71)+'…':src, W/2, H-18); }
+    it.labelTex.needsUpdate=true;
+  }
+  function drawPlaceholder(it,msg){
+    var x=it.phCanvas.getContext('2d'); x.fillStyle='#d9d1c0'; x.fillRect(0,0,256,256);
+    x.fillStyle='#8a8070'; x.font='18px Georgia'; x.textAlign='center'; x.fillText(msg,128,132); it.phTex.needsUpdate=true;
+  }
+  function prep(it){
+    if (it.ready) return; it.ready=true;
+    it.labelCanvas=document.createElement('canvas'); it.labelCanvas.width=1024; it.labelCanvas.height=240;
+    it.labelTex=new THREE.CanvasTexture(it.labelCanvas);
+    if (it.emb){ it.tex=new THREE.CanvasTexture(paint(it.kind,it.seed)); it.aspect=1; it.state='done'; }
+    else { it.phCanvas=document.createElement('canvas'); it.phCanvas.width=it.phCanvas.height=256; it.phTex=new THREE.CanvasTexture(it.phCanvas); drawPlaceholder(it,'loading…'); }
+    drawLabel(it);
+  }
+  function fitMesh(it){ if (!it.mesh||!it.aspect) return; var s=3,a=it.aspect; it.mesh.scale.set(a>=1?s:s*a, a>=1?s/a:s, 1); }
+
+  // ---------- Image sources (open access first), pins, cache, queue ----------
+  // Optional: free Rijksmuseum API key. Leave empty to skip that source.
+  var RIJKS_KEY='';
+  // Optional: run copyPins() in the browser console (F12) after visiting the rooms, then paste its output here to skip every search for all visitors.
+  var PINNED = {
+  };
+  var CACHE_KEY='gallery-pins-v4', cache={};
+  try{ cache=JSON.parse(localStorage.getItem(CACHE_KEY)||'{}'); }catch(e){}
+  function saveCache(it,c){ cache[it.t]={url:c.url,alt:c.alt||'',link:c.link,src:c.src,title:c.title||''}; try{ localStorage.setItem(CACHE_KEY,JSON.stringify(cache)); }catch(e){} }
+  function dl(id,file){ return 'https://archive.org/download/'+id+'/'+encodeURIComponent(file); }
+  function enc(s){ return encodeURIComponent(s); }
+  function strip(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/"/g,''); }
+  function norm(s){ return strip(s).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+  var STOP={the:1,and:1,with:1,from:1,for:1,les:1,des:1};
+  function toks(s){ return norm(s).split(' ').filter(function(w){ return w.length>2 && !STOP[w]; }); }
+  function surname(a){ a=strip(a).replace(/\s+the (Younger|Elder)$/,''); var w=a.split(' '); return /Rembrandt|Giotto/.test(a)? w[0] : w[w.length-1]; }
+  // A result must contain every significant word of the title and the artist's surname, otherwise it is rejected
+  function titleOK(it,t){ var n=' '+norm(t)+' '; return [it.qt].concat(it.alts||[]).some(function(q){ var tk=toks(q); return tk.length>0 && tk.every(function(w){ return n.indexOf(' '+w)>-1; }); }); }
+  function artistOK(it,s){ return (' '+norm(s)+' ').indexOf(' '+norm(surname(it.artist)))>-1; }
+  // fetch with timeout; resolves to parsed JSON or null (never throws)
+  function jf(url,opts){
+    var ctl=window.AbortController?new AbortController():null, t=setTimeout(function(){ if (ctl) ctl.abort(); },9000);
+    opts=opts||{}; if (ctl) opts.signal=ctl.signal;
+    return fetch(url,opts).then(function(r){ clearTimeout(t); return r.ok?r.json():null; }).catch(function(){ clearTimeout(t); return null; });
+  }
+  // Wikimedia asks browser apps to identify themselves with Api-User-Agent; retry without it if the header is blocked
+  function wjf(url){ return jf(url,{headers:{'Api-User-Agent':'WalkableGallery/1.0 (educational 3D art gallery)'}}).then(function(d){ return d||jf(url); }); }
+  var MET='https://collectionapi.metmuseum.org/public/collection/v1';
+  var BAD_FILE=/\b(detail|crop|cropped|copy|after|sketch|study|replica|frame|caricature|parody)\b/i;
+
+  var SOURCES=[
+    // Art Institute of Chicago: CC0, public-domain filter in the query, IIIF image at the recommended 843px width, CORS-friendly
+    {name:'Art Institute of Chicago', find:function(it){
+      return jf('https://api.artic.edu/api/v1/artworks/search?q='+enc(strip(it.qt)+' '+surname(it.artist))+'&query[term][is_public_domain]=true&limit=8&fields=id,title,artist_display,image_id').then(function(d){
+        var h=d&&d.data&&d.data.filter(function(a){ return a.image_id && titleOK(it,a.title) && artistOK(it,a.artist_display); })[0];
+        if (!h) return null;
+        return {url:((d.config&&d.config.iiif_url)||'https://www.artic.edu/iiif/2')+'/'+h.image_id+'/full/843,/0/default.jpg', link:'https://www.artic.edu/artworks/'+h.id, src:'Art Institute of Chicago', title:h.title};
+      }); }},
+    // The Met: CC0 objects only (isPublicDomain), medium-size image rather than the multi-MB original
+    {name:'The Met', find:function(it){
+      return jf(MET+'/search?hasImages=true&q='+enc(strip(it.qt)+' '+surname(it.artist))).then(function(d){
+        var ids=((d&&d.objectIDs)||[]).slice(0,8); if (!ids.length) return null;
+        return Promise.all(ids.map(function(id){ return jf(MET+'/objects/'+id); })).then(function(os){
+          var h=os.filter(function(o){ return o && o.isPublicDomain && o.primaryImageSmall && titleOK(it,o.title) && artistOK(it,o.artistDisplayName); })[0];
+          return h ? {url:h.primaryImageSmall, link:h.objectURL, src:'The Met', title:h.title} : null;
+        }); }); }},
+    // Wikimedia Commons: only files whose licence says public domain / CC0, 1024px thumbnail from upload.wikimedia.org
+    {name:'Wikimedia Commons', find:function(it){
+      var u='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=10&gsrsearch='+enc(strip(it.qt)+' '+surname(it.artist)+' filetype:bitmap')
+        +'&prop=imageinfo&iiprop=url|mime|extmetadata&iiurlwidth=1024&iiextmetadatafilter=LicenseShortName|Copyrighted|ObjectName|Artist';
+      return wjf(u).then(function(d){
+        var pages=d&&d.query&&d.query.pages; if (!pages) return null;
+        var list=Object.keys(pages).map(function(k){return pages[k];}).sort(function(a,b){return (a.index||0)-(b.index||0);});
+        var h=list.filter(function(p){
+          var ii=p.imageinfo&&p.imageinfo[0]; if (!ii||!/^image\/(jpeg|png)$/.test(ii.mime||'')) return false;
+          var md=ii.extmetadata||{}, lic=(md.LicenseShortName&&md.LicenseShortName.value)||'', cp=md.Copyrighted&&md.Copyrighted.value;
+          var pd=/public domain|^pd|cc0/i.test(lic) || cp==='False';
+          var name=(p.title||'').replace(/^File:/,'');
+          var who=(md.Artist&&md.Artist.value)||'';
+          return pd && titleOK(it,name) && (it.anon || artistOK(it,name) || artistOK(it,who)) && (!BAD_FILE.test(name)||BAD_FILE.test(it.qt));
+        })[0];
+        if (!h) return null; var ii=h.imageinfo[0], md=ii.extmetadata||{};
+        return {url:ii.thumburl||ii.url, link:ii.descriptionurl, src:'Wikimedia Commons', title:((md.ObjectName&&md.ObjectName.value)||(h.title||'').replace(/^File:/,'')).replace(/<[^>]+>/g,'')};
+      }); }},
+    // Rijksmuseum: needs a free API key (RIJKS_KEY above), skipped otherwise
+    {name:'Rijksmuseum', ok:function(){ return !!RIJKS_KEY; }, find:function(it){
+      return jf('https://www.rijksmuseum.nl/api/en/collection?key='+enc(RIJKS_KEY)+'&imgonly=true&ps=8&q='+enc(strip(it.qt)+' '+surname(it.artist))).then(function(d){
+        var h=((d&&d.artObjects)||[]).filter(function(o){ return o.webImage && titleOK(it,o.title) && artistOK(it,o.principalOrFirstMaker); })[0];
+        return h ? {url:h.webImage.url.replace(/=s\d+$/,'=w1200'), link:(h.links&&h.links.web)||'https://www.rijksmuseum.nl/en/collection', src:'Rijksmuseum', title:h.title} : null;
+      }); }}
+  ];
+
+  function loadImg(url){ return new Promise(function(res,rej){ var done=false, t=setTimeout(function(){ if(!done){ done=true; rej(0); } },20000);
+    new THREE.TextureLoader().setCrossOrigin('anonymous').load(url,function(x){ if(!done){ done=true; clearTimeout(t); res(x); } },undefined,function(e){ if(!done){ done=true; clearTimeout(t); rej(e); } }); }); }
+  // Load the candidate as a WebGL texture. If the host blocks CORS the load fails and the next source is tried.
+  function tryCand(it,c){
+    return loadImg(c.url).catch(function(){ if (!c.alt) throw 0; c.url=c.alt; c.alt=''; return loadImg(c.url); }).then(function(t){
+      t.minFilter=THREE.LinearFilter; t.generateMipmaps=false; t.anisotropy=4;
+      it.tex=t; it.aspect=t.image.width/t.image.height; it.link=c.link; it.srcName=c.src; it.archTitle=c.title||''; drawLabel(it);
+      if (it.mesh){ it.mesh.material.map=t; it.mesh.material.needsUpdate=true; fitMesh(it); }
+      return true;
+    }).catch(function(){ return false; });
+  }
+  function pinCand(p){
+    if (!p) return null;
+    if (p.url) return {url:p.url,alt:p.alt||'',link:p.link,src:p.src||'',title:p.title||''};
+    if (p.id && p.file) return {url:dl(p.id,p.file),alt:'https://archive.org/services/img/'+p.id,link:'https://archive.org/details/'+p.id,src:'Internet Archive',title:p.title||''};
+    return null;
+  }
+  function full(it,cb){
+    var i=0;
+    (function next(){
+      if (i>=SOURCES.length){ it.failed=true; cb(); return; }
+      var s=SOURCES[i++]; if (s.ok && !s.ok()) return next();
+      Promise.resolve().then(function(){ return s.find(it); }).catch(function(){ return null; }).then(function(c){
+        if (!c) return next();
+        return tryCand(it,c).then(function(ok){ if (ok){ saveCache(it,c); cb(); } else next(); });
+      });
+    })();
+  }
+  function resolve(it,cb){
+    var c=pinCand(PINNED[it.t]||cache[it.t]);
+    if (!c) return full(it,cb);
+    tryCand(it,c).then(function(ok){ if (ok) cb(); else full(it,cb); });
+  }
+  var queue=[], active=0, rlTimer=null;
+  function pump(){ while(active<6 && queue.length){ (function(it){ active++; it.state='loading';
+    resolve(it,function(){ active--; it.state='done'; if (it.failed){ promote(it); relayout(); } setStatus(); pump(); }); })(queue.shift()); } }
+  function promote(it){ var R=it.room; if (R && R.reserve && R.reserve.length) R.list.push(R.reserve.shift()); }
+  function relayout(){ clearTimeout(rlTimer); rlTimer=setTimeout(function(){ if (roomIdx>=0) enterRoom(roomIdx,true); },500); }
+  function enqueue(it){ if (it.state||it.emb) return; it.state='queued'; queue.push(it); }
+
+  window.copyPins=function(){
+    var all={}; Object.keys(cache).forEach(function(k){all[k]=cache[k];}); Object.keys(PINNED).forEach(function(k){all[k]=PINNED[k];});
+    var lines=Object.keys(all).map(function(k){ var c=pinCand(all[k]); return c?"    "+JSON.stringify(k)+": "+JSON.stringify({url:c.url,alt:c.alt||'',link:c.link,src:c.src,title:c.title||''}):null; }).filter(Boolean);
+    var txt="var PINNED = {\n"+lines.join(",\n")+"\n  };";
+    console.log(txt);
+    (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){ statusEl.textContent='Pins copied to clipboard'; }).catch(function(){ statusEl.textContent='Pins printed in the browser console (F12)'; });
+  };
+
+  // ---------- Room building ----------
+  var roomGroup=null, roomIdx=-1, half=12, stations=[], clickable=[], cur=null;
+  var statusEl=document.getElementById('status'), roomsEl=document.getElementById('rooms'), cap=document.getElementById('cap');
+  function setStatus(){
+    if (tour){ tourSay(); return; }
+    var R=ROOMS[roomIdx], vis=R.list.filter(function(i){return !i.failed;}), tot=vis.filter(function(i){return !i.emb;}).length, ok=vis.filter(function(i){return !i.emb && i.state==='done';}).length;
+    statusEl.textContent = R.name+' · '+vis.length+' paintings'+(tot&&ok<tot?' · loading from open-access archives ('+ok+'/'+tot+')':'')+' · click or E opens a painting’s link';
+  }
+  function signTex(R){
+    var c=document.createElement('canvas'); c.width=1024; c.height=256; var x=c.getContext('2d');
+    x.fillStyle='rgba(0,0,0,0)'; x.clearRect(0,0,1024,256); x.textAlign='center'; x.fillStyle='#2a2118';
+    x.font='bold 64px Georgia'; wrapText(x,R.name,512,100,960,70,2);
+    x.fillStyle='#7a5c22'; x.font='italic 36px Georgia'; x.fillText(R.sub,512,226);
+    return new THREE.CanvasTexture(c);
+  }
+  function enterRoom(i,keep){
+    if (roomGroup) scene.remove(roomGroup);
+    queue.forEach(function(it){ it.state=null; }); queue=[];
+    roomIdx=i; var R=ROOMS[i], vis=R.list.filter(function(it){return !it.failed;}), n=vis.length, per=Math.ceil(n/2), L=Math.max(24, per*5+6); half=L/2;
+    roomGroup=new THREE.Group(); scene.add(roomGroup); stations=[]; clickable=[]; cur=null; cap.style.display='none';
+    roomGroup.add(new THREE.HemisphereLight(0xfff3dc,0x3a3128,.85));
+    for (var z=-half+4; z<=half-3; z+=8){
+      var pl=new THREE.PointLight(0xffe6bd,.7,22); pl.position.set(0,5.2,z); roomGroup.add(pl);
+      var lamp=new THREE.Mesh(new THREE.BoxGeometry(1.6,.08,1.6), new THREE.MeshBasicMaterial({color:0xfff2d2})); lamp.position.set(0,5.95,z); roomGroup.add(lamp);
+    }
+    wood.repeat.set(6, L/2.8);
+    var floor=new THREE.Mesh(new THREE.PlaneGeometry(12,L), new THREE.MeshStandardMaterial({map:wood,roughness:.55})); floor.rotation.x=-Math.PI/2; roomGroup.add(floor);
+    var ceil=new THREE.Mesh(new THREE.PlaneGeometry(12,L), new THREE.MeshStandardMaterial({color:0xf4efe6})); ceil.rotation.x=Math.PI/2; ceil.position.y=6; roomGroup.add(ceil);
+    var wallMat=new THREE.MeshStandardMaterial({color:R.wall,roughness:.95});
+    [[-6,Math.PI/2],[6,-Math.PI/2]].forEach(function(w){ var m=new THREE.Mesh(new THREE.PlaneGeometry(L,6),wallMat); m.position.set(w[0],3,0); m.rotation.y=w[1]; roomGroup.add(m); });
+    [[-half,0],[half,Math.PI]].forEach(function(w){ var m=new THREE.Mesh(new THREE.PlaneGeometry(12,6),wallMat); m.position.set(0,3,w[0]); m.rotation.y=w[1]; roomGroup.add(m); });
+    [-5.95,5.95].forEach(function(x){ var s=new THREE.Mesh(new THREE.BoxGeometry(.1,.25,L),skirt); s.position.set(x,.125,0); roomGroup.add(s); });
+    for (var bz=-half+8; bz<=half-8; bz+=10){ var b=new THREE.Mesh(new THREE.BoxGeometry(2.4,.45,.8),benchMat); b.position.set(0,.23,bz); roomGroup.add(b); }
+    var sign=new THREE.Mesh(new THREE.PlaneGeometry(8,2), new THREE.MeshBasicMaterial({map:signTex(R),transparent:true})); sign.position.set(0,3.2,-half+.05); roomGroup.add(sign);
+
+    vis.forEach(function(it,idx){
+      prep(it);
+      var side=idx%2===0?-1:1, k=Math.floor(idx/2);
+      var g=new THREE.Group(); g.position.set(side*5.9, 2.7, half-3-(k+0)*5 - (per<1?0:0));
+      g.position.z = ((per-1)*2.5) - k*5;      // centred along the hall, first painting nearest the entrance
+      g.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2;
+      var fr=new THREE.Mesh(new THREE.BoxGeometry(3.7,3.7,.14),frameMat); g.add(fr);
+      var mt=new THREE.Mesh(new THREE.PlaneGeometry(3.4,3.4),matMat); mt.position.z=.075; g.add(mt);
+      var pm=new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({map: it.tex||it.phTex})); pm.scale.set(3,3,1); pm.position.z=.09; g.add(pm);
+      it.mesh=pm; fitMesh(it);
+      var lb=new THREE.Mesh(new THREE.PlaneGeometry(3.4,.8), new THREE.MeshBasicMaterial({map:it.labelTex})); lb.position.set(0,-2.15,.08); g.add(lb);
+      pm.userData.item=it; lb.userData.item=it; lb.userData.label=true; fr.userData.item=it; mt.userData.item=it; clickable.push(pm,lb,fr,mt);
+      roomGroup.add(g); stations.push({it:it,pos:g.position.clone()});
+    });
+    stations.slice().sort(function(a,b){return b.pos.z-a.pos.z;}).forEach(function(s){ enqueue(s.it); }); pump();
+    if (!keep){ camera.position.set(0,1.7,half-2); yaw=0; pitch=0; nav=null; }
+    var rs=document.getElementById('roomsel'); if (rs) rs.value=String(i);
+    setStatus();
+  }
+  // ---------- Walk tour: visits every room and every painting automatically ----------
+  var tour=null, SPEEDS=[0.5,0.75,1,1.5,2,3];
+  function wrapA(a){ while(a>Math.PI) a-=2*Math.PI; while(a<-Math.PI) a+=2*Math.PI; return a; }
+  var tinfo=document.getElementById('tinfo');
+  // room numbers run 1..N
+  function roomNo(i){ return i+1; }
+  function roomAt(n){ return n-1; }
+  var troom=document.getElementById('troom');
+  ROOMS.forEach(function(R,i){ var o=document.createElement('option'); o.value=i; o.textContent=roomNo(i)+' · '+R.name; troom.appendChild(o); });
+  troom.onchange=function(){
+    if (!tour) return; var i=+troom.value; if (!ROOMS[i]) return;
+    hush(); tour.room=i; tour.seen=[]; tour.tp=0; tour.st=null; tour.phase='enter'; tour.t=0; tour.wait=0; tour.said=false;
+    enterRoom(i); tourSay(); troom.blur();
+  };
+  function tourSay(){ var t=tourText(); statusEl.textContent=t; tinfo.textContent=t; if (troom.value!==String(roomIdx)) troom.value=roomIdx; }
+  function tourText(){ var R=ROOMS[roomIdx]; return 'Walk tour · '+R.name+' · '+Math.min(tour.seen.length+1,stations.length)+'/'+stations.length+(tour.paused?' · paused':''); }
+  function setTourBtn(){ var b=document.getElementById('tour'); if (b){ b.textContent=tour?'■ Stop tour (T)':'▶ Walk tour (T)'; b.classList.toggle('on',!!tour); } document.body.classList.toggle('touring',!!tour); tourUI(); }
+  function tourUI(){ if (!tour) return; document.getElementById('tpause').textContent=tour.paused?'▶ Resume':'⏸ Pause'; document.getElementById('tspeed').textContent=SPEEDS[tour.si]+'×'; tourSay(); }
+  function tourPause(){ if (tour){ tour.paused=!tour.paused; if (SS&&rd.on) try{ tour.paused?SS.pause():SS.resume(); }catch(e){} tourUI(); } }
+  function tourSpeed(d){ if (tour){ tour.si=Math.max(0,Math.min(SPEEDS.length-1,tour.si+d)); tourUI(); } }
+  // ---------- Read aloud (speech synthesis) ----------
+  var SS=window.speechSynthesis, rd={on:true,busy:false,cur:null};
+  var treadBtn=document.getElementById('tread');
+  function readLabel(){ treadBtn.textContent='🔊 Read aloud: '+(rd.on?'On':'Off'); treadBtn.classList.toggle('on',rd.on); }
+  function say(text){
+    if (!SS||!rd.on) return;
+    try{ SS.cancel(); var u=new SpeechSynthesisUtterance(text); rd.cur=u; rd.busy=true;
+      u.onend=u.onerror=function(){ if (rd.cur===u) rd.busy=false; };
+      SS.speak(u); }catch(e){ rd.busy=false; }
+  }
+  function hush(){ rd.busy=false; rd.cur=null; if (SS) try{ SS.cancel(); }catch(e){} }
+  function toggleRead(){ rd.on=!rd.on; readLabel(); if (!rd.on) hush(); }
+  function spoken(it){ return (it.title? it.title.replace(/\s*\(.*?\)/g,'') : it.t); }
+  if (!SS) treadBtn.style.display='none'; else { readLabel(); treadBtn.onclick=toggleRead; }
+  // manual stepping during the tour: jump to the next / previous painting (crossing into the next / previous room at the ends)
+  function tourOrder(){ return stations.slice().sort(function(a,b){ return (b.pos.z-a.pos.z) || (a.pos.x-b.pos.x); }).map(function(q){ return q.it; }); }
+  function tourManual(){ if (!tour) return null; hush(); tour.paused=false; if (SS) try{ SS.resume(); }catch(e){} tour.wait=0; tour.t=0; return tour; }
+  function tourNext(){
+    var T=tourManual(); if (!T) return;
+    if (T.st && (T.phase==='walk'||T.phase==='dwell') && T.seen.indexOf(T.st.it)<0) T.seen.push(T.st.it);
+    T.phase='pick'; T.st=null; T.said=false; tourUI();
+  }
+  function tourPrev(){
+    var T=tourManual(); if (!T) return;
+    var order=tourOrder(), idx=(T.st&&(T.phase==='walk'||T.phase==='dwell'))?order.indexOf(T.st.it):T.seen.length;
+    if (idx<0) idx=T.seen.length;
+    if (idx>0){ T.seen=order.slice(0,idx-1); T.phase='pick'; T.st=null; T.said=false; }
+    else if (T.room>0){ T.room--; T.tp=0; enterRoom(T.room); T.seen=tourOrder().slice(0,-1); T.phase='enter'; T.t=0; T.st=null; T.said=false; }
+    else { T.seen=[]; T.phase='pick'; T.st=null; T.said=false; }
+    tourUI();
+  }
+  function startTour(){ var r=Math.max(0,roomIdx); tour={room:r,seen:[],phase:'enter',t:0,wait:0,st:null,paused:false,si:2,said:false}; nav=null; hush(); try{ if (document.pointerLockElement) document.exitPointerLock(); }catch(e){} enterRoom(r,true); setTourBtn(); tourSay(); }
+  function stopTour(){ if (!tour) return; tour=null; hush(); setTourBtn(); setStatus(); }
+  function toggleTour(){ if (tour) stopTour(); else startTour(); }
+  document.getElementById('tstop').onclick=function(){ stopTour(); };
+  document.getElementById('tpause').onclick=tourPause;
+  document.getElementById('tprev').onclick=tourPrev;
+  document.getElementById('tnext').onclick=tourNext;
+  document.getElementById('tslow').onclick=function(){ tourSpeed(-1); };
+  document.getElementById('tfast').onclick=function(){ tourSpeed(1); };
+  // distance at which the whole frame and its plaque fit the screen (vertical FOV 70°, narrower screens need more room)
+  function tourDist(){ var tv=Math.tan(35*Math.PI/180), a=camera.aspect; return Math.min(9, Math.max(4.2, (2.3/tv)*1.12, (1.95/(tv*a))*1.05)); }
+  function tourStep(dt,p){
+    var T=tour;
+    pitch+=((T.tp||0)-pitch)*Math.min(1,3*dt);
+    if (T.phase==='enter'){ if (!T.said){ T.said=true; say(ROOMS[roomIdx].name); } T.t+=dt; if (T.t>1.6 && !(rd.on&&rd.busy&&T.t<8)) T.phase='pick'; return; }   // pause so the room sign can be read
+    if (T.phase==='pick'){
+      var order=stations.slice().sort(function(a,b){ return (b.pos.z-a.pos.z) || (a.pos.x-b.pos.x); });
+      var nxt=order.filter(function(st){ return T.seen.indexOf(st.it)<0; })[0];
+      if (!nxt){
+        if (T.room>=ROOMS.length-1){ tour=null; hush(); setTourBtn(); statusEl.textContent='Tour finished · use the room menu to revisit a room'; return; }
+        T.room++; T.seen=[]; T.tp=0; enterRoom(T.room); T.phase='enter'; T.t=0; T.said=false; tourSay(); return;
+      }
+      T.st=nxt; T.phase='walk'; T.t=0; T.wait=0; T.said=false; tourSay(); return;
+    }
+    // the room may have been re-laid out (a print was removed): re-find this painting
+    var cur2=stations.filter(function(st){ return st.it===T.st.it; })[0];
+    if (!cur2){ T.phase='pick'; return; }
+    T.st=cur2;
+    var side=cur2.pos.x<0?-1:1, vd=tourDist(), tx=side*(5.9-vd), tz=cur2.pos.z, tyaw=side<0?Math.PI/2:-Math.PI/2;
+    T.tp=Math.atan(0.65/vd);   // aim at the centre of frame + plaque (about 2.35 m high) from eye height 1.7 m
+    if (T.phase==='walk'){
+      var dx=tx-p.x, dz=tz-p.z, d=Math.hypot(dx,dz);
+      var want = d>0.6 ? Math.atan2(-dx,-dz) : tyaw, diff=wrapA(want-yaw);
+      yaw+=Math.max(-2.4*dt,Math.min(2.4*dt,diff));
+      if (d>0.05){ var k=Math.abs(diff)<0.7?1:0.15, step=Math.min(d,3.2*k*dt); p.x+=dx/d*step; p.z+=dz/d*step; }
+      if (d<0.1 && Math.abs(wrapA(tyaw-yaw))<0.06){ T.phase='dwell'; T.t=0; T.wait=0; }
+      return;
+    }
+    if (T.phase==='dwell'){
+      var it=T.st.it, ready=it.emb||it.state==='done';
+      if (!ready && T.wait<10){ T.wait+=dt; return; }          // give a slow image up to 10 s to arrive
+      if (!T.said){ T.said=true; say(spoken(it)); }
+      T.t+=dt; if (T.t>3.6 && !(rd.on&&rd.busy&&T.t<20)){ T.seen.push(it); T.phase='pick'; }
+    }
+  }
+
+  // menu
+  var tb=document.createElement('button'); tb.id='tour'; tb.className='room'; tb.textContent='▶ Walk tour (T)'; tb.onclick=toggleTour; roomsEl.appendChild(tb);
+  var rsel=document.createElement('select'); rsel.id='roomsel'; rsel.title='Choose a room';
+  ROOMS.forEach(function(R,i){ var o=document.createElement('option'); o.value=i; o.textContent=roomNo(i)+' · '+R.name; rsel.appendChild(o); });
+  rsel.onchange=function(){ stopTour(); enterRoom(+rsel.value); rsel.blur(); };
+  roomsEl.insertBefore(rsel, tb);
+
+  // ---------- Controls ----------
+  var keys={}, yaw=0, pitch=0, nav=null, numBuf='', numT=null;
+  var intro=document.getElementById('intro');
+  document.getElementById('enter').onclick=function(){ intro.style.display='none'; };
+  addEventListener('keydown', function(e){ keys[e.code]=true; if (e.code==='KeyE') openLink(); if (e.code==='KeyT') toggleTour(); if (e.code==='KeyR') toggleRead();
+    if (tour){ if (e.code==='Space'){ e.preventDefault(); tourPause(); } if (e.code==='KeyN') tourNext(); if (e.code==='KeyP') tourPrev(); if (e.code==='Equal'||e.code==='NumpadAdd') tourSpeed(1); if (e.code==='Minus'||e.code==='NumpadSubtract') tourSpeed(-1); }
+    var m=/^(?:Digit|Numpad)([0-9])$/.exec(e.code); if (m){ clearTimeout(numT); numBuf+=m[1]; if (numBuf.length>2) numBuf=m[1];
+      var go=function(){ var ri=roomAt(+numBuf); numBuf=''; if (ROOMS[ri]){ stopTour(); enterRoom(ri); } };
+      // a single digit that could still become a two-digit room number waits briefly for a second digit
+      if (+numBuf*10>ROOMS.length || numBuf.length===2) go(); else numT=setTimeout(go,650); } });
+  addEventListener('keyup', function(e){ keys[e.code]=false; });
+  // ---------- Idle: start the walk tour after 8 s without input once inside the gallery ----------
+  var lastAct=Date.now();
+  ['keydown','mousedown','mousemove','wheel','touchstart','pointerdown'].forEach(function(n){ addEventListener(n, function(){ lastAct=Date.now(); }, {passive:true, capture:true}); });
+  document.getElementById('enter').addEventListener('click', function(){ lastAct=Date.now(); });
+  setInterval(function(){
+    if (tour || intro.style.display!=='none'){ lastAct=Date.now(); return; }
+    if (Date.now()-lastAct>=8000){ lastAct=Date.now(); startTour(); }
+  }, 500);
+  function hold(id,k){ var b=document.getElementById(id); ['touchstart','mousedown'].forEach(function(ev){ b.addEventListener(ev,function(e){ e.preventDefault(); keys[k]=true; }); });
+    ['touchend','mouseup','mouseleave'].forEach(function(ev){ b.addEventListener(ev,function(){ keys[k]=false; }); }); }
+  hold('fw','KeyW'); hold('bk','KeyS');
+  var ray=new THREE.Raycaster();
+  function openLink(){
+    ray.setFromCamera({x:0,y:0},camera);
+    var h=ray.intersectObjects(clickable)[0];
+    var it = h && h.distance<9 ? h.object.userData.item : (cur&&cur.it);
+    if (it && it.link) window.open(it.link,'_blank','noopener');
+  }
+  // ---------- Click / tap navigation ----------
+  // click or tap the floor or a wall: walk that way · a painting: go and stand in front of it · its white title plate: open its link · drag: look around
+  var cvs=renderer.domElement, ptr=null;
+  function aim(e){
+    var r=cvs.getBoundingClientRect();
+    ray.setFromCamera({x:((e.clientX-r.left)/r.width)*2-1, y:-((e.clientY-r.top)/r.height)*2+1}, camera);
+    return roomGroup ? ray.intersectObjects(roomGroup.children,true)[0] : null;
+  }
+  function goArt(it){
+    var st=stations.filter(function(q){ return q.it===it; })[0]; if (!st) return false;
+    var side=st.pos.x<0?-1:1, vd=tourDist();
+    nav={x:side*(5.9-vd), z:st.pos.z, yaw:side<0?Math.PI/2:-Math.PI/2, pitch:Math.atan(0.65/vd)};
+    return true;
+  }
+  function goDir(h){
+    var p=camera.position, dx, dz;
+    if (h){ dx=h.point.x-p.x; dz=h.point.z-p.z; } else { dx=-Math.sin(yaw); dz=-Math.cos(yaw); }
+    var d=Math.hypot(dx,dz);
+    if (d<0.2){ dx=-Math.sin(yaw); dz=-Math.cos(yaw); d=1; }
+    var dist=Math.min(d,9);
+    nav={x:Math.max(-5,Math.min(5,p.x+dx/d*dist)), z:Math.max(-half+1.2,Math.min(half-1.2,p.z+dz/d*dist)), yaw:Math.atan2(-dx,-dz), pitch:0};
+  }
+  function tap(e){
+    var was=!!tour; if (was) stopTour();
+    var h=aim(e), it=h&&h.object.userData.item;
+    if (it){
+      if (h.object.userData.label && it.link && !was){ window.open(it.link,'_blank','noopener'); return; }
+      if (goArt(it)) return;
+    }
+    goDir(h);
+  }
+  cvs.addEventListener('pointerdown', function(e){ ptr={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,drag:false}; try{ cvs.setPointerCapture(e.pointerId); }catch(_){} });
+  cvs.addEventListener('pointermove', function(e){
+    if (!ptr){ if (e.pointerType==='mouse'){ var h=aim(e), l=h&&h.object.userData.label&&h.object.userData.item&&h.object.userData.item.link; cvs.style.cursor=l?'pointer':'default'; } return; }
+    if (!ptr.drag && Math.hypot(e.clientX-ptr.x,e.clientY-ptr.y)>8){ ptr.drag=true; if (tour) stopTour(); }
+    if (ptr.drag){ yaw-=(e.clientX-ptr.lx)*.005; pitch=Math.max(-1.2,Math.min(1.2,pitch-(e.clientY-ptr.ly)*.004)); nav=null; }
+    ptr.lx=e.clientX; ptr.ly=e.clientY;
+  });
+  cvs.addEventListener('pointerup', function(e){ var q=ptr; ptr=null; if (q && !q.drag) tap(e); });
+  cvs.addEventListener('pointercancel', function(){ ptr=null; });
+  addEventListener('resize', function(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+
+  // ---------- Loop ----------
+  var clock=new THREE.Clock();
+  function tick(){
+    var dt=Math.min(clock.getDelta(),.05), sp=(keys.ShiftLeft?6:3.4)*dt;
+    var f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0), s=(keys.KeyD?1:0)-(keys.KeyA?1:0);
+    if (tour && (f||s||keys.ArrowLeft||keys.ArrowRight)) stopTour();
+    var p=camera.position;
+    if (tour){ if (!tour.paused) tourStep(dt*SPEEDS[tour.si],p); }
+    else {
+      if (nav && (f||s||keys.ArrowLeft||keys.ArrowRight)) nav=null;
+      if (nav){
+        var nx=nav.x-p.x, nz=nav.z-p.z, nd=Math.hypot(nx,nz), ny=wrapA(nav.yaw-yaw);
+        yaw+=Math.max(-3*dt,Math.min(3*dt,ny)); pitch+=(nav.pitch-pitch)*Math.min(1,4*dt);
+        if (nd>0.05){ var nk=Math.abs(ny)<0.9?1:0.2, ns=Math.min(nd,4.5*nk*dt); p.x+=nx/nd*ns; p.z+=nz/nd*ns; }
+        if (nd<=0.06 && Math.abs(ny)<0.03) nav=null;
+      } else {
+        if (keys.ArrowLeft) yaw+=1.6*dt; if (keys.ArrowRight) yaw-=1.6*dt;
+        p.x+=(-Math.sin(yaw)*f+Math.cos(yaw)*s)*sp; p.z+=(-Math.cos(yaw)*f-Math.sin(yaw)*s)*sp;
+      }
+    }
+    p.x=Math.max(-5,Math.min(5,p.x)); p.z=Math.max(-half+1.2,Math.min(half-1.2,p.z));
+    camera.rotation.set(pitch,yaw,0);
+    var best=null, bd=5.5, fx=-Math.sin(yaw), fz=-Math.cos(yaw);
+    stations.forEach(function(st){ var dx=st.pos.x-p.x, dz=st.pos.z-p.z, d=Math.hypot(dx,dz); if (d<bd && (dx*fx+dz*fz)/d>.45){ bd=d; best=st; } });
+    if (best!==cur){ cur=best;
+      if (cur){ var it=cur.it; cap.style.display='block';
+        cap.innerHTML='<b></b><a target="_blank" rel="noopener"></a><small>Press E or click the title plate to open</small>';
+        cap.querySelector('b').textContent=it.t; var a=cap.querySelector('a'); a.href=it.link||'#'; a.textContent=it.link||'searching open archives…'; }
+      else cap.style.display='none'; }
+    else if (cur){ var a2=cap.querySelector('a'); if (a2 && cur.it.link && a2.getAttribute('href')!==cur.it.link){ a2.href=cur.it.link; a2.textContent=cur.it.link; } }
+    renderer.render(scene,camera); requestAnimationFrame(tick);
+  }
+  enterRoom(Math.floor(Math.random()*ROOMS.length)); tick();
+})();
+</script>
+</body>
+</html>
