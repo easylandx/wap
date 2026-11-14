@@ -44,6 +44,19 @@
   .touring #menu{display:none}
   .touring #tourbar{display:flex}
   .touring #cap{display:none !important}
+  #rooms{flex-wrap:wrap}
+  #srch{display:none;position:fixed;left:0;top:0;width:100%;height:100%;height:100dvh;z-index:7;background:rgba(14,13,12,.97);box-sizing:border-box;
+    padding:calc(12px + env(safe-area-inset-top,0px)) calc(14px + env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) calc(14px + env(safe-area-inset-left,0px))}
+  #srch .box{max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+  #srch .top{display:flex;gap:8px;align-items:center;padding-bottom:10px}
+  #sq{flex:1;min-width:0;font:inherit;font-size:16px;padding:11px 12px;background:#1d1a16;color:var(--fg);border:1px solid var(--gold);border-radius:0;outline:none;-webkit-appearance:none}
+  #sx{margin:0;min-height:44px}
+  #sl{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  #sl .ar{display:flex;justify-content:space-between;gap:10px;padding:13px 6px;border-bottom:1px solid #3a3226;cursor:pointer;color:var(--fg);font-size:16px}
+  #sl .ar span{color:#a99f8e;font-size:13px;white-space:nowrap}
+  #sl .pc{display:block;width:100%;text-align:left;padding:10px 6px 10px 18px;border:0;border-bottom:1px solid #2a241c;background:#1a1713;color:#d8cfbf;font:inherit;font-size:14px;margin:0;letter-spacing:0;cursor:pointer}
+  #sl .pc small{display:block;color:#a99f8e;font-size:12px}
+  #sl .none{padding:20px 6px;color:#a99f8e}
   #cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.7);z-index:3;pointer-events:none}
   #hud{position:fixed;left:0;right:0;bottom:0;z-index:3;pointer-events:none}
   #cap{display:none;max-width:560px;margin:0 auto calc(24px + env(safe-area-inset-bottom,0px)) auto;padding:14px 22px 14px 22px;background:rgba(14,13,12,.82);border:1px solid var(--gold);text-align:center;pointer-events:auto}
@@ -71,6 +84,7 @@
   <div id="status">Loading…</div>
 </div></div>
 <div id="tourbar"><span id="tinfo"></span><button id="tprev" class="room" title="Previous painting (P)">◀ Prev</button><button id="tnext" class="room" title="Next painting (N)">Next ▶</button><button id="tslow" class="room" title="Slower (−)">◀◀ Slower</button><span id="tspeed">1×</span><button id="tfast" class="room" title="Faster (+)">Faster ▶▶</button><select id="troom" title="Jump to a room and continue the tour there"></select><button id="tread" class="room" title="Read titles aloud (R)">🔊 Read aloud: On</button><button id="tpause" class="room" title="Pause / resume (Space)">⏸ Pause</button><button id="tstop" class="room" title="Stop (T)">■ Stop</button></div>
+<div id="srch"><div class="box"><div class="top"><input id="sq" type="search" placeholder="Search artist… (type the first letters)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="sx" class="room" aria-label="Close">✕</button></div><div id="sl"></div></div></div>
 <div id="cross"></div>
 <div id="hud"><div id="cap"></div></div>
 <div id="pad"><div class="wrap"><button id="fw">▲</button><button id="bk">▼</button></div></div>
@@ -725,12 +739,56 @@
   rsel.onchange=function(){ stopTour(); enterRoom(+rsel.value); rsel.blur(); };
   roomsEl.insertBefore(rsel, tb);
 
+
+  // ---------- Artist search ----------
+  var srch=document.getElementById('srch'), sq=document.getElementById('sq'), sl=document.getElementById('sl'), openArtist='';
+  function artistIndex(){
+    var map={}, out=[];
+    ROOMS.forEach(function(R){ R.list.forEach(function(it){
+      if (it.emb || it.failed || !it.artist) return;
+      var a=map[it.artist]; if (!a){ a=map[it.artist]={name:it.artist, key:norm(it.artist), sort:norm(surname(it.artist)+' '+it.artist), pieces:[]}; out.push(a); }
+      a.pieces.push(it);
+    }); });
+    return out.sort(function(x,y){ return x.sort<y.sort?-1:x.sort>y.sort?1:0; });
+  }
+  function artistMatches(a,q){
+    if (!q) return true; var words=a.key.split(' ');
+    return q.split(' ').every(function(t){ return words.some(function(w){ return w.indexOf(t)===0; }); });
+  }
+  function renderSearch(){
+    var q=norm(sq.value), list=artistIndex().filter(function(a){ return artistMatches(a,q); });
+    sl.innerHTML='';
+    if (!list.length){ var n=document.createElement('div'); n.className='none'; n.textContent='No artist found'; sl.appendChild(n); return; }
+    list.forEach(function(a){
+      var row=document.createElement('div'); row.className='ar';
+      var nm=document.createElement('div'); nm.textContent=a.name; var ct=document.createElement('span'); ct.textContent=a.pieces.length+(a.pieces.length===1?' work':' works');
+      row.appendChild(nm); row.appendChild(ct); sl.appendChild(row);
+      var open = openArtist===a.name || list.length===1;
+      row.onclick=function(){ openArtist = (openArtist===a.name && list.length>1) ? '' : a.name; renderSearch(); };
+      if (open) a.pieces.forEach(function(it){
+        var b=document.createElement('button'); b.className='pc'; b.textContent=it.title;
+        var sm=document.createElement('small'); sm.textContent=it.room.name; b.appendChild(sm);
+        b.onclick=function(){ gotoPiece(it); }; sl.appendChild(b);
+      });
+    });
+  }
+  function openSearch(){ stopTour(); srch.style.display='block'; sq.value=''; openArtist=''; renderSearch(); setTimeout(function(){ try{ sq.focus(); }catch(e){} },50); }
+  function closeSearch(){ srch.style.display='none'; try{ sq.blur(); }catch(e){} lastAct=Date.now(); }
+  function gotoPiece(it){
+    var ri=ROOMS.indexOf(it.room); closeSearch(); stopTour();
+    if (ri>=0 && ri!==roomIdx) enterRoom(ri);
+    goArt(it);
+  }
+  var sb=document.createElement('button'); sb.className='room'; sb.textContent='🔍 Artists'; sb.onclick=openSearch; roomsEl.insertBefore(sb, tb);
+  sq.addEventListener('input', function(){ openArtist=''; renderSearch(); });
+  document.getElementById('sx').onclick=closeSearch;
+
   // ---------- Controls ----------
   var keys={}, yaw=0, pitch=0, nav=null, numBuf='', numT=null;
   var intro=document.getElementById('intro');
   document.getElementById('enter').onclick=function(){ unlockSpeech(); intro.style.display='none'; };
   ['touchend','pointerup','click','keydown'].forEach(function(n){ addEventListener(n, unlockSpeech, {passive:true, capture:true}); });
-  addEventListener('keydown', function(e){ keys[e.code]=true; if (e.code==='KeyE') openLink(); if (e.code==='KeyT') toggleTour(); if (e.code==='KeyR') toggleRead();
+  addEventListener('keydown', function(e){ if (e.target && e.target.tagName==='INPUT'){ if (e.code==='Escape') closeSearch(); return; } keys[e.code]=true; if (e.code==='KeyE') openLink(); if (e.code==='KeyT') toggleTour(); if (e.code==='KeyR') toggleRead();
     if (tour){ if (e.code==='Space'){ e.preventDefault(); tourPause(); } if (e.code==='KeyN') tourNext(); if (e.code==='KeyP') tourPrev(); if (e.code==='Equal'||e.code==='NumpadAdd') tourSpeed(1); if (e.code==='Minus'||e.code==='NumpadSubtract') tourSpeed(-1); }
     var m=/^(?:Digit|Numpad)([0-9])$/.exec(e.code); if (m){ clearTimeout(numT); numBuf+=m[1]; if (numBuf.length>2) numBuf=m[1];
       var go=function(){ var ri=roomAt(+numBuf); numBuf=''; if (ROOMS[ri]){ stopTour(); enterRoom(ri); } };
@@ -742,7 +800,7 @@
   ['keydown','mousedown','mousemove','wheel','touchstart','pointerdown'].forEach(function(n){ addEventListener(n, function(){ lastAct=Date.now(); }, {passive:true, capture:true}); });
   document.getElementById('enter').addEventListener('click', function(){ lastAct=Date.now(); });
   setInterval(function(){
-    if (tour || intro.style.display!=='none'){ lastAct=Date.now(); return; }
+    if (tour || intro.style.display!=='none' || srch.style.display==='block'){ lastAct=Date.now(); return; }
     if (Date.now()-lastAct>=8000){ lastAct=Date.now(); startTour(); }
   }, 500);
   function hold(id,k){ var b=document.getElementById(id); ['touchstart','mousedown'].forEach(function(ev){ b.addEventListener(ev,function(e){ e.preventDefault(); keys[k]=true; }); });
