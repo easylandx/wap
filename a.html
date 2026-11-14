@@ -862,6 +862,14 @@
   });
   cvs.addEventListener('pointerup', function(e){ var q=ptr; ptr=null; if (q && !q.drag) tap(e); });
   cvs.addEventListener('pointercancel', function(){ ptr=null; });
+  // ---------- Pinch (two fingers) or mouse wheel zooms the 3D view in and out ----------
+  var pinch=null;
+  function tdist(t){ return Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY); }
+  function setFov(f){ camera.fov=Math.max(25,Math.min(95,f)); camera.updateProjectionMatrix(); }
+  cvs.addEventListener('touchstart', function(e){ if (e.touches.length===2){ pinch={d:tdist(e.touches)||1, f:camera.fov}; ptr=null; } }, {passive:true});
+  cvs.addEventListener('touchmove', function(e){ if (pinch && e.touches.length===2){ if (e.cancelable) e.preventDefault(); setFov(pinch.f*pinch.d/(tdist(e.touches)||1)); } }, {passive:false});
+  ['touchend','touchcancel'].forEach(function(n){ cvs.addEventListener(n, function(e){ if (e.touches.length<2) pinch=null; }, {passive:true}); });
+  cvs.addEventListener('wheel', function(e){ e.preventDefault(); setFov(camera.fov+(e.deltaY>0?3:-3)); }, {passive:false});
   addEventListener('resize', function(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
 
   // ---------- Loop ----------
