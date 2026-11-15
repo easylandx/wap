@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WhatPro</title>
+<style>
+  :root{
+    --bg:#0B6E6E;
+    --bg-dark:#084F55;
+    --card:#FFFFFF;
+    --ink:#10302F;
+    --muted:#4E6B69;
+    --gold:#D4AF37;
+    --gold-light:#F0C040;
+    --gold-deep:#C9A84C;
+    --wa:#1FA855;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    line-height:1.45;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding-left:16px;padding-right:16px}
+  header{padding-top:28px;padding-bottom:14px;text-align:center;color:#fff}
+  header h1{font-size:2.2rem;letter-spacing:.5px}
+  header h1 span{color:var(--gold-light)}
+  header p{color:#DFF3F0;margin-top:4px}
+  .gold-line{height:3px;background:var(--gold);border-radius:3px;margin:12px auto 0;width:90px}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;padding-bottom:6px}
+  .tab{
+    border:2px solid var(--gold);background:var(--bg-dark);color:#fff;
+    padding:8px 14px;border-radius:999px;font-size:.95rem;cursor:pointer;
+  }
+  .tab.active{background:var(--gold);color:var(--ink);font-weight:700}
+  .subtabs .tab{border-width:1px;font-size:.88rem;padding:6px 12px;background:transparent}
+  .subtabs .tab.active{background:var(--gold-light)}
+
+  .panel{
+    background:var(--card);border:2px solid var(--gold);border-radius:14px;
+    padding:16px;margin-top:14px;
+  }
+  .panel h2{font-size:1.05rem;margin-bottom:10px}
+  textarea{
+    width:100%;min-height:96px;resize:vertical;padding:10px;border-radius:10px;
+    border:1.5px solid #B9CFCC;font:inherit;font-size:1.05rem;
+  }
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+  .row input{
+    flex:1;min-width:200px;padding:10px;border-radius:10px;border:1.5px solid #B9CFCC;font:inherit;
+  }
+  .btn{
+    border:none;border-radius:10px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;
+  }
+  .btn-wa{background:var(--wa);color:#fff;flex:1;min-width:220px;font-size:1.05rem}
+  .btn-gold{background:var(--gold);color:var(--ink)}
+  .btn-line{background:#fff;color:var(--ink);border:1.5px solid var(--gold)}
+  .hint{font-size:.82rem;color:var(--muted);margin-top:8px}
+
+  .msg{
+    display:flex;gap:10px;align-items:center;justify-content:space-between;
+    border:1px solid #D7E5E3;border-radius:10px;padding:10px 12px;margin-top:8px;background:#FBFEFD;
+  }
+  .msg .txt{flex:1;cursor:pointer;word-break:break-word}
+  .msg .txt:hover{color:#0B6E6E}
+  .msg .go{
+    background:var(--wa);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;
+  }
+  .msg .del{background:none;border:none;color:#a33;cursor:pointer;font-size:1.1rem}
+  .sec-title{margin-top:16px;font-weight:700;color:var(--muted);font-size:.9rem}
+  .empty{color:var(--muted);font-size:.9rem;margin-top:8px}
+
+  #toast{
+    position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:opacity .25s;font-size:.9rem;max-width:90vw;text-align:center;
+  }
+  #toast.show{opacity:1}
+  footer{color:#DFF3F0;text-align:center;font-size:.8rem;padding-top:22px;padding-bottom:30px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>What<span>Pro</span> 💌</h1>
+    <div class="gold-line"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="tabs" id="cats" aria-label="Categorías"></nav>
+  <nav class="tabs subtabs" id="groups" aria-label="Grupos"></nav>
+
+  <section class="panel">
+    <h2>✍️ Tu mensaje</h2>
+    <textarea id="composer" placeholder="Toca un mensaje de la lista o escribe el tuyo…"></textarea>
+    <div class="row">
+      <input id="phone" type="tel" inputmode="numeric" placeholder="Número con código de país (opcional) · ej. 34600111222">
+    </div>
+    <div class="row">
+      <button class="btn btn-wa" id="sendMain">Abrir WhatsApp con este mensaje ➤</button>
+      <button class="btn btn-gold" id="saveCustom">＋ Guardar como mío</button>
+      <button class="btn btn-line" id="copyBtn">Copiar</button>
+    </div>
+    <p class="hint" id="hint"></p>
+  </section>
+
+  <section class="panel" id="list"></section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+/* ---------- DATOS ---------- */
+const EMO = '🍀🍀🍀💵💵💵🥰🥰🥰';
+
+const DATA = {
+  mujer:{ name:'Coco', icon:'💖', groups:{
+    'Buenos días':[
+      'Buenos días Caracolita ' + EMO,
+      EMO + ' Cocosita preciosi tqmmm bendiciones buenos días besitos tqmmmm',
+      'Buenas días Amorcito linda preciosi tqmmm bendiciones besitos ' + EMO,
+      'Buenas días Caracolin preciosi Fukumi tqmmm Amén besitos ' + EMO,
+      'Cocosita buenos días ' + EMO,
+      EMO + ' Caracolita linda buen día Amén tqmmm preciosi bendiciones',
+      EMO + ' Tqmmmm Amén buen día bendiciones Fukumi Cocosita preciosa',
+      'Amén Fukumi Caracolin bendiciones buenas días besitos ' + EMO,
+      'Buenas días Amorcito linda Amén preciosi Fukumi ' + EMO,
+      EMO + ' Cocosita preciosa buenas días bendiciones tqmmm',
+      EMO + ' Buenas días Fukumi tqmmmm Amén Caracolita'
+    ],
+    'Buenas noches':[
+      'Buenas noches Caracolita ' + EMO,
+      EMO + ' Cocosita preciosi tqmmm bendiciones buenas noches besitos tqmmmm',
+      'Buenas noches Amorcito linda preciosi tqmmm bendiciones besitos ' + EMO,
+      'Buenas noches Caracolin preciosi Fukumi tqmmm Amén besitos ' + EMO,
+      'Cocosita buenas noches ' + EMO,
+      'Tqmmmm besitos Fukumi preciosi buenas noches Amorcito linda ' + EMO,
+      EMO + ' Amén buenas noches Fukumi tqmmm Cocosita bendiciones',
+      'Buenas noches preciosi Fukumi Cocosita besitos tqmmmm ' + EMO,
+      EMO + ' Tqmmmm buenas noches Caracolin tqmmm besitos',
+      EMO + ' Tqmmmm Cocosita Fukumi buenas noches',
+      EMO + ' Cocosita preciosa bendiciones buenas noches Fukumi Amén tqmmm'
+    ],
+    'Responder':[
+      'Tqmmm Cocosita preciosi 🥰🍀🍀🍀',
+      '🍀🍀🍀🍀🍀🍀🍀🍀🍀',
+      '😍😍😍😍😍😍😍😍😍',
+      '🥰🥰🥰🥰🥰🥰🥰🥰🥰🥰',
+      'Recibido ✅ gracias',
+      'Gracias 🙏',
+      '👍',
+      '🍀🍀🍀🍀🍀🍀🍀🍀',
+      'Gracias 🙏',
+      '10 minutos ⏰',
+      'Yo también 😍❤️😍',
+      'Tqmmmm 🥰🍀',
+      'Besitos 😘😘😘',
+      'Amén 🙏',
+      'Abrazo 🤗',
+      'Te llamo 😘'
+    ]
+  }},
+  madre:{ name:'Mamaita', icon:'👩‍👧', groups:{
+    'Mensajes':[
+      '🥰🥰🥰🥰🥰🥰🥰🥰🥰🥰',
+      '🍀🍀🍀🍀🍀🍀🍀🍀',
+      'Buenas noches Mamaita 🍀💵🥰💵🍀',
+      'tqmmmmmmm',
+      'Te llamo ?',
+      '😍😍😍😍😍😍😍😍😍'
+    ]
+  }},
+  familia:{ name:'Familia', icon:'👨‍👩‍👧‍👦', groups:{
+    'Mensajes':[
+      '🍀🍀🍀🍀🍀🍀🍀🍀🍀',
+      '😍😍😍😍😍😍😍😍😍',
+      '🥰🥰🥰🥰🥰🥰🥰🥰🥰🥰'
+    ]
+  }},
+  amigos:{ name:'Otros', icon:'🤝', groups:{
+    'Mensajes':[
+      'Recibido ✅ gracias',
+      'Gracias 🙏',
+      '👍'
+    ]
+  }},
+  responder:{ name:'Responder', icon:'↩️', groups:{
+    'Mensajes':[
+      '🍀🍀🍀🍀🍀🍀🍀🍀',
+      'Gracias 🙏',
+      '10 minutos ⏰',
+      'Yo también 😍❤️😍',
+      'Tqmmmm 🥰🍀',
+      'Besitos 😘😘😘',
+      'Amén 🙏',
+      'Abrazo 🤗',
+      'Te llamo 😘'
+    ]
+  }}
+};
+
+/* ---------- GENERADOR DE VARIACIONES (mujer) ---------- */
+const NICKS = ['Caracolita','Cocosita','Amorcito linda','Caracolin','Caracolita linda','Cocosita preciosa'];
+const COMMON = ['preciosi','Fukumi','tqmmm','tqmmmm','bendiciones','besitos','Amén'];
+const NIGHT_EXTRA = [];
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function shuffle(a){
+  a = a.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function gen(mode){
+  const greet = mode==='dia'
+    ? pick(['buenos días','buenas días','buen día'])
+    : 'buenas noches';
+  const pool = mode==='dia' ? COMMON : COMMON.concat(NIGHT_EXTRA);
+  const count = 2 + Math.floor(Math.random()*3);
+  const words = shuffle([greet, pick(NICKS)].concat(shuffle(pool).slice(0,count)));
+  let text = words.join(' ');
+  text = text.charAt(0).toUpperCase() + text.slice(1);
+  /* Los emojis siempre conservan su orden: 🍀🍀🍀💵💵💵🥰🥰🥰 */
+  return Math.random() < .5 ? EMO + ' ' + text : text + ' ' + EMO;
+}
+function genList(mode, n=6){
+  const set = new Set();
+  let guard = 0;
+  while(set.size<n && guard++<200) set.add(gen(mode));
+  return [...set];
+}
+
+/* ---------- ESTADO ---------- */
+const ORDER = ['madre','familia','mujer','amigos','responder'];
+let cat = 'madre';
+let group = 'Mensajes';
+let variations = { dia: genList('dia'), noche: genList('noche') };
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v===null? d : JSON.parse(v);}catch(e){return d;} },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const customKey = c => 'zapmimo_custom_' + c;
+const phoneKey = c => 'zapmimo_phone_' + c;
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+/* ---------- ENVÍO ---------- */
+function digits(s){ return (s||'').replace(/\D/g,''); }
+
+function sendWhatsApp(text){
+  text = (text||'').trim();
+  if(!text){ toast('Escribe o elige un mensaje primero'); return; }
+  const phone = digits($('phone').value);
+  const q = (phone ? 'phone=' + phone + '&' : '') + 'text=' + encodeURIComponent(text);
+
+  if(isMobile){
+    /* Abre directamente la app, sin pantalla intermedia */
+    window.location.href = 'whatsapp://send?' + q;
+    setTimeout(() => {
+      if(!document.hidden){
+        window.location.href = 'https://wa.me/' + (phone||'') + '?text=' + encodeURIComponent(text);
+      }
+    }, 1800);
+  } else {
+    /* Escritorio: directo a WhatsApp Web, sin preguntas previas */
+    window.open('https://web.whatsapp.com/send?' + q, 'zapmimo_whatsapp_web');
+  }
+  toast(phone ? 'Abriendo el chat… pulsa Enviar ➤' : 'Elige el contacto en WhatsApp y pulsa Enviar ➤');
+}
+
+/* ---------- INTERFAZ ---------- */
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function groupNames(){
+  const names = Object.keys(DATA[cat].groups);
+  names.push('Mis mensajes');
+  return names;
+}
+
+function renderTabs(){
+  const cats = $('cats'); cats.innerHTML = '';
+  ORDER.forEach(id=>{
+    const b = document.createElement('button');
+    b.className = 'tab' + (id===cat ? ' active':'');
+    b.textContent = DATA[id].icon + ' ' + DATA[id].name;
+    b.onclick = ()=>{ cat = id; group = groupNames()[0]; $('phone').value = store.get(phoneKey(cat), ''); render(); };
+    cats.appendChild(b);
+  });
+  const gr = $('groups'); gr.innerHTML = '';
+  groupNames().forEach(g=>{
+    const b = document.createElement('button');
+    b.className = 'tab' + (g===group ? ' active':'');
+    b.textContent = g;
+    b.onclick = ()=>{ group = g; render(); };
+    gr.appendChild(b);
+  });
+}
+
+function addMsg(container, text, deletable, idx){
+  const row = document.createElement('div'); row.className = 'msg';
+  const t = document.createElement('div'); t.className = 'txt'; t.textContent = text;
+  t.title = 'Toca para editar abajo';
+  t.onclick = ()=>{ $('composer').value = text; $('composer').focus(); window.scrollTo({top:0,behavior:'smooth'}); };
+  const go = document.createElement('button'); go.className = 'go'; go.textContent = 'Enviar ➤';
+  go.onclick = ()=> sendWhatsApp(text);
+  row.appendChild(t);
+  if(deletable){
+    const d = document.createElement('button'); d.className='del'; d.textContent='✕'; d.title='Borrar';
+    d.onclick = ()=>{
+      const list = store.get(customKey(cat), []); list.splice(idx,1); store.set(customKey(cat), list); render();
+    };
+    row.appendChild(d);
+  }
+  row.appendChild(go);
+  container.appendChild(row);
+}
+
+function renderList(){
+  const box = $('list'); box.innerHTML = '';
+  const h = document.createElement('h2'); h.textContent = DATA[cat].icon + ' ' + DATA[cat].name + ' · ' + group;
+  box.appendChild(h);
+
+  if(group === 'Mis mensajes'){
+    const list = store.get(customKey(cat), []);
+    if(!list.length){
+      const e = document.createElement('p'); e.className='empty';
+      e.textContent = 'Aún no tienes mensajes propios aquí. Escribe uno arriba y pulsa “Guardar como mío”.';
+      box.appendChild(e);
+    }
+    list.forEach((m,i)=> addMsg(box, m, true, i));
+    return;
+  }
+
+  DATA[cat].groups[group].forEach(m => addMsg(box, m, false));
+}
+
+function renderHint(){
+  $('hint').textContent = isMobile
+    ? 'En el móvil se abre directamente la app de WhatsApp. Sin número, eliges el contacto dentro de WhatsApp.'
+    : 'En el ordenador se abre directamente WhatsApp Web. Sin número, eliges el contacto allí. WhatsApp siempre pide pulsar Enviar tú mismo.';
+}
+
+function render(){ renderTabs(); renderList(); renderHint(); }
+
+/* ---------- EVENTOS ---------- */
+$('sendMain').onclick = ()=> sendWhatsApp($('composer').value);
+$('copyBtn').onclick = async ()=>{
+  const v = $('composer').value; if(!v){ toast('Nada que copiar'); return; }
+  try{ await navigator.clipboard.writeText(v); toast('Mensaje copiado ✅'); }catch(e){ toast('No se pudo copiar'); }
+};
+$('saveCustom').onclick = ()=>{
+  const v = $('composer').value.trim(); if(!v){ toast('Escribe un mensaje primero'); return; }
+  const list = store.get(customKey(cat), []); list.unshift(v); store.set(customKey(cat), list);
+  toast('Guardado en “Mis mensajes” ✅'); if(group==='Mis mensajes') renderList();
+};
+$('phone').addEventListener('input', ()=> store.set(phoneKey(cat), $('phone').value));
+
+$('phone').value = store.get(phoneKey(cat), '');
+render();
+</script>
+</body>
+</html>
