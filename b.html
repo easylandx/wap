@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Bible</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#161b33">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Karla:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#161b33;--deep:#0f1226;--gilt:#c9a24a;--vellum:#efe6d2;--mute:#9aa0bf;--dur:.2s;--fg:#efe6d2;--accent:#c9a24a;--line:#3a4170;--fs:clamp(1.2rem,1rem + .6vw,1.5rem);
+--serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;--sans:'Karla',system-ui,-apple-system,'Segoe UI',sans-serif;
+--st:max(14px,calc(env(safe-area-inset-top) + 8px));--sl:max(14px,calc(env(safe-area-inset-left) + 8px));--sr:max(14px,calc(env(safe-area-inset-right) + 8px));--sb:max(18px,calc(env(safe-area-inset-bottom) + 10px))}
+@media(prefers-reduced-motion:reduce){:root{--dur:0s}}
+:root[data-theme=light]{--ink:#eceff7;--deep:#fff;--fg:#161b33;--accent:#8a6a1c;--mute:#5b6180;--line:#b7bdd6}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overscroll-behavior:none}
+body{position:fixed;inset:0;background:#0b0d1c;color:var(--fg);font:16px/1.5 var(--sans);overflow:hidden}
+#stage{position:fixed;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+body.t #stage{touch-action:pan-y;background:var(--vellum)}
+#sheet{width:100%;height:100%;will-change:transform}
+#img{display:block;width:100%;height:100%;object-fit:contain;transform-origin:50% 50%;-webkit-user-drag:none;pointer-events:none}
+#text,#meas{width:100%;height:100%;overflow:hidden;background:var(--vellum);color:#2a2418;font-family:var(--serif);font-size:calc(var(--fs)*var(--k,1));line-height:1.65;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;
+padding-top:max(64px,calc(env(safe-area-inset-top) + 56px));padding-bottom:max(112px,calc(env(safe-area-inset-bottom) + 104px));
+padding-left:max(22px,calc((100% - 46rem)/2),calc(env(safe-area-inset-left) + 18px));padding-right:max(22px,calc((100% - 46rem)/2),calc(env(safe-area-inset-right) + 18px))}
+#meas{position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;z-index:-1}
+#text.v,#meas.v{font-size:calc(var(--fs)*.82*var(--k,1))}
+#text .hd,#meas .hd{display:block;font-weight:700;color:#8a6a1c;margin-bottom:.35em}
+#text span.hl{background:#c9a24a66;border-radius:3px}
+[hidden]{display:none!important}
+.fab{position:fixed;z-index:5;transition:opacity .25s}
+body.hide .fab{opacity:0;pointer-events:none}
+.fab,.dock button{color:#efe6d2;background:rgba(15,18,38,.82);border:1px solid var(--gilt);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.dock{background:none!important;border:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;left:50%;transform:translateX(-50%);bottom:var(--sb);display:flex;gap:10px;align-items:center}
+.dock button{width:54px;height:54px;border-radius:50%;font:500 1.9rem/1 var(--serif);cursor:pointer;padding:0}
+#play{width:74px;height:74px;background:var(--gilt);color:#1b1608;font-size:1.6rem}
+#auto{width:44px;height:44px;font-size:1.25rem}
+#auto[aria-pressed=true]{background:var(--gilt);color:#1b1608}
+#menuB{top:var(--st);right:var(--sr);width:48px;height:48px;border-radius:50%;font-size:1.4rem;cursor:pointer;padding:0}
+.chip{top:var(--st);left:var(--sl);padding:11px 14px;border-radius:24px;font:600 .9rem var(--sans)}
+#rib{cursor:pointer;display:flex;align-items:center;gap:8px}
+#ribI{width:92px;min-height:34px;padding:2px 8px;border-radius:8px;font-size:16px}
+#favB{width:44px!important;height:44px!important;font-size:1.25rem!important}
+#favp,#pas{position:fixed;z-index:8;left:0;right:0;bottom:0;max-height:75dvh;overflow:auto;background:var(--ink);color:var(--fg);border-top:1px solid var(--gilt);border-radius:18px 18px 0 0;box-shadow:0 -12px 40px #000a;padding-top:12px;padding-bottom:max(16px,calc(env(safe-area-inset-bottom) + 12px));padding-left:max(18px,calc(env(safe-area-inset-left) + 12px));padding-right:max(18px,calc(env(safe-area-inset-right) + 12px))}
+@media(min-width:700px){#favp,#pas{left:50%;right:auto;width:560px;transform:translateX(-50%)}}
+#favp b,#pas b{color:var(--accent)}#fvx,#pasx{min-width:44px;min-height:44px;background:none;border:0;color:var(--mute);font:600 1rem var(--sans);cursor:pointer}
+.fv,.sr{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:8px 12px;min-height:52px;font-size:.95rem;line-height:1.25}
+#sres{display:grid;gap:8px;margin-top:8px}#sres:empty{display:none}#sres p{margin:4px 2px;color:var(--mute);font-size:.9rem}
+.fv b,.sr b{color:var(--accent)}.fv span,.sr span{font-weight:500}.fv small{font-weight:400;color:var(--mute);margin-top:2px;font-size:.85rem}
+#toast{position:fixed;z-index:9;left:50%;transform:translateX(-50%);top:max(72px,calc(env(safe-area-inset-top) + 64px));width:max-content;max-width:min(92vw,520px);display:flex;gap:10px;align-items:center;background:rgba(15,18,38,.94);color:#efe6d2;border:1px solid var(--gilt);border-radius:12px;padding:10px 14px;font-size:.95rem}
+#scrim{position:fixed;inset:0;z-index:7;background:#0009}
+#panel{position:fixed;z-index:8;left:0;right:0;top:0;max-height:90dvh;overflow:auto;background:var(--ink);color:var(--fg);border-bottom:1px solid var(--gilt);border-radius:0 0 18px 18px;box-shadow:0 12px 40px #000a;
+padding-top:max(14px,calc(env(safe-area-inset-top) + 10px));padding-bottom:16px;padding-left:max(18px,calc(env(safe-area-inset-left) + 12px));padding-right:max(18px,calc(env(safe-area-inset-right) + 12px))}
+@media(min-width:700px){#panel{left:50%;right:auto;width:560px;transform:translateX(-50%)}}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.lang{display:flex;gap:4px}
+.lang button,#x{min-width:44px;min-height:44px;background:none;border:0;border-bottom:2px solid transparent;color:var(--mute);font:600 1rem var(--sans);cursor:pointer}
+.lang button[aria-pressed=true]{color:var(--fg);border-bottom-color:var(--gilt)}
+.grp{margin-bottom:14px}.grp>label,label{color:var(--mute);font-size:.9rem}
+label{display:flex;align-items:center;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 84px 84px;gap:8px;margin:6px 0 8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center}
+select,input{font:inherit;font-size:16px;color:var(--fg);background:var(--deep);border:1px solid var(--line);border-radius:10px;min-height:48px;padding:6px 10px;min-width:0;width:100%}
+#pg{width:76px}
+.btn{min-height:48px;width:100%;border:1px solid var(--line);border-radius:10px;background:var(--deep);color:var(--fg);font:600 1rem var(--sans);cursor:pointer}
+.btn.pri{background:var(--gilt);color:#1b1608;border-color:var(--gilt)}
+#retry{min-height:40px;background:none;border:1px solid var(--gilt);border-radius:8px;color:#efe6d2;font:600 .9rem var(--sans);padding:0 12px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gilt);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="stage"><div id="sheet"><img id="img" alt="" draggable="false"><div id="text" hidden></div></div></div>
+<div id="rib" class="fab chip" role="button" tabindex="0"><span id="ribT">1</span><input id="ribI" type="number" min="1" inputmode="numeric" hidden></div>
+<button id="menuB" class="fab">☰</button>
+<div class="fab dock"><button id="favB" aria-label="★">★</button><button id="prev">‹</button><button id="play"></button><button id="next">›</button><button id="auto" aria-pressed="false">⟳</button></div>
+<div id="toast" hidden><span id="msg" role="status"></span><button id="retry" hidden></button></div>
+<div id="scrim" hidden></div>
+<section id="panel" hidden>
+  <div class="ph"><div class="lang" role="group" aria-label="Language"><button data-l="en" aria-pressed="false">EN</button><button data-l="es" aria-pressed="false">ES</button><button id="theme"></button></div><button id="x">✕</button></div>
+  <div class="grp"><label id="sT"></label><input id="sq" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" style="margin-top:6px"><div id="sres"></div></div>
+  <div class="grp"><label id="gt"></label><div class="g3"><select id="bk"></select><select id="ch"></select><input id="vs" type="number" min="1" inputmode="numeric"></div><button id="go" class="btn pri"></button></div>
+  <div class="grp g2"><select id="kind"></select><select id="ed"></select></div>
+  <div class="grp g2"><label><span id="spl"></span><select id="rate"><option value="0.8">0.8×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>
+  <label><span id="pl"></span><input id="pg" type="number" min="1" inputmode="numeric"><span id="tot"></span></label></div>
+  <div class="grp g2"><button id="view" class="btn"></button><label><span id="dl"></span><select id="adel"><option value="5">5 s</option><option value="8">8 s</option><option value="10">10 s</option><option value="12">12 s</option><option value="20">20 s</option><option value="30">30 s</option></select></label></div>
+  <div class="grp"><label id="alT"></label><div class="g2" style="margin-top:6px"><button id="alm" class="btn">−</button><button id="alp" class="btn">+</button></div></div>
+  <div class="grp"><label id="fvT"></label><div class="g2" id="favL" style="margin-top:6px;align-items:stretch"></div></div>
+  <div class="grp"><button id="clr" class="btn"></button></div>
+  <small id="bv" style="display:block;text-align:center;color:var(--mute)"></small>
+</section>
+<section id="favp" hidden><div class="ph"><b id="fvT2"></b><button id="fvx">✕</button></div><div id="favL2" style="display:grid;gap:8px"></div></section>
+<section id="pas" hidden><div class="ph"><b id="pasT"></b><button id="pasx">✕</button></div><div id="pasB" style="font-family:var(--serif);font-size:1.2rem;line-height:1.6"></div><small id="pasS" style="display:block;margin-top:8px;color:var(--mute)"></small><div class="g2" style="margin-top:12px"><button id="pasR" class="btn"></button><button id="pasG" class="btn pri"></button></div></section>
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const T={
+en:{read:'Read aloud',stop:'Pause',prev:'Previous page',next:'Next page',text:'Text',scan:'Scan',load:'Finding Bibles on archive.org…',err:'Could not reach archive.org. Check your connection and try again.',retry:'Try again',speed:'Speed',page:'Page',ed:'Edition',blank:'This page has no readable text.',noimg:'This page image did not load.',notext:'The text of this book is not available.',none:'No open editions found here. Try another category.',kind:'Category',full:'Complete Bibles',easy:'Easy to read',theme:'Switch theme',rough:'The scanned text of this edition looks rough. Try another edition.',custom:'Other edition…',ask:'archive.org link or identifier',bad:'Could not open that item.'},
+es:{read:'Leer en voz alta',stop:'Pausa',prev:'Página anterior',next:'Página siguiente',text:'Texto',scan:'Escaneo',load:'Buscando Biblias en archive.org…',err:'No se pudo conectar con archive.org. Comprueba tu conexión e inténtalo de nuevo.',retry:'Reintentar',speed:'Velocidad',page:'Página',ed:'Edición',blank:'Esta página no tiene texto legible.',noimg:'No se cargó la imagen de esta página.',notext:'El texto de este libro no está disponible.',none:'No hay ediciones abiertas en esta categoría. Prueba con otra.',kind:'Categoría',full:'Biblias completas',easy:'Fácil de leer',theme:'Cambiar tema',rough:'El texto escaneado de esta edición tiene muchos errores. Prueba con otra edición.',custom:'Otra edición…',ask:'Enlace o identificador de archive.org',bad:'No se pudo abrir ese elemento.'}
+};
+const CLR={en:{b:'Clear cache and start over',ok:'Done ✓',err:'Could not clear the cache'},es:{b:'Borrar caché y empezar de nuevo',ok:'Listo ✓',err:'No se pudo borrar la caché'}};
+/* Source selection: the most downloaded complete, open (not borrow-only) Bibles on archive.org.
+   English favours King James / Authorized editions; Spanish favours Reina-Valera. */
+const Q={
+ en:{full:'title:(bible)',
+  easy:'title:(bible OR testament OR gospels OR psalms) AND title:("basic english" OR plain OR modern OR "twentieth century" OR simple OR easy OR today OR "world english" OR everyday OR paraphrase)'},
+ es:{full:'title:(biblia OR bible)',
+  easy:'title:(biblia OR testamento OR evangelios OR salmos) AND title:(sencill* OR popular OR moderna OR actual OR hoy OR claro OR facil OR fácil)'}
+};
+const LANGQ={en:'language:(eng OR English)',es:'language:(spa OR Spanish)'};
+const BASE=/commentar|dictionar|concordanc|study|lexicon|harmony|sermon|handbook|atlas|encyclop|hymn|comentario|diccionario|concordancia/i;
+const PART=/stor(y|ies)|children|infantil|guide|history|apocryph|selections|verses|psalter|notes|nuevo testamento|new testament|gospel/i;
+const TERM=/bible|biblia|testament|gospel|evangel|psalm|salmo/i;
+const FULL={en:/king james|authori[sz]ed|holy bible/i,es:/reina|valera|santa biblia|sagrada biblia|biblia/i};
+const EASY=/basic english|plain|modern|twentieth|simple|easy|today|world english|everyday|paraphrase|sencill|popular|moderna|actual|hoy|claro|f[aá]cil/i;
+const K=['full','easy'];
+/* Edition opened the first time (after that the last one used is reopened, on the page where the reader left off) */
+const KJVS=[{id:'kjv-bible',title:'The Holy Bible, King James Version (2024 scan)',year:2024},{id:'the-holy-bible-kjv',title:'The Holy Bible, King James Version (1769 text)',year:1769}];
+const PREF={es:{full:{id:'tx-rv'},easy:{id:'tx-bes'}},en:{full:{id:'tx-bsb'},easy:{id:'tx-bbe'}}};
+const syn=window.speechSynthesis;
+const img=$('#img'),sheet=$('#sheet'),stage=$('#stage'),txt=$('#text'),pg=$('#pg');
+let lang=ls.get('bible-lang')||((navigator.language||'en').slice(0,2)==='es'?'es':'en');
+let theme=ls.get('bible-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'),cur=-1,resume=null,kind=['easy'].includes(ls.get('bible-kind'))?ls.get('bible-kind'):'full';
+let eds=[],ed=null,page=0,textMode=false,reading=false,token=0,wake=null;
+
+function setTheme(){document.documentElement.dataset.theme=theme;$('#theme').textContent=theme==='light'?'☾':'☀';$('#theme').setAttribute('aria-label',T[lang].theme)}
+function kindUI(){const e=$('#kind');if(e.dataset.l!==lang){e.dataset.l=lang;e.setAttribute('aria-label',T[lang].kind);e.innerHTML=K.map(k=>`<option value="${k}" title="${T[lang].tip?T[lang].tip['k_'+k]:''}">${T[lang][k]}</option>`).join('')}e.value=kind}
+function msg(s,retry){$('#msg').textContent=s||'';$('#retry').hidden=!retry;$('#toast').hidden=!s}
+function ui(){
+  const t=T[lang];
+  document.documentElement.lang=lang;setTheme();kindUI();
+  document.querySelectorAll('.lang button[data-l]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===lang));
+  $('#ed').setAttribute('aria-label',t.ed);
+  $('#prev').setAttribute('aria-label',t.prev);$('#next').setAttribute('aria-label',t.next);
+  $('#spl').textContent=t.speed;$('#pl').textContent=t.page;$('#retry').textContent=t.retry;
+  $('#play').textContent=reading?'❚❚':'▶';$('#play').setAttribute('aria-label',reading?t.stop:t.read);ui2();
+  $('#view').textContent=textMode?t.scan:t.text;
+  $('#play').hidden=!syn;
+}
+const score=d=>{const t=d.title||'',n=d.n||0,y=d.year||0;let s=0;
+  if(BASE.test(t)||!TERM.test(t))return -9;
+  if(kind==='full'){
+    if(FULL[lang].test(t))s+=4;
+    if(/reina|valera|king james|authori[sz]ed/i.test(t))s+=3;
+    if(PART.test(t))s-=8;
+    if(n>=900&&n<=3000)s+=4;else if(n<400)s-=5;
+    if(y&&y<=1923)s+=1;
+  }else{
+    if(EASY.test(t))s+=5;
+    if(n>=30)s+=1;
+  }
+  return s};
+
+async function loadEditions(){
+  stopRead();ed=null;eds=[];$('#ed').innerHTML='';
+  msg(T[lang].load);
+  const q=Q[lang][kind]+' AND mediatype:texts AND '+LANGQ[lang]+' AND NOT access-restricted-item:true';
+  const url='https://archive.org/advancedsearch.php?q='+encodeURIComponent(q)+
+    '&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=year&fl%5B%5D=imagecount&sort%5B%5D=downloads+desc&rows=100&output=json';
+  try{
+    const r=await fetch(url);if(!r.ok)throw 0;
+    const seen=new Set();
+    const rawAll=(await r.json()).response.docs
+      .filter(d=>+d.imagecount>=(kind==='full'?100:20)&&d.title)
+      .map((d,i)=>{const o={id:d.identifier,title:[].concat(d.title)[0],year:parseInt([].concat(d.year||[])[0])||0,n:+d.imagecount};o.s=score(o)-i*.02;return o});
+    let docs=rawAll
+      .filter(o=>o.s>=3)
+      .filter(o=>{const k=o.title.toLowerCase().replace(/[^a-z0-9ñáéíóú]+/g,' ').slice(0,40)+o.year;if(seen.has(k))return false;seen.add(k);return true})
+      .sort((a,b)=>b.s-a.s).slice(0,15);
+    const best=docs[0];
+    /* The pinned default edition must always be offered, even when its score or download rank leaves it out of the top 15 */
+    {const p0=PREF[lang]&&PREF[lang][kind];
+     if(p0&&p0.t){const h=rawAll.find(d=>d.year===p0.y&&p0.re.test(d.title)&&p0.t.test(d.title)&&d.n>=p0.n[0]&&d.n<=p0.n[1]);if(h&&!docs.some(x=>x.id===h.id))docs.push(h)}}
+    try{const mt=JSON.parse(ls.get('bible-meta-'+lang+kind)||'null');if(mt&&mt.id&&mt.n&&!/^tx-/.test(mt.id)&&!docs.some(d=>d.id===mt.id))docs.push({id:mt.id,title:mt.title,year:mt.year||0,n:mt.n,s:0})}catch(e){}
+    /* Extra King James scans always offered in English (complete Bibles on archive.org) */
+    await Promise.all((lang==='en'&&kind==='full'?KJVS:[]).filter(a=>!docs.some(d=>d.id===a.id)).map(async a=>{
+      let n=0;
+      try{const m=(await(await fetch('https://archive.org/metadata/'+a.id)).json()).metadata||{};n=+m.imagecount||+m.pages||0}catch(e){}
+      if(!n){try{const pj=await(await fetch(`https://archive.org/download/${a.id}/${a.id}_page_numbers.json`)).json();n=(pj.pages||[]).length}catch(e){}}
+      if(n)docs.push({id:a.id,title:a.title,year:a.year,n,s:0})}));
+    docs.sort((a,b)=>(b.year||-1)-(a.year||-1)||b.s-a.s);
+    { const vs=vlist();docs=vs.concat(docs.filter(d=>!vs.some(v=>v.id===d.id))) }
+    if(!docs.length){msg(T[lang].none,true);return}
+    eds=docs;
+    $('#ed').innerHTML=docs.map(edOpt).join('')+`<option value="x">${T[lang].custom}</option>`;
+    const saved=ls.get('bible-user-'+lang+kind)==='1'?ls.get('bible-ed-'+lang+kind):null;let k=docs.findIndex(d=>d.id===saved);
+    if(k<0){const pf=PREF[lang]&&PREF[lang][kind];k=pf&&pf.id?docs.findIndex(d=>d.id===pf.id):-1;if(k<0&&pf)k=docs.findIndex(d=>!d.v&&d.year===pf.y&&pf.re.test(d.title)&&(!pf.t||pf.t.test(d.title))&&d.n>=pf.n[0]&&d.n<=pf.n[1]);
+      if(k<0&&pf)k=docs.findIndex(d=>!d.v&&d.year===pf.y&&pf.re.test(d.title)&&d.n>=pf.n[0]&&d.n<=pf.n[1]);
+      /* The pinned edition is not part of this category's results (e.g. "Fácil de leer"): look it up in the complete-Bibles search and add it */
+      if(k<0&&pf&&pf.t){try{
+        const u2='https://archive.org/advancedsearch.php?q='+encodeURIComponent(Q[lang].full+' AND year:'+pf.y+' AND mediatype:texts AND '+LANGQ[lang]+' AND NOT access-restricted-item:true')+'&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=year&fl%5B%5D=imagecount&sort%5B%5D=downloads+desc&rows=100&output=json';
+        const hit=(await(await fetch(u2)).json()).response.docs.map(d=>({id:d.identifier,title:[].concat(d.title||'')[0],year:parseInt([].concat(d.year||[])[0])||0,n:+d.imagecount,s:0}))
+          .find(d=>d.year===pf.y&&pf.re.test(d.title)&&pf.t.test(d.title)&&d.n>=pf.n[0]&&d.n<=pf.n[1]);
+        if(hit){docs.push(hit);eds=docs;$('#ed').innerHTML=docs.map(edOpt).join('')+`<option value="x">${T[lang].custom}</option>`;k=docs.indexOf(hit)}}catch(e){}}}
+    if(k<0)k=docs.indexOf(best);
+    if(k<0)k=0;
+    $('#ed').value=k;open(docs[k]);msg('');
+  }catch(e){
+    const vs=vlist();
+    if(eds.length>vs.length&&ed){msg(T[lang].err,true);return}
+    if(vs.length){eds=vs;$('#ed').innerHTML=vs.map(edOpt).join('')+`<option value="x">${T[lang].custom}</option>`;const sv=ls.get('bible-user-'+lang+kind)==='1'?ls.get('bible-ed-'+lang+kind):null,k=Math.max(0,vs.findIndex(d=>d.id===sv));$('#ed').value=k;open(vs[k]);msg('')}
+    else msg(T[lang].err,true)}
+}
+async function custom(){
+  const v=prompt(T[lang].ask),back=()=>{$('#ed').value=eds.indexOf(ed)};
+  if(!v)return back();
+  const id=(v.match(/archive\.org\/(?:details|download|stream)\/([^/?#\s]+)/)||[0,v.trim()])[1];
+  try{
+    const m=(await (await fetch('https://archive.org/metadata/'+encodeURIComponent(id))).json()).metadata,n=+m.imagecount;
+    if(!n)throw 0;
+    const e={id,title:[].concat(m.title)[0],year:m.year,n},sel=$('#ed');
+    ls.set('bible-user-'+lang+kind,'1');eds.push(e);sel.add(new Option(e.title.slice(0,70)+', '+n+' p.',eds.length-1),sel.options[sel.options.length-1]);
+    sel.value=eds.length-1;open(e);msg('');
+  }catch(x){msg(T[lang].bad);back()}
+}
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function open(e){
+  stopRead();ed=e;e.off=+ls.get('bible-off-'+e.id)||0;ls.set('bible-ed-'+lang+kind,e.id);ls.set('bible-meta-'+lang+kind,JSON.stringify({id:e.id,title:e.title,year:e.year,n:e.n}));
+  pg.max=e.n;$('#tot').textContent='/ '+e.n.toLocaleString(lang==='es'?'es-ES':'en-GB');
+  $('#view').hidden=!!e.v;
+  if(e.v&&$('#msg').textContent===T[lang].noimg)msg('');
+  if(!e.v&&forcedT&&textMode){forcedT=0;setView()}
+  show(+ls.get('bible-pos-'+e.id)||0);
+  if(e.v&&!textMode){forcedT=1;setView()}
+}
+let forcedT=0,sub=0,subN=1,fsT=0,rzT=0;
+function ribLabel(){$('#ribT').textContent=ed.v?chLbl(ed.l,page)+(subN>1?' · '+(sub+1)+'/'+subN:''):(page+1)+' / '+ed.n}
+const src=(n,w)=>`https://archive.org/download/${ed.id}/page/n${n}${w?'_w1000':''}.jpg`;
+function show(i,s){
+  if(!ed)return;
+  if(reading){token++;if(syn)syn.cancel()}resume=null;
+  page=Math.max(0,Math.min(ed.n-1,i));
+  cur=-1;
+  if(!ed.v){img.dataset.f='';img.alt=ed.title+', '+(page+1);img.src=src(page,1);
+    for(const k of [page+1,page+2,page+3])if(k<ed.n)new Image().src=src(k,1)}
+  sub=(ed.v&&s!==undefined)?s:0;subN=1;ribLabel();$('#ribI').max=ed.n;pg.value=page+1;
+  ls.set('bible-pos-'+ed.id,page);resetZoom();armAuto();
+  if(ed.v&&page+1<ed.n){const e1=ed,[b1,c1]=bcOf(page+1);setTimeout(()=>{if(ed===e1)chapterText(e1.l,b1,c1,e1.tw).catch(()=>{})},900)}
+  if(textMode)renderText();
+  if(reading)read();
+}
+img.onerror=()=>{if(ed&&ed.v)return;const f=+img.dataset.f||0;img.dataset.f=f+1;
+  if(f===0)img.src=src(page,0);
+  else if(f===1)img.src=`https://iiif.archive.org/image/iiif/2/${ed.id}%24${page}/full/!1000,1400/0/default.jpg`;
+  else msg(T[lang].noimg)};
+img.onload=()=>{if($('#msg').textContent===T[lang].noimg)msg('')};
+
+/* OCR text: archive.org keeps the full text with pages split by form feeds */
+const JUNK=/https?:|www\.|archive\.org|\.com\b|\.org\b|@|digitized|google|microsoft|generated|©|copyright|all rights|library of|university|biblioteca|digitalizado/i;
+const HEAD=s=>s.length<50&&(!/[a-zà-ÿ]{3}/.test(s)||/^\d{1,4}\s*[A-ZÁÉÍÓÚÑ ,.]+$/.test(s)||/^(?:[A-ZÁÉÍÓÚÑ][A-Za-zÀ-ÿ.,']*\s){1,4}\d{1,4}\.?$/.test(s)||/\b(chap|cap[ií]tulo|cap|p[aá]g|page)\b\.?\s*[\divxlc]+/i.test(s));
+function clean(t){
+  const L=(t||'').split(/\r?\n/).map(s=>s.trim()).filter(s=>(s.match(/[A-Za-zÀ-ÿ]/g)||[]).length>=3&&!JUNK.test(s));
+  for(let k=0;k<3;k++){if(L.length>2&&HEAD(L[0]))L.shift();if(L.length>2&&HEAD(L[L.length-1]))L.pop()}
+  return L.join(' ').replace(/(\w)-\s+(?=[a-zà-ÿ])/g,'$1').replace(/(^|\s)\d{1,3}(?=\s|$)/g,' ').replace(/(^|\s)\d{1,3}(?=[A-ZÁÉÍÓÚÑ“"'‘])/g,' ').replace(/[|_~*^•¶†‡§]/g,' ').replace(/\s+/g,' ').trim();
+}
+/* What is spoken has no punctuation at all; each mark becomes a pause instead */
+const sayText=(s,sc)=>(sc?s.replace(/\d+/g,' '):s).normalize('NFC').replace(/[\u00B4`\u02CA\u02CB\u00A8\u02C6\u02DC\u0300-\u036F\u2032\u2033\u00AD\u200B-\u200F]/g,'').replace(/[\u2018\u2019]/g,"'").replace(/["“”«»¿¡()\[\]{}<>*_~^|\\\/=+#@%&$§¶†‡•—–]/g,' ').replace(/(^|\s)'+|'+(?=\s|$)/g,' ').replace(/(\w)-(?=\w)/g,'$1 ').replace(/[.,;:!?…]+/g,' ').replace(/\s+/g,' ').trim();
+const PAUSE={',':160,';':320,':':320,'.':520,'!':520,'?':520};
+function chunkify(t,sc){
+  const out=[];
+  for(const m of t.replace(/\s*[—–]+\s*/g,', ').match(/[^.,;:!?]+(?:[.,;:!?]+|$)/g)||[]){
+    const show=m.trim();if(!show)continue;
+    const mark=(show.match(/([.,;:!?])\W*$/)||[])[1],parts=[];let b='';
+    for(const w of show.split(/\s+/)){if(b&&(b+' '+w).length>150){parts.push(b);b=w}else b=b?b+' '+w:w}
+    parts.push(b);
+    parts.forEach((x,i)=>out.push({show:x,say:sayText(x,sc),pause:i===parts.length-1?(PAUSE[mark]||0):0}));
+  }
+  return out;
+}
+async function chunksAll(i){
+  if(ed.v){
+    const e1=ed,[b,c]=bcOf(i),o=await chapterText(e1.l,b,c,e1.tw),nm=BK[e1.l][b].split('|')[0],
+      hd=`${nm}, ${e1.l==='es'?'capítulo':'chapter'} ${c}`;
+    return[{show:nm+' '+c,say:sayText(hd),pause:520,h:1}].concat(chunkify(o.v.map(x=>x.t).join(' ')));
+  }
+  const t=await pageText(i);return t.length<30?[]:chunkify(t,true)}
+/* Text view: the whole page must fit on one screen. Scanned pages shrink their type to fit; chapters of the text
+   editions are longer than a page, so they are split into screens that each fit (swipe to move between them). */
+const meas=document.createElement('div');meas.id='meas';document.body.appendChild(meas);
+const SCR=new Map();
+const spanOf=x=>{const e=document.createElement('span');e.textContent=x.show+' ';if(x.h)e.className='hd';return e};
+function screens(i,c){
+  meas.classList.toggle('v',!!ed.v);
+  const cs=getComputedStyle(meas),key=ed.id+'|'+i+'|'+meas.clientWidth+'x'+meas.clientHeight+'|'+cs.fontSize;
+  if(SCR.has(key))return SCR.get(key);
+  meas.replaceChildren(...c.map(spanOf));
+  const H=meas.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom),out=[];let g=[],top=null;
+  [...meas.children].forEach((e,k)=>{
+    const r=e.getClientRects();if(!r.length){g.push(c[k]);return}
+    const rt=r[0].top,rb=r[r.length-1].bottom;if(top===null)top=rt;
+    if(g.length&&rb-top>H-1){out.push(g);g=[];top=rt}
+    g.push(c[k])});
+  if(g.length)out.push(g);
+  meas.replaceChildren();
+  if(SCR.size>300)SCR.clear();SCR.set(key,out);return out;
+}
+async function chunks(i){
+  const c=await chunksAll(i);
+  if(ed.v&&i===page&&c.length){const g=screens(i,c);return g[sub<0?g.length-1:Math.min(sub,g.length-1)]||[]}
+  return c;
+}
+function fitText(){
+  txt.style.fontSize='';txt.style.overflowY='';
+  if(txt.scrollHeight<=txt.clientHeight+1)return;
+  let lo=8,hi=parseFloat(getComputedStyle(txt).fontSize),b=lo;
+  for(let k=0;k<10;k++){const m=(lo+hi)/2;txt.style.fontSize=m+'px';if(txt.scrollHeight<=txt.clientHeight+1){b=m;lo=m}else hi=m}
+  txt.style.fontSize=b+'px';
+  if(txt.scrollHeight>txt.clientHeight+1)txt.style.overflowY='auto';
+}
+function warn(){if(ed.q<.8&&!ed.w){ed.w=1;msg(T[lang].rough)}if(ed.ap&&!ed.apw){ed.apw=1;msg(T[lang].apx);setTimeout(()=>msg(''),8000)}}
+function hl(i){
+  if(!textMode)return;
+  txt.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
+  const e=txt.children[i];if(e){e.classList.add('hl');e.scrollIntoView({block:'nearest'})}
+}
+function loadText(){
+  const E0=ed;if(!ed.tp)ed.tp=fetch(`https://archive.org/download/${ed.id}/${ed.id}_djvu.txt`,AbortSignal.timeout?{signal:AbortSignal.timeout(90000)}:{})
+    .then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{const w=t.slice(0,60000).split(/\s+/).filter(Boolean);ed.q=w.filter(x=>/^[A-Za-zÀ-ÿ'’-]+[.,;:!?]*$/.test(x)||/^\d{1,3}$/.test(x)).length/(w.length||1);let P=t.split('\f');if(P.length<E0.n*.5){E0.ap=1;const N=t.length;P=[];let a0=0;for(let i=1;i<=E0.n;i++){let b=i<E0.n?t.indexOf('\n',Math.round(i*N/E0.n)):N;if(b<0)b=N;P.push(t.slice(a0,b));a0=b}}return P})
+    .catch(e=>{ed.tp=null;throw e});
+  return ed.tp;
+}
+async function pageText(i){
+  const a=await loadText();return clean(a[mi(a,i)]);
+}
+async function renderText(){
+  const my=page,E=ed;txt.textContent='…';txt.classList.toggle('v',!!ed.v);
+  try{
+    let c=await chunksAll(my);if(my!==page||E!==ed)return;
+    if(ed.v&&c.length){const g=screens(my,c);sub=sub<0?g.length-1:Math.min(sub,g.length-1);subN=g.length;c=g[sub];ribLabel()}
+    txt.replaceChildren(...(c.length?c.map(spanOf):[T[lang].blank]));
+    txt.scrollTop=0;fitText();warn();hl(cur);
+  }catch(e){if(my===page)txt.textContent=T[lang].notext}
+}
+function setView(){
+  textMode=!textMode;img.hidden=textMode;txt.hidden=!textMode;document.body.classList.toggle('t',textMode);resetZoom();
+  stage.style.cursor='';ui();if(textMode)renderText();
+}
+
+/* Read aloud */
+function voice(){
+  const vs=syn.getVoices(),pref=lang==='es'?['es-ES','es']:['en-GB','en-US','en'];
+  for(const p of pref){const v=vs.find(v=>v.lang.replace('_','-').startsWith(p));if(v)return v}
+  return null;
+}
+async function read(from=0){
+  const my=++token;syn.cancel();await new Promise(r=>setTimeout(r,100));if(my!==token)return;
+  let c;try{c=await chunks(page)}catch(e){if(my===token){stopRead();msg(T[lang].notext)}return}
+  if(my!==token)return;warn();
+  if(!c.length){pageDone();return}
+  let i=from;
+  const next=()=>{
+    if(my!==token)return;
+    if(i>=c.length){pageDone();return}
+    const k=c[i++];cur=i-1;hl(cur);
+    if(!k.say){next();return}
+    const u=new SpeechSynthesisUtterance(k.say);
+    u.lang=lang==='es'?'es-ES':'en-GB';const v=voice();if(v)u.voice=v;
+    u.rate=+$('#rate').value;
+    u.onend=()=>{if(my!==token)return;const d=k.pause/u.rate;d?setTimeout(next,d):next()};
+    u.onerror=e=>{if(e.error!=='interrupted'&&e.error!=='canceled'&&my===token)stopRead()};
+    syn.speak(u);
+  };
+  next();
+}
+async function startRead(){
+  reading=true;clearTimeout(autoT);ui();
+  try{wake=await navigator.wakeLock.request('screen')}catch(e){}
+  read(resume&&resume.e===ed.id&&resume.p===page?resume.i:(textMode?visIdx():0));
+}
+function toggle(){if(!reading&&syn){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;syn.speak(u)}catch(e){}}if(reading){resume={e:ed.id,p:page,i:Math.max(0,cur)};stopRead()}else startRead()}
+function stopRead(){
+  reading=false;token++;if(syn)syn.cancel();
+  try{wake&&wake.release()}catch(e){}wake=null;ui();
+}
+
+
+Object.assign(T.en,{pasGo:'Open in the scanned page',pasErr:'Could not load the text. Check your connection, or open the scanned page.',srch:'Search by words',sph:'e.g. anxiety, love, hope, forgiveness',nores:'No passages found for those words.',fav:'Most beautiful passages',align:'Align text (see Text view)',apx:'This edition has no page breaks in its text, so the spoken page is approximate. Fix it with Align text in the menu.',menu:'Menu',goto:'Go to book, chapter, verse',verse:'Verse',go:'Go',auto:'Auto-turn pages',delay:'If silent',close:'Close',idx:'Indexing this edition…',appr:'Position estimated for this edition.',nogo:'This edition has no text to navigate.'});
+Object.assign(T.es,{pasGo:'Abrir en la página escaneada',pasErr:'No se pudo cargar el texto. Revisa tu conexión o abre la página escaneada.',srch:'Buscar por palabras',sph:'p. ej. ansiedad, amor, esperanza, perdón',nores:'No se encontraron pasajes con esas palabras.',fav:'Pasajes destacados',align:'Alinear texto (ver vista Texto)',apx:'Esta edición no marca las páginas en su texto, así que la página leída es aproximada. Corrígela con Alinear texto en el menú.',menu:'Menú',goto:'Ir a libro, capítulo, versículo',verse:'Versículo',go:'Ir',auto:'Pasar página automáticamente',delay:'Si no hay voz',close:'Cerrar',idx:'Indexando esta edición…',appr:'Posición estimada en esta edición.',nogo:'Esta edición no tiene texto para navegar.'});
+const BK={en:'Genesis,Exodus,Leviticus,Numbers,Deuteronomy,Joshua,Judges,Ruth,1 Samuel,2 Samuel,1 Kings,2 Kings,1 Chronicles,2 Chronicles,Ezra,Nehemiah,Esther,Job,Psalms|Psalm,Proverbs,Ecclesiastes,Song of Solomon|Song of Songs|Canticles,Isaiah,Jeremiah,Lamentations,Ezekiel,Daniel,Hosea,Joel,Amos,Obadiah,Jonah,Micah,Nahum,Habakkuk,Zephaniah,Haggai,Zechariah,Malachi,Matthew,Mark,Luke,John,Acts,Romans,1 Corinthians,2 Corinthians,Galatians,Ephesians,Philippians,Colossians,1 Thessalonians,2 Thessalonians,1 Timothy,2 Timothy,Titus,Philemon,Hebrews,James,1 Peter,2 Peter,1 John,2 John,3 John,Jude,Revelation|Apocalypse'.split(','),
+es:'Génesis,Éxodo,Levítico,Números,Deuteronomio,Josué,Jueces,Rut,1 Samuel,2 Samuel,1 Reyes,2 Reyes,1 Crónicas,2 Crónicas,Esdras,Nehemías,Ester,Job,Salmos|Salterio,Proverbios,Eclesiastés,Cantares|Cantar de los Cantares,Isaías,Jeremías,Lamentaciones,Ezequiel,Daniel,Oseas,Joel,Amós,Abdías,Jonás,Miqueas,Nahúm,Habacuc,Sofonías,Hageo,Zacarías,Malaquías,Mateo,Marcos,Lucas,Juan,Hechos,Romanos,1 Corintios,2 Corintios,Gálatas,Efesios,Filipenses,Colosenses,1 Tesalonicenses,2 Tesalonicenses,1 Timoteo,2 Timoteo,Tito,Filemón,Hebreos,Santiago,1 Pedro,2 Pedro,1 Juan,2 Juan,3 Juan,Judas,Apocalipsis'.split(',')};
+const NCH='50,40,27,36,34,24,21,4,31,24,22,25,29,36,10,13,10,42,150,31,12,8,66,52,5,48,12,14,3,9,1,4,7,3,3,3,2,14,4,28,16,24,21,28,16,16,13,6,6,4,4,5,3,6,4,3,1,13,5,5,3,5,1,1,1,22'.split(',').map(Number);
+const ORD={1:/\b(1|I|1ST|FIRST|PRIMER|PRIMERO|PRIMERA)\b/,2:/\b(2|II|2ND|SECOND|SEGUNDO|SEGUNDA)\b/,3:/\b(3|III|3RD|THIRD|TERCER|TERCERO)\b/};
+const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+const rom=n=>{let r='';for(const[v,t]of[[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']])while(n>=v){r+=t;n-=v}return r};
+const mi=(a,i)=>{const k=Math.abs(a.length-ed.n)>Math.max(3,ed.n*.03)?Math.round(i*(a.length-1)/Math.max(1,ed.n-1)):i;return Math.max(0,Math.min(a.length-1,k+(ed.off||0)))};
+let auto=ls.get('bible-auto')==='1',adel=+ls.get('bible-adel')||10,autoT=null,busy=false,fs=1;
+const panel=$('#panel'),menuOpen=()=>!panel.hidden||!$('#favp').hidden;
+function openMenu(o){if(o)pasHide();panel.hidden=!o;$('#scrim').hidden=!o;if(o)$('#favp').hidden=true;if(!o)armAuto();else if(ed)buildIdx().catch(()=>{})}
+const FAV=[
+{b:20,c:3,v:1,en:['Ecclesiastes 3:1-8','A time for everything','A poem that accepts every season of life: weeping and laughing each have their place.'],es:['Eclesiastés 3:1-8','Todo tiene su tiempo','Un poema filosófico que acepta todas las etapas de la vida: tanto el llorar como el reír tienen su lugar.']},
+{b:18,c:23,v:1,en:['Psalm 23','The Lord is my shepherd','A classic song of trust, comfort and refuge, even in the darkest valley.'],es:['Salmo 23','El Señor es mi pastor','Un canto clásico de confianza, consuelo y refugio, incluso en el valle de sombra de muerte.']},
+{b:45,c:13,v:4,en:['1 Corinthians 13:4-8','The hymn to love','The best-known description of patience, kindness and true devotion; love never ends.'],es:['1 Corintios 13:4-8','El himno al amor','La definición más conocida de la paciencia, la bondad y la entrega verdadera: el amor nunca deja de ser.']},
+{b:42,c:3,v:16,en:['John 3:16','God so loved the world','The central verse on God’s universal love and the message of salvation.'],es:['Juan 3:16','De tal manera amó Dios','El versículo central sobre el amor universal de Dios y el mensaje de salvación.']},
+{b:49,c:4,v:6,en:['Philippians 4:6-7','The peace of God','Practical guidance for finding calm in the face of anxiety.'],es:['Filipenses 4:6-7','La paz de Dios','Una guía práctica para encontrar calma mental frente a la ansiedad.']},
+{b:22,c:40,v:31,en:['Isaiah 40:31','Wings like eagles','A promise of renewal for those who are weary.'],es:['Isaías 40:31','Alas como las águilas','Una promesa de renovación para quienes atraviesan el cansancio.']},
+{b:44,c:8,v:28,en:['Romans 8:28','All things work for good','A message of hope about the purpose behind every circumstance.'],es:['Romanos 8:28','Todas las cosas ayudan a bien','Un mensaje de esperanza sobre el propósito detrás de cada circunstancia.']},
+{b:39,c:5,v:3,en:['Matthew 5:3-12','The Beatitudes','The start of the Sermon on the Mount, where Jesus redefines who is truly blessed: those who mourn will be comforted, and peacemakers are blessed.'],es:['Mateo 5:3-12','Las Bienaventuranzas','El inicio del Sermón del Monte, donde Jesús redefine quiénes son los verdaderamente dichosos: los que lloran serán consolados y los pacificadores son bienaventurados.']},
+{b:21,c:8,v:6,en:['Song of Solomon 8:6-7','Love is strong as death','One of the most intense and poetic declarations of love in ancient literature: many waters cannot quench love.'],es:['Cantares 8:6-7','Fuerte es como la muerte el amor','Una de las declaraciones de amor más intensas y poéticas de la literatura antigua: las muchas aguas no podrán apagar el amor.']},
+{b:23,c:29,v:11,en:['Jeremiah 29:11','Plans of peace','A beloved verse about hope and the future: a promise of wellbeing, thoughts of peace and not of evil.'],es:['Jeremías 29:11','Pensamientos de paz','Un versículo muy querido sobre la esperanza y el futuro: una promesa de bienestar, pensamientos de paz y no de mal.']},
+{b:39,c:11,v:28,en:['Matthew 11:28-30','Come to me and rest','A direct invitation to spiritual rest for those who feel overwhelmed and burdened.'],es:['Mateo 11:28-30','Venid a mí y descansad','Una invitación directa al descanso espiritual para quienes se sienten abrumados y cargados.']},
+{b:18,c:91,v:1,en:['Psalm 91','Under the shadow of the Almighty','A hymn of protection and absolute security in the face of danger.'],es:['Salmo 91','Bajo la sombra del Omnipotente','Un himno de protección y seguridad absoluta ante el peligro.']},
+{b:3,c:6,v:24,en:['Numbers 6:24-26','The priestly blessing','One of the oldest and most moving blessings in the biblical tradition, asking for favor, protection and peace.'],es:['Números 6:24-26','La bendición sacerdotal','Una de las bendiciones más antiguas y emotivas de la tradición bíblica: pide favor, guarda y paz.']},
+{b:65,c:21,v:4,en:['Revelation 21:4','Every tear wiped away','A final vision of total comfort and restoration: no more death, mourning, crying or pain.'],es:['Apocalipsis 21:4','Enjugará toda lágrima','Una visión final de consuelo total y restauración de la humanidad: ya no habrá muerte, ni llanto, ni dolor.']},
+{b:18,c:139,v:13,en:['Psalm 139:13-14','Marvelous are your works','An intimate, poetic song about the value of life and human identity, full of wonder and gratitude: “I will praise thee; for I am fearfully and wonderfully made: marvellous are thy works.”'],es:['Salmo 139:13-14','Maravillosas son tus obras','Un canto íntimo y poético sobre el valor de la vida y la identidad humana. Expresa asombro y gratitud con la frase “Porque tú formaste mis entrañas; tú me hiciste en el vientre de mi madre. Te alabaré; porque formidables, maravillosas son tus obras”.']},
+{b:19,c:3,v:5,en:['Proverbs 3:5-6','Trust in the LORD','A classic piece of wisdom that invites us to let go of excessive control: “Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.”'],es:['Proverbios 3:5-6','Fíate de Jehová','Un consejo clásico de sabiduría y entrega que invita a soltar el control excesivo. Guía al creyente diciendo “Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia. Reconócelo en todos tus caminos, y él enderezará tus veredas”.']},
+{b:24,c:3,v:22,en:['Lamentations 3:22-23','New every morning','A poem full of hope, written in the midst of adversity: “It is of the LORD’s mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.”'],es:['Lamentaciones 3:22-23','Nuevas son cada mañana','Un poema lleno de esperanza escrito en medio de la adversidad. Recuerda que el amor de Dios se renueva a diario al afirmar que “por la misericordia de Jehová no hemos sido consumidos, porque nunca decayeron sus misericordias. Nuevas son cada mañana; grande es tu fidelidad”.']}];
+const FAVK=[
+{es:['TODO TIENE SU TIEMPO','TODAS LAS COSAS TIENEN SU TIEMPO','TIEMPO DE NACER','TODO LO QUE SE QUIERE DEBAJO DEL CIELO'],en:['TO EVERY THING THERE IS A SEASON','TO EVERYTHING THERE IS A SEASON','A TIME TO BE BORN','A TIME TO BORN']},
+{es:['ES MI PASTOR','VALLE DE SOMBRA DE MUERTE','NADA ME FALTARA'],en:['THE LORD IS MY SHEPHERD','LORD IS MY SHEPHERD','VALLEY OF THE SHADOW OF DEATH','I SHALL NOT WANT']},
+{es:['ES SUFRIDO','ES SUFRIDA','ES BENIGNO','ES BENIGNA','EL AMOR ES PACIENTE'],en:['CHARITY SUFFERETH LONG','LOVE SUFFERETH LONG','LOVE IS PATIENT','CHARITY SUFFERETH']},
+{es:['DE TAL MANERA AMO DIOS AL MUNDO','AMO DIOS AL MUNDO','TAL MANERA AMO'],en:['GOD SO LOVED THE WORLD','SO LOVED THE WORLD']},
+{es:['POR NADA ESTEIS AFANOSOS','NADA ESTEIS AFANOSOS','NO ESTEIS AFANOSOS','POR NADA ESTEIS SOLICITOS','NO ESTEIS ANSIOSOS','NO ESTEIS PREOCUPADOS','NO SE AFANEN POR NADA','NO ESTEN ANGUSTIADOS POR NADA','SOBREPASA TODO ENTENDIMIENTO','SOBREPUJA TODO ENTENDIMIENTO','EXCEDE A TODO ENTENDIMIENTO','SUPERA TODO ENTENDIMIENTO','PAZ DE DIOS QUE SOBREPASA'],en:['BE CAREFUL FOR NOTHING','BE ANXIOUS FOR NOTHING','DO NOT BE ANXIOUS ABOUT ANYTHING','DO NOT BE ANXIOUS','BE ANXIOUS ABOUT NOTHING','BE CAREFUL FOR NO THING','PEACE OF GOD WHICH PASSETH','PASSETH ALL UNDERSTANDING','PASSES ALL UNDERSTANDING','SURPASSES ALL UNDERSTANDING','TRANSCENDS ALL UNDERSTANDING']},
+{es:['ALAS COMO AGUILAS','ALAS COMO LAS AGUILAS','LEVANTARAN ALAS'],en:['MOUNT UP WITH WINGS AS EAGLES','WINGS AS EAGLES','WINGS LIKE EAGLES','SHALL RENEW THEIR STRENGTH']},
+{es:['TODAS LAS COSAS LES AYUDAN A BIEN','LES AYUDAN A BIEN','AYUDAN A BIEN','TODAS LAS COSAS OBRAN JUNTAMENTE'],en:['ALL THINGS WORK TOGETHER FOR GOOD','WORK TOGETHER FOR GOOD','WORKETH TOGETHER FOR GOOD']},
+{es:['BIENAVENTURADOS LOS POBRES DE ESPIRITU','POBRES DE ESPIRITU','BIENAVENTURADOS LOS QUE LLORAN','BIENAVENTURADOS LOS MANSOS'],en:['BLESSED ARE THE POOR IN SPIRIT','POOR IN SPIRIT','BLESSED ARE THEY THAT MOURN','BLESSED ARE THE MEEK']},
+{es:['FUERTE ES COMO LA MUERTE EL AMOR','FUERTE COMO LA MUERTE','MUCHAS AGUAS NO PODRAN APAGAR'],en:['LOVE IS STRONG AS DEATH','STRONG AS DEATH','MANY WATERS CANNOT QUENCH LOVE']},
+{es:['PENSAMIENTOS DE PAZ','PENSAMIENTOS QUE TENGO ACERCA DE VOSOTROS','PENSAMIENTOS QUE PIENSO'],en:['THOUGHTS OF PEACE','THOUGHTS THAT I THINK TOWARD YOU','PLANS TO PROSPER YOU']},
+{es:['TRABAJADOS Y CARGADOS','FATIGADOS Y CARGADOS','CANSADOS Y CARGADOS','VENID A MI TODOS'],en:['ALL YE THAT LABOUR AND ARE HEAVY LADEN','ALL YE THAT LABOUR','COME TO ME ALL YOU WHO ARE WEARY','COME UNTO ME ALL']},
+{es:['ABRIGO DEL ALTISIMO','SOMBRA DEL OMNIPOTENTE','MORARA BAJO LA SOMBRA'],en:['SECRET PLACE OF THE MOST HIGH','SHADOW OF THE ALMIGHTY','DWELLETH IN THE SECRET PLACE']},
+{es:['TE BENDIGA Y TE GUARDE','RESPLANDECER SU ROSTRO SOBRE TI','HAGA RESPLANDECER SU ROSTRO'],en:['THE LORD BLESS THEE AND KEEP THEE','BLESS THEE AND KEEP THEE','MAKE HIS FACE SHINE UPON THEE','BLESS YOU AND KEEP YOU']},
+{es:['ENJUGARA DIOS TODA LAGRIMA','TODA LAGRIMA DE LOS OJOS','YA NO HABRA MUERTE','ENJUGARA TODA LAGRIMA'],en:['WIPE AWAY ALL TEARS','SHALL BE NO MORE DEATH','NO MORE DEATH']},
+{es:['FORMIDABLES MARAVILLOSAS SON TUS OBRAS','TU FORMASTE MIS ENTRANAS','MARAVILLOSAS SON TUS OBRAS','TE ALABARE PORQUE FORMIDABLES'],en:['FEARFULLY AND WONDERFULLY MADE','MARVELLOUS ARE THY WORKS','MARVELOUS ARE YOUR WORKS','THOU HAST POSSESSED MY REINS']},
+{es:['FIATE DE JEHOVA DE TODO TU CORAZON','FIATE DE JEHOVA','NO TE APOYES EN TU PROPIA PRUDENCIA','CONFIA EN JEHOVA DE TODO TU CORAZON','ENDEREZARA TUS VEREDAS'],en:['TRUST IN THE LORD WITH ALL THINE HEART','TRUST IN THE LORD WITH ALL YOUR HEART','LEAN NOT UNTO THINE OWN UNDERSTANDING','LEAN NOT ON YOUR OWN UNDERSTANDING','HE SHALL DIRECT THY PATHS']},
+{es:['NUEVAS SON CADA MANANA','POR LA MISERICORDIA DE JEHOVA NO HEMOS SIDO CONSUMIDOS','NO HEMOS SIDO CONSUMIDOS','GRANDE ES TU FIDELIDAD'],en:['NEW EVERY MORNING','GREAT IS THY FAITHFULNESS','GREAT IS YOUR FAITHFULNESS','MERCIES THAT WE ARE NOT CONSUMED','NOT CONSUMED']}];
+{const O=[12,2,9,3,6,7,0,8,1,11,13,16,14,15,4,10,5],f=O.map(i=>FAV[i]),k=O.map(i=>FAVK[i]);FAV.splice(0,17,...f);FAVK.splice(0,17,...k)}/* order: Num, 1Co, Jer, Jn, Phil, Mt11, Isa, Rom, Mt5, Eccl, Song, Ps23, Ps91, Rev */
+const favHTML=full=>FAV.map((p,i)=>{const[r,t,d]=p[lang];return `<button class="btn fv" data-i="${i}" title="${esc(d)}"><b>${esc(r)}</b><span>${esc(t)}</span>${full?`<small>${esc(d)}</small>`:''}</button>`}).join('');
+function favUI(){$('#favL').innerHTML=favHTML(0);$('#favL2').innerHTML=favHTML(1);$('#fvT').textContent='★ '+T[lang].fav;$('#fvT2').textContent='★ '+T[lang].fav}
+/* Search by words: keywords for the featured passages (key = book:chapter) plus related passages */
+const KWF={
+'20:3':{en:'time season seasons life change weep laugh patience',es:'tiempo estaciones vida cambio llorar reir paciencia momentos'},
+'18:23':{en:'shepherd comfort trust valley fear protection guidance',es:'pastor consuelo confianza valle miedo temor proteccion guia'},
+'45:13':{en:'love patience kindness charity marriage wedding',es:'amor paciencia bondad caridad matrimonio boda'},
+'42:3':{en:'love salvation eternal life faith',es:'amor salvacion vida eterna fe'},
+'49:4':{en:'anxiety worry anxious calm peace prayer thanksgiving mind',es:'ansiedad preocupacion afan calma paz oracion gratitud mente nervios'},
+'22:40':{en:'tired weary strength renewal hope eagles exhaustion',es:'cansancio fatiga fuerza renovacion esperanza aguilas agotamiento'},
+'44:8':{en:'hope purpose good trials meaning',es:'esperanza proposito bien pruebas sentido'},
+'39:5':{en:'blessed happiness mourn comfort peacemakers meek',es:'bienaventuranzas felicidad dichosos consuelo pacificadores mansos'},
+'21:8':{en:'love passion devotion marriage romance',es:'amor pasion entrega matrimonio romance'},
+'23:29':{en:'hope future plans peace welfare',es:'esperanza futuro planes paz bienestar'},
+'39:11':{en:'rest tired burdened weary overwhelmed',es:'descanso cansado cargado agobiado abrumado estres'},
+'18:91':{en:'protection safety refuge danger fear shelter',es:'proteccion seguridad refugio peligro miedo temor abrigo'},
+'3:6':{en:'blessing peace protection favor',es:'bendicion paz proteccion favor'},
+'65:21':{en:'tears death grief mourning comfort pain restoration',es:'lagrimas muerte duelo llanto consuelo dolor restauracion'},
+'18:139':{en:'life identity gratitude wonder creation birth',es:'vida identidad gratitud asombro creacion nacimiento'},
+'19:3':{en:'trust wisdom guidance control decisions direction',es:'confianza sabiduria guia control decisiones camino direccion'},
+'24:3':{en:'hope mercy faithfulness morning adversity renewal',es:'esperanza misericordia fidelidad mañana adversidad renovacion'}};
+const X=(b,c,v,en,es,ke,ks)=>({b,c,v,en,es,k:{en:ke,es:ks}});
+const EXTRA=[
+X(18,46,1,['Psalm 46:1-2','God is our refuge'],['Salmo 46:1-2','Dios es nuestro refugio'],'refuge strength help fear trouble storm safety','refugio fortaleza ayuda miedo temor problemas tormenta seguridad'),
+X(18,27,1,['Psalm 27:1','Whom shall I fear'],['Salmo 27:1','¿De quién temeré?'],'fear light courage salvation','miedo temor luz valor salvacion'),
+X(22,41,10,['Isaiah 41:10','Do not be afraid'],['Isaías 41:10','No temas'],'fear afraid strength help courage','miedo temor fuerza ayuda valor no temas'),
+X(5,1,9,['Joshua 1:9','Be strong and courageous'],['Josué 1:9','Esfuérzate y sé valiente'],'courage strong brave fear new beginnings','valor valiente fuerza miedo nuevo comienzo animo'),
+X(39,6,25,['Matthew 6:25-34','Do not worry about tomorrow'],['Mateo 6:25-34','No te afanes por el mañana'],'worry anxiety anxious future food care','ansiedad preocupacion afan afanes futuro mañana comida cuidado'),
+X(59,5,7,['1 Peter 5:7','Cast your cares on him'],['1 Pedro 5:7','Echad sobre él vuestras cargas'],'anxiety worry cares burden care','ansiedad preocupacion cargas descargar cuidado'),
+X(18,34,18,['Psalm 34:18','Near to the brokenhearted'],['Salmo 34:18','Cerca de los quebrantados de corazón'],'sadness grief broken heart comfort sorrow','tristeza dolor duelo corazon quebrantado consuelo pena'),
+X(18,121,1,['Psalm 121:1-2','Where does my help come from'],['Salmo 121:1-2','¿De dónde vendrá mi socorro?'],'help protection guard journey','ayuda socorro proteccion guarda camino viaje'),
+X(20,4,9,['Ecclesiastes 4:9-10','Two are better than one'],['Eclesiastés 4:9-10','Mejores son dos que uno'],'friendship company together loneliness help','amistad compañia juntos soledad ayuda'),
+X(19,17,17,['Proverbs 17:17','A friend loves at all times'],['Proverbios 17:17','El amigo ama en todo tiempo'],'friend friendship love loyalty','amigo amistad amor lealtad'),
+X(61,4,18,['1 John 4:18','Perfect love casts out fear'],['1 Juan 4:18','El amor echa fuera el temor'],'love fear','amor miedo temor'),
+X(48,4,32,['Ephesians 4:32','Be kind and forgive'],['Efesios 4:32','Sed benignos y perdonaos'],'forgive forgiveness kindness mercy compassion','perdon perdonar bondad compasion misericordia'),
+X(50,3,13,['Colossians 3:13','Bear with one another'],['Colosenses 3:13','Soportándoos y perdonándoos'],'forgive patience bear forgiveness','perdon perdonar paciencia soportar'),
+X(18,51,10,['Psalm 51:10','Create in me a clean heart'],['Salmo 51:10','Crea en mí un corazón limpio'],'forgiveness repentance clean heart renewal','perdon arrepentimiento corazon limpio renovacion'),
+X(57,11,1,['Hebrews 11:1','What faith is'],['Hebreos 11:1','Qué es la fe'],'faith hope trust certainty','fe esperanza confianza certeza'),
+X(58,1,2,['James 1:2-4','Trials produce patience'],['Santiago 1:2-4','Las pruebas producen paciencia'],'trials patience testing perseverance hardship','pruebas paciencia perseverancia dificultad sufrimiento'),
+X(47,5,22,['Galatians 5:22-23','The fruit of the Spirit'],['Gálatas 5:22-23','El fruto del Espíritu'],'joy peace patience kindness gentleness self-control love virtues','gozo paz paciencia bondad mansedumbre dominio propio amor virtudes'),
+X(46,12,9,['2 Corinthians 12:9','Strength in weakness'],['2 Corintios 12:9','El poder se perfecciona en la debilidad'],'weakness strength grace','debilidad fuerza gracia'),
+X(49,4,13,['Philippians 4:13','I can do all things through Christ'],['Filipenses 4:13','Todo lo puedo en Cristo'],'strength can do endurance','fuerza todo lo puedo animo perseverar'),
+X(18,30,5,['Psalm 30:5','Weeping lasts a night, joy comes in the morning'],['Salmo 30:5','Por la noche el llanto, a la mañana la alegría'],'sadness joy weeping morning','tristeza alegria llanto mañana gozo'),
+X(42,14,27,['John 14:27','My peace I give you'],['Juan 14:27','Mi paz os dejo'],'peace fear troubled heart','paz miedo turbado corazon tranquilidad'),
+X(42,16,33,['John 16:33','Take heart: I have overcome'],['Juan 16:33','Confiad, yo he vencido'],'peace trouble tribulation courage overcome','paz aflicciones tribulacion animo vencer'),
+X(39,7,7,['Matthew 7:7-8','Ask, seek, knock'],['Mateo 7:7-8','Pedid, buscad, llamad'],'prayer ask seek knock','oracion pedir buscar llamar'),
+X(32,6,8,['Micah 6:8','Act justly, love mercy'],['Miqueas 6:8','Hacer justicia y amar misericordia'],'justice mercy humility','justicia misericordia humildad'),
+X(19,15,1,['Proverbs 15:1','A gentle answer turns away wrath'],['Proverbios 15:1','La blanda respuesta quita la ira'],'anger words gentle conflict','ira enojo palabras suave conflicto'),
+X(22,26,3,['Isaiah 26:3','Perfect peace'],['Isaías 26:3','Completa paz'],'peace trust mind steadfast','paz confianza mente firme'),
+X(18,118,24,['Psalm 118:24','This is the day'],['Salmo 118:24','Este es el día'],'joy day gratitude rejoice','alegria dia gratitud gozo'),
+X(51,5,16,['1 Thessalonians 5:16-18','Rejoice, pray, give thanks'],['1 Tesalonicenses 5:16-18','Estad siempre gozosos, orad, dad gracias'],'gratitude thanks joy prayer','gratitud gracias gozo oracion agradecimiento'),
+X(4,31,6,['Deuteronomy 31:6','He will not leave you'],['Deuteronomio 31:6','No te dejará ni te desamparará'],'courage fear alone presence','valor miedo soledad presencia no temas'),
+X(39,28,20,['Matthew 28:20','I am with you always'],['Mateo 28:20','Yo estoy con vosotros todos los días'],'presence alone loneliness','presencia soledad compañia'),
+X(18,37,4,['Psalm 37:4-5','Commit your way to the Lord'],['Salmo 37:4-5','Encomienda a Jehová tu camino'],'trust desires plans commit','confianza deseos planes encomendar'),
+X(0,1,1,['Genesis 1:1','In the beginning'],['Génesis 1:1','En el principio'],'creation beginning origin','creacion principio origen'),
+X(18,19,1,['Psalm 19:1','The heavens declare'],['Salmo 19:1','Los cielos cuentan la gloria de Dios'],'creation nature sky glory','creacion naturaleza cielo gloria')];
+let sRes=[];
+function sAll(){return FAV.map((p,i)=>({f:i,b:p.b,c:p.c,v:p.v,en:p.en,es:p.es,k:KWF[p.b+':'+p.c]||{}})).concat(EXTRA)}
+function sRender(){
+  const box=$('#sres'),q=norm($('#sq').value),toks=q.split(' ').filter(t=>t.length>=2);sRes=[];
+  if(!toks.length){box.innerHTML='';return}
+  const L=sAll().map(e=>{const l=e[lang],hay=' '+norm(l.join(' ')+' '+(e.k.en||'')+' '+(e.k.es||'')+' ')+' ';let s=0;
+    for(const t of toks){const st=t.length>5?t.slice(0,-2):t;if(hay.includes(' '+t))s+=3;else if(hay.includes(' '+st))s+=2}
+    return[e,s]}).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]||(a[0].f===undefined)-(b[0].f===undefined)).slice(0,14);
+  sRes=L.map(x=>x[0]);
+  box.innerHTML=sRes.length?sRes.map((e,i)=>`<button class="btn sr" data-s="${i}"><b>${e.f!==undefined?'★ ':''}${esc(e[lang][0])}</b><span>${esc(e[lang][1])}</span></button>`).join(''):`<p>${esc(T[lang].nores)}</p>`;
+}
+/* Jump inside the scanned edition (depends on the OCR of that edition) */
+function goScan(e){
+  if(!ed)return;
+  if(e.f!==undefined){goFav(e.f);return}
+  $('#bk').value=e.b;chUI();$('#ch').value=e.c;$('#vs').value=e.v>1?e.v:'';fk=null;$('#go').onclick();
+}
+/* Passage viewer: the verses come straight from an open Bible-text service, so it does not depend on the scan */
+const BID='GEN EXO LEV NUM DEU JOS JDG RUT 1SA 2SA 1KI 2KI 1CH 2CH EZR NEH EST JOB PSA PRO ECC SNG ISA JER LAM EZK DAN HOS JOL AMO OBA JON MIC NAM HAB ZEP HAG ZEC MAL MAT MRK LUK JHN ACT ROM 1CO 2CO GAL EPH PHP COL 1TH 2TH 1TI 2TI TIT PHM HEB JAS 1PE 2PE 1JN 2JN 3JN JUD REV'.split(' ');
+const jget=async u=>{const r=await fetch(u,AbortSignal.timeout?{signal:AbortSignal.timeout(15000)}:{});if(!r.ok)throw new Error(r.status);return r.json()};
+const vtx=c=>(Array.isArray(c)?c:[c]).map(x=>typeof x==='string'?x:x&&typeof x.text==='string'?x.text:x&&x.content?vtx(x.content):'').join(' ').replace(/\s+/g,' ').trim();
+const WANT={es:{re:/valera|\br09\b|rvr|reina/i,lg:/^(spa|es)/i,gb:'valera'},en:{re:/king james|\bkjv\b|authori[sz]ed/i,lg:/^(eng|en)/i,gb:'kjv'}};
+const PROV=[
+ async(L,b,c,w0)=>{ /* helloao: discover the translation, then fetch the chapter */
+  const w=w0||WANT[L],j=await(PROV.h||(PROV.h=jget('https://bible.helloao.org/api/available_translations.json').catch(e=>{PROV.h=null;throw e}))),
+   t=(j.translations||j).find(t=>w.lg.test(t.language||t.languageEnglishName||t.id||'')&&w.re.test([t.id,t.name,t.englishName].join(' ')));
+  if(!t)throw 0;
+  const d=await jget(`https://bible.helloao.org/api/${t.id}/${BID[b]}/${c}.json`);
+  return{n:t.englishName||t.name||t.id,v:d.chapter.content.filter(x=>x.type==='verse').map(x=>({n:+x.number,t:vtx(x.content)}))}},
+ async(L,b,c,w0)=>{ /* getBible */
+  const w=w0||WANT[L];let ab=w.gb,nm=ab.toUpperCase();
+  if(L==='es'||w.disc){try{const j=await jget('https://api.getbible.net/v2/translations.json'),t=Object.entries(j).find(([k,t])=>w.re.test((t.translation||t.name||'')+' '+k));if(t){ab=t[1].abbreviation||t[0];nm=t[1].translation||ab}}catch(e){}}
+  const d=await jget(`https://api.getbible.net/v2/${ab}/${b+1}/${c}.json`);
+  return{n:nm,v:(d.verses||[]).map(x=>({n:+x.verse,t:String(x.text||'').replace(/\s+/g,' ').trim()}))}},
+ async(L,b,c,w0)=>{ /* bible-api.com (English public-domain translations) */
+  const w=w0||WANT[L];if(!w.ba)throw 0;
+  const fix=d=>({n:d.translation_name||(d.translation&&d.translation.name)||w.ba.toUpperCase(),v:(d.verses||[]).filter(x=>x&&x.text).map(x=>({n:+x.verse,t:String(x.text).replace(/\s+/g,' ').trim()}))});
+  let o;
+  try{o=fix(await jget(`https://bible-api.com/data/${w.ba}/${BID[b]}/${c}`))}catch(e){}
+  if(o&&o.v.length)return o;
+  /* fallback: reference query, with book names in the language of the edition (Spanish editions need Spanish names) */
+  return fix(await jget('https://bible-api.com/'+encodeURIComponent(BK[L][b].split('|')[0]+' '+c)+'?translation='+w.ba+'&single_chapter_book_matching=indifferent'))}];
+const CHM=new Map();
+async function chapterText(L,b,c,w){
+  const key=w&&w.k?`bible-ch-${L}-${w.k}-${b}-${c}`:`bible-ch-${L}-${b}-${c}`;
+  if(CHM.has(key))return CHM.get(key);
+  const hit=ls.get(key);
+  if(hit){try{const o=JSON.parse(hit);if(o&&o.v&&o.v.length){CHM.set(key,o);return o}}catch(e){}}
+  for(const p of PROV){try{const o=await p(L,b,c,w);if(o.v.length){CHM.set(key,o);ls.set(key,JSON.stringify(o));return o}}catch(e){}}
+  throw new Error('none');
+}
+/* Text editions: modern public-domain Bibles read chapter by chapter (no scan). One "page" = one chapter. */
+const CUM=[0];NCH.forEach(c=>CUM.push(CUM[CUM.length-1]+c));
+const bcOf=i=>{let b=0;while(b<65&&i>=CUM[b+1])b++;return[b,i-CUM[b]+1]};
+const chLbl=(L,i)=>{const[b,c]=bcOf(i);return BK[L][b].split('|')[0]+' '+c};
+const EN_=/^(eng|en)/i;
+const TEXTEDS={
+ en:[
+  {id:'tx-bsb',l:'en',v:1,n:CUM[66],kinds:['full','easy'],title:'Berean Standard Bible (modern English, public domain)',tw:{k:'bsb',lg:EN_,re:/berean standard|\bbsb\b/i,gb:'bsb',ba:'bsb',disc:1}},
+  {id:'tx-web',l:'en',v:1,n:CUM[66],kinds:['full','easy'],title:'World English Bible (modern English)',tw:{k:'web',lg:EN_,re:/world english|\bweb\b|eng_?web/i,gb:'web',ba:'web',disc:1}},
+  {id:'tx-asv',l:'en',v:1,n:CUM[66],kinds:['full'],title:'American Standard Version (clear and literal)',tw:{k:'asv',lg:EN_,re:/american standard|\basv\b/i,gb:'asv',ba:'asv',disc:1}},
+  {id:'tx-bbe',l:'en',v:1,n:CUM[66],kinds:['easy'],title:'Bible in Basic English (very easy to read)',tw:{k:'bbe',lg:EN_,re:/basic english|\bbbe\b/i,gb:'bbe',ba:'bbe',disc:1}}],
+ es:[
+  {id:'tx-rv',l:'es',v:1,n:CUM[66],kinds:['full'],title:'Reina-Valera (texto, dominio público)',tw:{k:'rv',lg:/^(spa|es)/i,re:/valera|\br09\b|rvr|reina/i,gb:'valera',ba:'rv1909',disc:1}},
+  {id:'tx-bes',l:'es',v:1,n:CUM[66],kinds:['full','easy'],title:'Biblia en Español Sencillo (lenguaje fácil)',tw:{k:'bes',lg:/^(spa|es)/i,re:/sencillo|\bbes\b/i,gb:'bes',ba:'bes'}},
+  {id:'tx-vbl',l:'es',v:1,n:CUM[66],kinds:['full'],title:'Versión Biblia Libre (moderna)',tw:{k:'vbl',lg:/^(spa|es)/i,re:/biblia libre|\bvbl\b/i,gb:'vbl',ba:'vbl'}}]
+};
+const vlist=()=>(TEXTEDS[lang]||[]).filter(t=>t.kinds.includes(kind)).map(t=>({...t,year:0,s:0}));
+const edOpt=(d,i)=>d.v?`<option value="${i}" title="${esc(d.title)}">★ ${esc(d.title)}</option>`:`<option value="${i}" title="${esc(d.title)} (${d.year||'?'}, ${d.n} p.)">${d.year||'?'}: ${esc(d.title.slice(0,64))}, ${d.n} p.</option>`;
+let pasE=null,pasSay=false,pasTok=0;
+const vrange=e=>{const m=e.en[0].match(/:(\d+)(?:-(\d+))?$/);return m?[+m[1],+(m[2]||m[1])]:[1,999]};
+function pasHide(){const el=$('#pas');if(el.hidden)return;el.hidden=true;pasTok++;pasRT++;if(pasSay){pasSay=false;if(syn)syn.cancel()}}
+function pasUI(){const t=T[lang];$('#pasR').textContent=pasSay?'❚❚ '+t.stop:'▶ '+t.read;$('#pasG').textContent=t.pasGo;$('#pasR').hidden=!syn}
+function openPas(e){try{return openPas0(e)}catch(x){msg(String(x&&x.message||x))}}
+async function openPas0(e){
+  if(!e)return;pasE=e;const t=T[lang],my=++pasTok;
+  if(reading)stopRead();
+  panel.hidden=true;$('#favp').hidden=true;$('#pas').hidden=false;$('#scrim').hidden=false;
+  pasRT++;if(pasSay){pasSay=false;if(syn)syn.cancel()}
+  $('#pasT').textContent=e[lang][0]+' · '+e[lang][1];$('#pasB').textContent='…';$('#pasS').textContent='';pasUI();
+  const[a,z]=vrange(e);
+  try{
+    const o=await chapterText(lang,e.b,e.c);if(my!==pasTok)return;
+    const vs=o.v.filter(x=>x.n>=a&&x.n<=z);if(!vs.length)throw 0;
+    pasE.text=vs.map(x=>x.t).join(' ');
+    $('#pasB').replaceChildren(...vs.flatMap(x=>{const s=document.createElement('sup');s.textContent=x.n+' ';s.style.cssText='color:var(--mute);font:600 .6em var(--sans)';return[s,document.createTextNode(x.t+' ')]}));
+    $('#pasS').textContent=o.n||'';
+  }catch(x){if(my===pasTok){$('#pasB').textContent=t.pasErr;pasE.text=''}}
+}
+let pasRT=0;
+function pasStopSay(){pasRT++;pasSay=false;if(syn)syn.cancel();pasUI()}
+function pasRead(){
+  if(!syn||!pasE)return;
+  if(pasSay){pasStopSay();return}
+  if(!pasE.text)return;
+  try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;syn.speak(u)}catch(x){}
+  const my=++pasRT,c=chunkify(pasE.text);let i=0;pasSay=true;pasUI();
+  const next=()=>{
+    if(my!==pasRT)return;
+    if(i>=c.length){pasSay=false;pasUI();return}
+    const k=c[i++];if(!k.say){next();return}
+    const u=new SpeechSynthesisUtterance(k.say);
+    u.lang=lang==='es'?'es-ES':'en-GB';const v=voice();if(v)u.voice=v;u.rate=+$('#rate').value;
+    u.onend=()=>{if(my!==pasRT)return;const d=k.pause/u.rate;d?setTimeout(next,d):next()};
+    u.onerror=ev=>{if(ev.error!=='interrupted'&&ev.error!=='canceled'&&my===pasRT){pasSay=false;pasUI()}};
+    syn.speak(u);
+  };
+  syn.cancel();setTimeout(next,100);
+}
+function goS(e){openPas(e)}
+function openFav(o){if(o)pasHide();$('#favp').hidden=!o;$('#scrim').hidden=!o;if(o)panel.hidden=true;else armAuto()}
+function goFav(i){const p=FAV[i];if(!ed)return;$('#bk').value=p.b;chUI();$('#ch').value=p.c;$('#vs').value=p.v>1?p.v:'';openFav(false);fk=FAVK[i][lang];$('#go').onclick()}
+T.en.tip={prev:'Previous page (←)',next:'Next page (→)',play:'Read aloud from this page (Space)',pause:'Pause reading (Space)',autoOn:'Auto-turn is ON: turns the page after reading it, or after a short wait if silent. Click to turn off',autoOff:'Auto-turn is OFF. Click to turn pages automatically',menu:'Open the menu',rib:'Page number. Click to type a page to go to',close:'Close the menu',theme:'Switch between light and dark theme',bk:'Book (Libro)',ch:'Chapter (Capítulo)',vs:'Verse (Versículo), optional',go:'Go to the chosen book, chapter and verse',kind:'Type of Bible',ed:'Edition (scanned Bible from archive.org)',rate:'Reading speed',pg:'Type a page number and press Enter',view:'Switch between the scanned page and its text',adel:'How long to wait before turning the page when not reading aloud',alm:'Shift the text one page earlier',alp:'Shift the text one page later',retry:'Try again',k_full:'Complete Bibles',k_easy:'Simpler language editions'};
+T.es.tip={prev:'Página anterior (←)',next:'Página siguiente (→)',play:'Leer en voz alta desde esta página (Espacio)',pause:'Pausar la lectura (Espacio)',autoOn:'Paso automático ACTIVADO: pasa la página al terminar de leerla, o tras una breve espera si no hay voz. Clic para desactivar',autoOff:'Paso automático DESACTIVADO. Clic para pasar páginas automáticamente',menu:'Abrir el menú',rib:'Número de página. Clic para escribir la página a la que ir',close:'Cerrar el menú',theme:'Cambiar entre tema claro y oscuro',bk:'Libro',ch:'Capítulo',vs:'Versículo (opcional)',go:'Ir al libro, capítulo y versículo elegidos',kind:'Tipo de Biblia',ed:'Edición (Biblia escaneada de archive.org)',rate:'Velocidad de lectura',pg:'Escribe un número de página y pulsa Intro',view:'Cambiar entre la página escaneada y su texto',adel:'Cuánto esperar antes de pasar la página si no se lee en voz alta',alm:'Desplazar el texto una página antes',alp:'Desplazar el texto una página después',retry:'Reintentar',k_full:'Biblias completas',k_easy:'Ediciones en lenguaje sencillo'};
+function tips(){const t=T[lang].tip;
+ const m={'#prev':t.prev,'#next':t.next,'#play':reading?t.pause:t.play,'#auto':auto?t.autoOn:t.autoOff,'#menuB':t.menu,'#rib':t.rib,'#ribI':t.rib,'#x':t.close,'#scrim':t.close,'#theme':t.theme,'#bk':t.bk,'#ch':t.ch,'#vs':t.vs,'#go':t.go,'#kind':t.kind,'#ed':t.ed,'#rate':t.rate,'#pg':t.pg,'#view':t.view,'#adel':t.adel,'#alm':t.alm,'#alp':t.alp,'#retry':t.retry,'#favB':T[lang].fav,'#fvx':t.close};
+ for(const k in m){const e=$(k);if(e)e.title=m[k]}
+ document.querySelectorAll('.lang button[data-l]').forEach(b=>b.title=b.dataset.l==='en'?'English':'Español');
+ $('#rate').querySelectorAll('option').forEach(o=>o.title=t.rate+': '+o.textContent);
+ $('#adel').querySelectorAll('option').forEach(o=>o.title=t.adel+': '+o.textContent);
+ $('#bk').querySelectorAll('option').forEach(o=>o.title=o.textContent);
+ $('#ch').querySelectorAll('option').forEach(o=>o.title=t.ch+' '+o.textContent)}
+function ui2(){const t=T[lang];if(!$('#clr').dataset.busy)$('#clr').textContent=CLR[lang].b;$('#sT').textContent='🔍 '+t.srch;$('#sq').placeholder=t.sph;$('#sq').setAttribute('aria-label',t.srch);sRender();pasUI();$('#gt').textContent=t.goto;$('#go').textContent=t.go;$('#vs').placeholder=t.verse;$('#vs').setAttribute('aria-label',t.verse);$('#dl').textContent=t.delay;
+ $('#menuB').setAttribute('aria-label',t.menu);$('#x').setAttribute('aria-label',t.close);$('#auto').setAttribute('aria-label',t.auto);$('#auto').setAttribute('aria-pressed',auto);$('#adel').value=adel;$('#alT').textContent=T[lang].align+': '+((ed&&ed.off)||0);$('#alT').parentElement.hidden=!!(ed&&ed.v);bkUI();favUI();tips()}
+function bkUI(){const b=$('#bk'),v=b.value||'0';if(b.dataset.l!==lang){b.dataset.l=lang;b.innerHTML=BK[lang].map((n,i)=>`<option value="${i}">${n.split('|')[0]}</option>`).join('')}b.value=v;chUI()}
+function chUI(){const c=$('#ch'),n=NCH[+$('#bk').value];if(+c.dataset.n!==n){c.dataset.n=n;c.innerHTML=Array.from({length:n},(_,i)=>`<option>${i+1}</option>`).join('')}}
+function visIdx(){return Math.max(0,[...txt.children].findIndex(e=>e.offsetTop+e.offsetHeight>txt.scrollTop+70))}
+function pageDone(){if(auto&&(page<ed.n-1||sub<subN-1))go(1);else stopRead()}
+function armAuto(){clearTimeout(autoT);if(!auto||reading||!ed)return;autoT=setTimeout(()=>{if(menuOpen()||z.s>1||drag||document.activeElement===$('#ribI'))armAuto();else go(1)},adel*1000)}
+function go(dir){
+ if(!ed||busy)return;
+ let t=page+dir,s;
+ if(ed.v){if(dir>0&&sub<subN-1){t=page;s=sub+1}else if(dir<0&&sub>0){t=page;s=sub-1}else if(dir<0)s=-1}
+ if(t<0||t>=ed.n)return;busy=true;if(reading){token++;if(syn)syn.cancel()}
+ sheet.style.transition='transform var(--dur)';sheet.style.transform=`translateX(${-dir*100}%)`;
+ setTimeout(()=>{sheet.style.transition='none';sheet.style.transform=`translateX(${dir*100}%)`;show(t,s);busy=false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{sheet.style.transition='transform var(--dur)';sheet.style.transform='none'}))},180)}
+
+/* Gestures: swipe to turn, pinch to zoom (image) or resize text, double tap to zoom, tap to show/hide controls */
+const ptr=new Map();let sx=0,sy=0,dx=0,drag=false,moved=false,pinch=null,pz={x:0,y:0},z={s:1,x:0,y:0},lastT=0,tapT=0;
+function applyZ(){img.style.transform=`translate(${z.x}px,${z.y}px) scale(${z.s})`}
+function clampZ(){const mx=(z.s-1)*stage.clientWidth/2,my=(z.s-1)*stage.clientHeight/2;z.x=Math.max(-mx,Math.min(mx,z.x));z.y=Math.max(-my,Math.min(my,z.y))}
+function resetZoom(){z={s:1,x:0,y:0};applyZ()}
+function setFs(v){fs=Math.max(.7,Math.min(2.6,v));document.documentElement.style.setProperty('--k',fs);if(textMode){clearTimeout(fsT);fsT=setTimeout(()=>{if(textMode&&ed)renderText()},140)}}
+document.documentElement.style.setProperty('--k',fs);
+document.addEventListener('gesturestart',e=>e.preventDefault());
+stage.addEventListener('pointerdown',e=>{
+  ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});try{stage.setPointerCapture(e.pointerId)}catch(_){}
+  if(ptr.size===1){drag=true;sx=e.clientX;sy=e.clientY;dx=0;moved=false;pz={x:z.x,y:z.y};sheet.style.transition='none'}
+  else if(ptr.size===2){drag=false;moved=true;sheet.style.transition='transform var(--dur)';sheet.style.transform='none';const[a,b]=[...ptr.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,s:z.s,k:fs}}
+});
+stage.addEventListener('pointermove',e=>{
+  if(!ptr.has(e.pointerId))return;ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch&&ptr.size>=2){const[a,b]=[...ptr.values()],r=Math.hypot(a.x-b.x,a.y-b.y)/pinch.d;
+    if(textMode)setFs(pinch.k*r);else{z.s=Math.min(5,Math.max(1,pinch.s*r));clampZ();applyZ()}return}
+  if(!drag)return;const mx=e.clientX-sx,my=e.clientY-sy;if(Math.abs(mx)+Math.abs(my)>8)moved=true;
+  if(!textMode&&z.s>1){z.x=pz.x+mx;z.y=pz.y+my;clampZ();applyZ()}else{dx=mx;sheet.style.transform=`translateX(${dx}px)`}
+});
+function tap(){const t=Date.now();
+  if(t-lastT<300){clearTimeout(tapT);lastT=0;if(!textMode){z.s=z.s>1?1:2.5;if(z.s===1)z.x=z.y=0;clampZ();img.style.transition='transform .2s';applyZ();setTimeout(()=>img.style.transition='',230)}return}
+  lastT=t;tapT=setTimeout(()=>document.body.classList.toggle('hide'),300)}
+const end=e=>{
+  ptr.delete(e.pointerId);
+  if(pinch){if(ptr.size<2)pinch=null;if(ptr.size===1){const[a]=[...ptr.values()];sx=a.x;sy=a.y;pz={x:z.x,y:z.y};dx=0;drag=true}return}
+  if(!drag||ptr.size)return;drag=false;
+  if((textMode||z.s===1)&&Math.abs(dx)>70){const d=dx<0?1:-1;sheet.style.transition='transform var(--dur)';sheet.style.transform='none';
+    // continue the slide from where the finger left it
+    busy=false;go(d);return}
+  sheet.style.transition='transform var(--dur)';sheet.style.transform='none';
+  if(!moved&&e.type==='pointerup')tap();
+};
+stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
+stage.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();const f=Math.exp(-e.deltaY*.01);if(textMode)setFs(fs*f);else{z.s=Math.min(5,Math.max(1,z.s*f));clampZ();applyZ()}},{passive:false});
+
+/* Book / chapter / verse navigation: found by reading the edition's OCR text */
+function buildIdx(){
+  if(ed.v)return Promise.resolve();
+  if(ed.bkp)return ed.bkp;
+  const e0=ed;
+  return ed.bkp=(async()=>{
+    const a=await loadText(),n=e0.n,cache=[];e0.a=a;
+    const ln=p=>cache[p]||(cache[p]=(a[mi(a,p)]||'').split(/\r?\n/).map(x=>norm(x.trim())).filter(Boolean));
+    const H=[];
+    for(let p=0;p<n;p++){H.push((a[mi(a,p)]||'').slice(0,500).split(/\r?\n/).map(x=>x.trim()).filter(Boolean).slice(0,4).map(norm));if(p%200===199)await new Promise(r=>setTimeout(r))}
+    const nm=BK[lang].map(x=>x.split('|').map(y=>norm(y.replace(/^\d /,'')))),
+      toc=p=>{const t=' '+ln(p).join(' ')+' ';return nm.filter(g=>g.some(m=>t.includes(' '+m+' '))).length};
+    const s=[];let from=0;
+    for(let i=0;i<66;i++){
+      const num=/^\d/.test(BK[lang][i])?+BK[lang][i][0]:0;let f=-1;
+      for(let p=from;p<n&&f<0;p++)for(const l of H[p]){
+        const pad=' '+l+' ';
+        if(nm[i].some(m=>{const x=pad.indexOf(' '+m+' ');if(x<0||l.length>m.length+(/EPISTLE|EPISTOLA|CARTA/.test(l)?64:32))return false;return !num||ORD[num].test(pad.slice(Math.max(0,x-18),x+1))})&&toc(p)<6){f=p;break}}
+      s.push(f);if(f>=0)from=f+1;
+      if(i%8===7)await new Promise(r=>setTimeout(r))}
+    const cum=[0];NCH.forEach(c=>cum.push(cum[cum.length-1]+c));const est=s.map(x=>x<0);
+    for(let i=0;i<66;i++)if(s[i]<0){let A=i-1;while(A>=0&&s[A]<0)A--;let B=i+1;while(B<66&&s[B]<0)B++;
+      const pa=A>=0?s[A]:Math.round(n*.03),ca=A>=0?cum[A]:0,pb=B<66?s[B]:n-2,cb=B<66?cum[B]:cum[66];
+      s[i]=Math.round(pa+(pb-pa)*(cum[i]-ca)/(cb-ca))}
+    e0.bk={ln,s,est,c:{}};
+  })().catch(e=>{e0.bkp=null;throw e});
+}
+function chapters(i){
+  const B=ed.bk;if(B.c[i])return B.c[i];
+  const e=i<65?B.s[i+1]:ed.n,N=NCH[i],o=[B.s[i]];let p=o[0];
+  for(let c=2;c<=N;c++){
+    const re=new RegExp(`^(?:CHAPTER|CHAP|CAPITULO|CAP|PSALMS?|SALMOS?) (?:${c}|${rom(c)})$`);let f=-1;
+    for(let q=p;q<e&&q<=p+40&&f<0;q++){const x=B.ln(q);if(x.some((l,j)=>re.test(l)||(j>0&&j<x.length-1&&l===''+c)))f=q}
+    o.push(f);if(f>=0)p=f}
+  for(let c=1;c<N;c++)if(o[c]<0){const a=c-1;let b=c;while(b<N&&o[b]<0)b++;const pa=o[a],pb=b<N?o[b]:Math.max(pa,e-1);for(let k=c;k<b;k++)o[k]=Math.round(pa+(pb-pa)*(k-a)/(b-a))}
+  return B.c[i]=o;
+}
+let fk=null;
+/* Never leave "Indexando…" on screen: any failure (slow text download, bad OCR, unexpected error) falls back to an estimated page for the chosen chapter */
+$('#go').onclick=async()=>{
+  const e0=ed,bi=+$('#bk').value,c=+$('#ch').value||1;
+  try{await goImpl()}
+  catch(x){
+    if(!e0||e0!==ed||e0.v){msg(T[lang].bad);return}
+    const tot=CUM[66],pos=CUM[bi]+c-1,p=Math.round((e0.n-1)*.03+(e0.n-1)*.94*pos/tot);
+    msg(T[lang].appr);show(Math.max(0,Math.min(e0.n-1,p)));setTimeout(()=>{if($('#msg').textContent===T[lang].appr)msg('')},6000);
+  }
+};
+const goImpl=async()=>{
+  if(!ed)return;
+  if(ed.v){fk=null;openMenu(false);msg('');show(CUM[+$('#bk').value]+(+$('#ch').value||1)-1);return}
+  const t=T[lang],bi=+$('#bk').value,c=+$('#ch').value||1,v=+$('#vs').value||0,keys=fk;fk=null;
+  openMenu(false);msg(t.idx);
+  await Promise.race([buildIdx(),new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timeout')),60000))]);
+  const B=ed.bk,cp=chapters(bi),p=cp[c-1];let pg2=p,fr=0,key=null,found=false;
+  if(keys){
+    const nx=bi<65?B.s[bi+1]:ed.n,lo=B.est[bi]?0:B.s[bi],hi=B.est[bi]?ed.n:Math.min(ed.n,nx+1),cand=[];
+    /* Space-insensitive match (survives OCR spacing and hyphenated line breaks), also across a page boundary; the most specific phrase (first in the list) wins on each page */
+    const ks0=keys.map(k=>k.replace(/ /g,''));
+    const scan=(a0,b0)=>{for(let q=a0;q<b0;q++){const own=B.ln(q).join(' ').replace(/ /g,''),nxt=q+1<ed.n?B.ln(q+1).join(' ').replace(/ /g,'').slice(0,90):'',x3=own+nxt;let bx=-1,bk=null;for(let j=0;j<keys.length;j++){const x=x3.indexOf(ks0[j]);if(x>=0&&x<own.length){bx=x;bk=keys[j];break}}if(bx>=0)cand.push([q,bx/Math.max(1,own.length),bk])}};
+    scan(lo,hi);if(!cand.length&&(lo>0||hi<ed.n))scan(0,ed.n);
+    if(cand.length){cand.sort((x,y)=>Math.abs(x[0]-p)-Math.abs(y[0]-p));[pg2,fr,key]=cand[0];found=true}
+  }
+  if(!found&&v>1){
+    const a=ed.a,e=Math.max(p+1,Math.min(cp[c]??(bi<65?B.s[bi+1]:ed.n),p+6)),off=[];let all='';
+    for(let q=p;q<e;q++){off.push(all.length);all+=' '+(a[mi(a,q)]||'').replace(/\s+/g,' ')}
+    let cu=0;for(let u=2;u<=v;u++){const m=new RegExp(`(?:^|\\s)${u}(?=\\s*[A-Za-zÀ-ÿ“"‘'¿¡])`).exec(all.slice(cu));if(m)cu+=m.index+m[0].length}
+    let k=0;while(k+1<off.length&&off[k+1]<=cu)k++;
+    pg2=p+k;fr=(cu-off[k])/Math.max(1,(off[k+1]??all.length)-off[k]);
+  }
+  const est=(keys&&!found)||(!keys&&B.est[bi]);msg(est?t.appr:'');if(est)setTimeout(()=>{if($('#msg').textContent===t.appr)msg('')},6000);
+  show(pg2);
+  if(found||v>1){const k=await chunks(pg2);if(page===pg2&&k.length){let i=Math.min(k.length-1,Math.floor(fr*k.length));
+    if(key){const ks=k.map(x=>norm(x.show)),w2=key.split(' ').slice(0,2).join(' '),j=ks.findIndex(x=>x.includes(key)),j2=j>=0?j:ks.findIndex(x=>x.includes(w2));if(j2>=0)i=j2}
+    resume={e:ed.id,p:pg2,i};if(reading)read(i);if(textMode){await renderText();cur=i;hl(i)}}}
+};
+function nudge(d){if(!ed)return;ed.off=(ed.off||0)+d;ls.set('bible-off-'+ed.id,ed.off);ed.bk=null;ed.bkp=null;ui2();show(page)}
+$('#alm').onclick=()=>nudge(-1);$('#alp').onclick=()=>nudge(1);
+const ribI=$('#ribI'),ribT=$('#ribT');
+function ribEdit(o){ribI.hidden=!o;ribT.hidden=o;if(o){ribI.value=page+1;ribI.focus();ribI.select()}}
+function ribGo(){const v=parseInt(ribI.value);ribEdit(false);if(ed&&v>=1&&v<=ed.n&&v-1!==page)show(v-1)}
+$('#rib').onclick=()=>{if(ribI.hidden)ribEdit(true)};
+$('#rib').onkeydown=e=>{if(e.target===$('#rib')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();ribEdit(true)}};
+ribI.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')ribGo();else if(e.key==='Escape')ribEdit(false)};
+ribI.onblur=()=>{if(!ribI.hidden)ribGo()};
+$('#bk').onchange=chUI;
+$('#menuB').onclick=()=>openMenu(true);$('#x').onclick=$('#scrim').onclick=()=>{openMenu(false);openFav(false);pasHide()};$('#fvx').onclick=()=>openFav(false);$('#favB').onclick=()=>openFav(true);
+$('#pasx').onclick=pasHide;$('#pasR').onclick=pasRead;$('#pasG').onclick=()=>{const e=pasE;pasHide();$('#scrim').hidden=true;if(e)goScan(e)};
+document.addEventListener('click',e=>{const b=e.target.closest('.fv');if(b)openPas(sAll()[+b.dataset.i]);const r=e.target.closest('.sr');if(r&&sRes[+r.dataset.s])goS(sRes[+r.dataset.s])});
+$('#sq').addEventListener('input',sRender);
+$('#sq').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'&&sRes[0])goS(sRes[0])});
+$('#auto').onclick=()=>{auto=!auto;ls.set('bible-auto',auto?'1':'0');ui2();armAuto()};
+$('#adel').onchange=e=>{adel=+e.target.value;ls.set('bible-adel',adel);armAuto()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){openMenu(false);openFav(false);pasHide()}});
+
+
+$('#prev').onclick=()=>go(-1);
+$('#next').onclick=()=>go(1);
+$('#play').onclick=()=>toggle();
+$('#view').onclick=setView;
+$('#retry').onclick=()=>ed?msg(''):loadEditions();
+$('#kind').onchange=e=>{kind=e.target.value;ls.set('bible-kind',kind);loadEditions()};
+$('#ed').onchange=e=>{if(e.target.value==='x')return custom();ls.set('bible-user-'+lang+kind,'1');open(eds[+e.target.value])};
+pg.onchange=()=>show((+pg.value||1)-1);
+$('#rate').onchange=()=>{if(reading)read(Math.max(0,cur))};
+$('#theme').onclick=()=>{theme=theme==='light'?'dark':'light';ls.set('bible-theme',theme);setTheme()};
+document.querySelectorAll('.lang button[data-l]').forEach(b=>b.onclick=()=>{if(b.dataset.l===lang)return;lang=b.dataset.l;ls.set('bible-lang',lang);ui();loadEditions()});
+document.addEventListener('keydown',e=>{
+  if(/INPUT|SELECT/.test(document.activeElement.tagName))return;
+  if(e.key==='ArrowRight')go(1);
+  else if(e.key==='ArrowLeft')go(-1);
+  else if(e.key===' '&&document.activeElement.tagName!=='BUTTON'){e.preventDefault();toggle()}
+});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&reading&&!wake)navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wake=w).catch(()=>{})});
+
+window.addEventListener('resize',()=>{if(textMode&&ed){clearTimeout(rzT);rzT=setTimeout(()=>renderText(),160)}});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(textMode&&ed)renderText()});
+const BUILD='2.9';
+/* The button also forgets the saved reading position, edition and category (bible-pos-*, -ed-*, -user-*, -meta-*, -kind) and the saved chapter texts (bible-ch-*)
+   so the app reopens on the default edition, on its cover. Language and theme are kept.
+   Clears ONLY this app's cache: caches named "bible*" or holding this app's own files,
+   and the service worker registered for this app's folder. Other apps, cookies,
+   passwords and localStorage are never touched. */
+async function clearAppCache(){
+  /* Caches and service workers only exist on http(s) pages. From a local file there is nothing to clear. */
+  if(!/^https?:$/.test(location.protocol))return;
+  const base=new URL('./',location.href).href,own=[new URL('manifest.json',base).href,new URL('sw.js',base).href];
+  try{
+    if(window.caches){
+      for(const k of await caches.keys()){
+        let mine=/^bible/i.test(k);
+        if(!mine){try{const c=await caches.open(k);for(const u of own){if(await c.match(u)){mine=true;break}}}catch(e){}}
+        if(mine)await caches.delete(k);
+      }
+    }
+  }catch(e){}
+  try{
+    if(navigator.serviceWorker){
+      for(const r of await navigator.serviceWorker.getRegistrations()){if(r.scope===base)await r.unregister()}
+    }
+  }catch(e){}
+}
+$('#clr').onclick=async()=>{
+  const b=$('#clr');if(b.dataset.busy)return;b.dataset.busy='1';
+  try{await clearAppCache();try{Object.keys(localStorage).filter(k=>/^bible-(pos-|ed-|user-|meta-|ch-|kind$)/.test(k)).forEach(k=>localStorage.removeItem(k))}catch(e){}b.textContent=CLR[lang].ok;setTimeout(()=>location.reload(),700)}
+  catch(e){b.textContent=CLR[lang].err;setTimeout(()=>{delete b.dataset.busy;b.textContent=CLR[lang].b},2000)}
+};
+(async()=>{
+  if(ls.get('bible-build')!==BUILD){ls.set('bible-build',BUILD);try{await clearAppCache()}catch(e){}}
+  if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+$('#bv').textContent='v'+BUILD;
+ui();loadEditions();
+})();
+</script>
+</body>
+</html>
