@@ -1,353 +1,348 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#161b33">
-<title>LibroPro</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Karla:wght@400;600&display=swap" rel="stylesheet">
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#141416">
+<title>PosterPro</title>
 <style>
-:root{--bg:#0f1226;--fg:#efe6d2;--mute:#9aa0bf;--gilt:#c9a24a;--pg:#1b2040;--pf:#efe6d2;--bar:rgba(15,18,38,.88);
---serif:'Cormorant Garamond',Georgia,serif;--sans:'Karla',system-ui,sans-serif;
---st:max(20px,calc(env(safe-area-inset-top) + 14px));--sb:max(22px,calc(env(safe-area-inset-bottom) + 14px));
---sl:max(22px,calc(env(safe-area-inset-left) + 16px));--sr:max(22px,calc(env(safe-area-inset-right) + 16px))}
-:root[data-theme=light]{--bg:#efe6d2;--fg:#161b33;--mute:#5b6180;--pg:#f7f0de;--pf:#2a2418}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;overscroll-behavior:none}
-body{position:fixed;inset:0;background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);overflow:hidden}
-[hidden]{display:none!important}
-button{font:inherit;color:inherit;cursor:pointer}
-/* Estantería */
-#shelf{position:fixed;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(var(--st) + 22px) var(--sr) calc(var(--sb) + 28px) var(--sl)}
-#shelf header{max-width:60rem;margin:0 auto 26px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-#shelf h1{margin:0;font:700 2.1rem/1 var(--serif);color:var(--gilt)}
-#shelf header p{margin:4px 0 0;color:var(--mute);font-size:.9rem}
-#grid{max-width:60rem;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:26px 18px}
-.bk{background:none;border:0;padding:0;text-align:left}
-.cv{aspect-ratio:2/3;border-radius:4px 8px 8px 4px;background:linear-gradient(135deg,#2a3166,#161b33);border:1px solid #c9a24a55;box-shadow:0 6px 16px #0006;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;font:700 1rem/1.15 var(--serif);color:var(--gilt)}
-.cv img{width:100%;height:100%;object-fit:cover;display:block;margin:-10px;max-width:none;width:calc(100% + 20px);height:calc(100% + 20px)}
-.bk b{display:block;margin-top:9px;font:700 1.02rem/1.15 var(--serif)}
-.bk i{display:block;font-style:normal;color:var(--mute);font-size:.82rem}
-.pill{background:var(--bar);color:#efe6d2;border:1px solid var(--gilt);border-radius:22px;height:40px;min-width:40px;padding:0 12px;font:600 .85rem var(--sans)}
-/* Lector */
-#rd{position:fixed;inset:0;background:var(--pg)}
-#stage{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
-#sheet{position:absolute;inset:0;will-change:transform}
-#img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:#0b0d1c;pointer-events:none;-webkit-user-drag:none}
-#txt,#meas{position:absolute;inset:0;overflow:hidden;background:var(--pg);color:var(--pf);font:500 18px/1.6 var(--serif);
-padding:max(64px,calc(env(safe-area-inset-top) + 52px)) max(30px,calc(env(safe-area-inset-right) + 26px)) max(48px,calc(env(safe-area-inset-bottom) + 38px)) max(30px,calc(env(safe-area-inset-left) + 26px));text-align:justify;hyphens:auto}
-#meas{visibility:hidden;pointer-events:none;z-index:-1}
-#txt p,#meas p{margin:0 0 .6em}
-@media(min-width:760px){#txt,#meas{padding-left:max(60px,calc((100% - 44rem)/2));padding-right:max(60px,calc((100% - 44rem)/2))}}
-#ind{flex:none;background:var(--bar);color:#efe6d2;border:1px solid #c9a24a88;border-radius:16px;height:32px;padding:0 11px;font:600 .78rem var(--sans);white-space:nowrap;letter-spacing:.02em}
-#tb,#bb{position:absolute;z-index:6;left:var(--sl);right:var(--sr);display:flex;align-items:center;gap:8px;transition:opacity .25s}
-#tb{top:var(--st)}#bb{bottom:var(--sb);justify-content:center;flex-wrap:wrap}
-#tb>*{transition:opacity .25s}
-#tt{flex:1;min-width:0;text-align:center;font:700 1rem var(--serif);color:var(--gilt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 4px #000a}
-body:not(.c) #bb{opacity:0;pointer-events:none}
-body:not(.c) #tb{pointer-events:none}body:not(.c) #tb>*:not(#ind){opacity:0;pointer-events:none}body:not(.c) #ind{pointer-events:auto}
-@media(max-width:520px){#tt{display:none}#tb .lgs{margin-left:auto}}
-#play{width:58px;height:58px;border-radius:50%;background:var(--gilt);color:#1b1608;border-color:var(--gilt);font-size:1.3rem;padding:0}
-#wa{background:#25D366;border-color:#25D366;color:#fff;display:inline-flex;align-items:center;gap:6px}
-#au[aria-pressed=true]{background:var(--gilt);color:#1b1608}
-.lgs{display:flex;gap:8px;align-items:center}.lgs button{width:38px;height:27px;padding:0;border:2px solid transparent;border-radius:6px;background:none;overflow:hidden;opacity:.55;line-height:0}
-.lgs button[aria-pressed=true]{opacity:1;border-color:var(--gilt)}.lgs svg{width:100%;height:100%;display:block}
-#tb .lgs{background:var(--bar);padding:6px 8px;border-radius:22px;border:1px solid var(--gilt)}
-.ar{position:absolute;top:50%;z-index:6;transform:translateY(-50%);width:42px;height:62px;border-radius:21px;padding:0;font-size:2rem;line-height:1;opacity:.5;transition:opacity .25s}
-body.c .ar{opacity:1}#pv{left:max(8px,env(safe-area-inset-left))}#nx{right:max(8px,env(safe-area-inset-right))}
-#menu,#cmenu{position:absolute;inset:0;z-index:9;background:#0f1226cc;display:flex;justify-content:flex-end}
-#cmenu{justify-content:flex-start}
-#menu .pn,#cmenu .pn{width:min(320px,88%);height:100%;background:var(--bg);color:var(--fg);overflow-y:auto;padding:calc(var(--st) + 8px) var(--sr) var(--sb) 20px;border-left:1px solid var(--gilt)}
-#cmenu .pn{border-left:0;border-right:1px solid var(--gilt);padding:calc(var(--st) + 8px) 20px var(--sb) var(--sl)}
-#cmenu .bt{margin:-4px 0 10px;color:var(--mute);font:400 .85rem var(--sans)}
-#menu h2,#cmenu h2{margin:0 0 10px;font:700 1.5rem var(--serif);color:var(--gilt)}
-.mi{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid #c9a24a33;padding:12px 4px;font:700 1.05rem var(--serif)}
-.mi i{display:block;font:400 .8rem var(--sans);color:var(--mute)}.mi[aria-current=true]{color:var(--gilt)}
-#msg{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0f1226ee;color:#efe6d2;text-align:center;padding:40px}
-</style>
-</head>
-<body>
-<section id="shelf">
-  <header><div><h1 id="appn"></h1><p id="sub"></p></div><div style="display:flex;gap:8px"><button class="pill" id="sth"></button><div class="lgs"></div></div></header>
-  <div id="grid"></div>
-</section>
-<section id="rd" hidden>
-  <div id="stage"><div id="sheet"><img id="img" alt=""><div id="txt" hidden></div></div></div>
-  <div id="meas"></div>
-  <div id="tb"><button id="ind"></button><button class="pill" id="back">‹</button><button class="pill" id="mb">☰</button><button class="pill" id="chb" hidden></button><div id="tt"></div><div class="lgs"></div></div>
-  <div id="bb"><button class="pill" id="vw"></button><button class="pill" id="au">↻ Auto</button><button class="pill" id="play">▶</button><button class="pill" id="spd">1×</button><button class="pill" id="th"></button><button class="pill" id="wa"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.2 13.7c-.2.6-1.2 1.2-1.7 1.2-.4 0-1 .2-3.3-.7-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6c-.1.1-.3.3-.1.6.6 1 1.3 1.7 2.3 2.2.3.2.5.1.7-.1l.8-1c.2-.2.4-.2.6-.1l1.9.9c.3.1.5.2.5.4 0 .2 0 .8-.2 1.3z"/></svg>WhatsApp</button></div>
-  <button class="pill ar" id="pv" aria-label="‹">‹</button><button class="pill ar" id="nx" aria-label="›">›</button>
-  <div id="menu" hidden><div class="pn"><h2 id="mh"></h2><div id="mlist"></div></div></div>
-  <div id="cmenu" hidden><div class="pn"><h2 id="cmh"></h2><div class="bt" id="cbt"></div><div id="clist"></div></div></div>
-  <div id="msg" hidden><div id="mt"></div><button class="pill" id="retry"></button></div>
-</section>
+:root{--bg:#141416;--pn:#1e1f23;--ln:#34363c;--ink:#f1ece0;--mu:#a29d90;--ac:#d6a64e;--sp:clamp(18px,4vw,40px)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Helvetica Neue",Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+button,select,input{font:inherit;color:inherit}
+button,select{background:var(--pn);border:1px solid var(--ln);border-radius:999px;padding:8px 15px;cursor:pointer}
+button:hover{border-color:var(--ac)}button.on{background:var(--ac);color:#1a1405;border-color:var(--ac)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+header{max-width:1400px;margin:auto;padding:calc(var(--sp) + env(safe-area-inset-top)) var(--sp) 8px}
+.logo{font:italic 700 clamp(34px,6vw,54px)/1 Georgia,serif;margin:0;letter-spacing:-1px}.logo b{color:var(--ac);font-style:normal}
+.tag{color:var(--mu);margin:8px 0 18px;font-family:Georgia,serif;font-size:17px}
+#q{width:100%;background:var(--pn);border:1px solid var(--ln);border-radius:999px;padding:12px 18px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 4px;scrollbar-width:none}
+.chips button{flex:none;white-space:nowrap;font-size:13px;padding:6px 13px}
+main{max-width:1400px;margin:auto;padding:8px var(--sp) calc(110px + env(safe-area-inset-bottom))}
+#msg{color:var(--mu);margin:8px 2px 18px;min-height:22px}
+#wall{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(10px,2vw,22px)}
+@media(min-width:620px){#wall{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){#wall{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:1200px){#wall{grid-template-columns:repeat(5,1fr)}}
+.po{position:relative;aspect-ratio:2/3;background:var(--pn);border-radius:6px;overflow:hidden;cursor:pointer;box-shadow:0 8px 22px #0007;transition:transform .25s}
+.po:hover{transform:translateY(-4px)}
+.po img{width:100%;height:100%;object-fit:cover;display:block}
+.po small{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 9px;font-size:12px;background:linear-gradient(transparent,#000d);opacity:0;transition:opacity .25s}
+.po:hover small,.po:focus-within small{opacity:1}
+@media(hover:none){.po small{opacity:1}}
+.h{position:absolute;top:8px;right:8px;width:34px;height:34px;padding:0;border-radius:50%;background:#000a;line-height:1}
+.h.on{color:#1a1405}
+#feed{display:none;flex-direction:column;gap:clamp(28px,6vh,60px);align-items:center}
+body.feed #wall{display:none}body.feed #feed{display:flex}
+body.feed{scroll-snap-type:y proximity}
+.fc{width:min(100%,560px);scroll-snap-align:center}
+.fc img{width:100%;max-height:78vh;object-fit:contain;display:block;border-radius:6px;background:var(--pn);box-shadow:0 14px 40px #000a;cursor:pointer}
+.fr{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px 0}
+.fr b{display:block;font:italic 700 18px/1.2 Georgia,serif}.fr span{color:var(--mu);font-size:13px}
+.fr div:last-child{display:flex;gap:8px;flex:none}.fr .h{position:static}
+#more{height:60px;text-align:center;color:var(--mu);margin-top:20px}
+nav{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10;display:flex;gap:6px;padding:7px;background:#0b0b0df0;border:1px solid var(--ln);border-radius:999px;backdrop-filter:blur(10px);max-width:calc(100vw - 32px)}
+nav button{border:0;background:none;padding:9px 15px;white-space:nowrap}
+nav button.on{background:var(--ac)}
+.layer{position:fixed;inset:0;z-index:30}
+#detail{background:#000d;display:flex;align-items:center;justify-content:center;padding:var(--sp)}
+.sheet{background:var(--pn);border:1px solid var(--ln);border-radius:16px;max-width:900px;width:100%;max-height:100%;overflow:auto;display:grid;grid-template-columns:minmax(0,1fr)}
+@media(min-width:700px){.sheet{grid-template-columns:1fr 1fr}}
+.sheet img{width:100%;max-height:72vh;object-fit:contain;background:#0d0d0f}
+.info{padding:24px}.info h2{font:italic 700 26px/1.15 Georgia,serif;margin:0 0 8px}.info p{color:var(--mu);margin:4px 0}.info a{color:var(--ac)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+#show{background:#000;overflow:hidden}#show:not(.ui){cursor:none}
+#stage{position:absolute;inset:0}
+.slide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 1.1s;animation:kb var(--d) ease-in-out forwards}
+.slide.on{opacity:1}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.1) translate(var(--dx),var(--dy))}}
+@media(prefers-reduced-motion:reduce){.slide{animation:none}.po{transition:none}}
+#cap{position:absolute;left:var(--sp);bottom:calc(var(--sp) + env(safe-area-inset-bottom));font:italic 22px Georgia,serif;text-shadow:0 2px 12px #000;max-width:70vw}
+.ctl{position:absolute;left:0;right:0;top:0;padding:calc(var(--sp) * .6 + env(safe-area-inset-top)) var(--sp);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;background:linear-gradient(#000b,transparent);opacity:0;transition:opacity .3s}
+.ui .ctl{opacity:1}
+.ctl button,.ctl select{background:#000a;border-color:#fff4}.ctl select option{color:#000}
+#ar{background:#0e0d0c;touch-action:none;overflow:hidden}
+#ar video,#ar canvas{position:absolute;inset:0;width:100%;height:100%}#ar video{object-fit:cover}
+#ar .c{display:none}
+#ar.s-placed #arAdd,#ar.s-placed #arDel,#ar.s-placed #shutter,#ar.canc.s-aim #arCancel{display:block}
+#arcross{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#fffd;box-shadow:0 0 0 2px #0007;display:none;pointer-events:none}
+#ar.s-aim #arcross{display:block}
+#ar.live{background:transparent}#ar.m-xr video,#ar.m-xr canvas,#ar.m-xr #arcross,#ar.m-xr #shutter{display:none!important}
+#artop{position:absolute;left:0;top:0;padding:calc(var(--sp) * .8 + env(safe-area-inset-top)) var(--sp)}
+#arbot{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:var(--sp) var(--sp) calc(var(--sp) + env(safe-area-inset-bottom))}
+#ar .ab{background:#0e0d0cd0;border-color:#fff4}#arAdd,#arCancel{justify-self:start}#arDel{justify-self:end}
+#shutter{width:72px;height:72px;border-radius:50%;border:4px solid #fff;background:#fff3;padding:0;position:relative}
+#shutter::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#fff}
+#arhint{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 2 * var(--sp));text-align:center;font-size:14px;padding:8px 14px;background:#0e0d0cd0;border:1px solid var(--ln);border-radius:12px;pointer-events:none;transition:opacity .5s}
+#ar.hh #arhint{opacity:0}#arhint:empty{display:none}
+#arpick{position:absolute;left:0;right:0;bottom:0;z-index:5;background:#141416f2;padding:var(--sp) var(--sp) calc(var(--sp) + env(safe-area-inset-bottom));border-radius:18px 18px 0 0}
+#arpick .pt{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+#arpl{display:flex;gap:10px;overflow-x:auto}#arpl img{height:120px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;cursor:pointer;flex:none}
+#toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#000e;padding:10px 16px;border-radius:999px;z-index:50;font-size:14px;max-width:calc(100vw - 40px);text-align:center}
+</style></head><body>
+<header>
+<h1 class="logo">Poster<b>Pro</b></h1>
+<p class="tag">Curate, play, and preview iconic posters on your wall.</p>
+<input id="q" type="search" placeholder="Search posters (Metropolis, Paris, jazz)" aria-label="Search posters">
+<div class="chips" id="cats"></div><div class="chips" id="eras"></div><div class="chips" id="srcs"></div>
+</header>
+<main><div id="msg"></div><div id="wall"></div><div id="feed"></div><div id="more"></div></main>
+<nav><button id="vWall" class="on">Wall</button><button id="vFeed">Feed</button><button id="vFav">♥ <span id="fn">0</span></button><button id="play">▶ Play</button></nav>
+
+<div id="detail" class="layer" hidden></div>
+<div id="show" class="layer" hidden><div id="stage"></div><div id="cap"></div>
+<div class="ctl"><select id="int" aria-label="Interval"><option value="10">10 s</option><option value="30">30 s</option><option value="60">1 min</option><option value="300">5 min</option></select>
+<button id="shuf" class="on">Shuffle</button><button id="meta" class="on">Title</button><button id="prev" aria-label="Previous">‹</button><button id="pause">Pause</button><button id="next" aria-label="Next">›</button><button id="fs">Fullscreen</button><button id="xShow">Close</button></div></div>
+<div id="ar" class="layer s-aim" hidden><video id="arvid" playsinline muted autoplay></video><canvas id="arcv"></canvas><div id="arcross"></div>
+<div id="artop"><button id="arX" class="ab">✕ Exit</button></div><div id="arhint"></div>
+<div id="arbot"><button id="arCancel" class="c ab">Cancel</button><button id="arAdd" class="c ab">＋ Add another</button><button id="shutter" class="c" aria-label="Take photo"></button><button id="arDel" class="c ab">🗑 Remove</button></div>
+<div id="arpick" hidden><div class="pt"><b>Choose a poster</b><button id="arpx">✕</button></div><div id="arpl"></div></div></div>
+<div id="toast" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-(()=>{
-/* ===== CONFIGURACIÓN: para otra app de la serie, cambia solo APP y BOOKS ===== */
-const APP={name:'LibroPro',key:'lp',sub:{es:'Literatura española',en:'Spanish literature'},voice:'es-ES'};
-const BOOKS=[
-['quijote','Don Quijote de la Mancha','Cervantes','title:(quijote) AND creator:(cervantes)'],
-['novelas','Novelas ejemplares','Cervantes','title:("novelas ejemplares")'],
-['lazarillo','Lazarillo de Tormes','Anónimo','title:(lazarillo)'],
-['celestina','La Celestina','Fernando de Rojas',null,'La Celestina','celestina'],
-['rimas','Rimas','Bécquer','title:(rimas) AND creator:(becquer OR bécquer)'],
-['leyendas','Leyendas','Bécquer',null,'Leyendas (Bécquer)','leyendas'],
-['quevedo','Obras','Quevedo',null,'Obras de Quevedo','quevedo'],
-['garcilaso','Obras','Garcilaso de la Vega','creator:(garcilaso)'],
-['lope','Fuenteovejuna','Lope de Vega',null,'Fuenteovejuna','fuenteovejuna'],
-['calderon','La vida es sueño','Calderón de la Barca','title:("vida es sueño")'],
-['manrique','Coplas','Jorge Manrique','title:(coplas) AND creator:(manrique)'],
-['machado','Campos de Castilla','Antonio Machado','title:("campos de castilla")'],
-['dario','Prosas profanas','Rubén Darío',null,'Prosas profanas y otros poemas','prosas profanas'],
-['galdos','Fortunata y Jacinta','Galdós',null,'Fortunata y Jacinta','fortunata'],
-['regenta','La Regenta','Clarín',null,'La Regenta','regenta'],
-['valera','Pepita Jiménez','Juan Valera','title:("pepita jimenez" OR "pepita jiménez")']];
-const T={es:{retry:'Reintentar',err:'No se pudo cargar. Revisa tu conexión.',load:'Cargando…',page:'Página',text:'Texto',goto:'Ir a la página',read:'Leer',theme:['☀ Claro','☾ Oscuro'],share:'Leo en '+APP.name,books:'Libros',auto:'Pasar página automáticamente',spd:'Velocidad de lectura',ch:'Capítulos e índice',chb:'Cap.'},
- en:{retry:'Retry',err:'Could not load. Check your connection.',load:'Loading…',page:'Page',text:'Text',goto:'Go to page',read:'Read',theme:['☀ Light','☾ Dark'],share:'Reading in '+APP.name,books:'Books',auto:'Turn pages automatically',spd:'Reading speed',ch:'Chapters & index',chb:'Ch.'}};
-/* ===== utilidades ===== */
-const $=s=>document.querySelector(s),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const ls={g:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},d:k=>{try{localStorage.removeItem(k)}catch(e){}}};
-const K=APP.key+'-';
-let lang=ls.g(K+'lang')||((navigator.language||'es').startsWith('en')?'en':'es'),theme=ls.g(K+'theme')||'dark';
-let prefTxt=false,bk=null,n=0,page=0,sub=0,scr=[''],txtMode=false,rid=0,busy=0,z=1,tx=0,ty=0,rate=+ls.g(K+'rate')||1,reading=0,tok=0,pend=null,auto=0,autoT=0;
-const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const html=s=>s.split('¶').map(x=>x.trim()).filter(Boolean).map(x=>'<p>'+esc(x)+'</p>').join('');
-const clean=t=>(t||'').replace(/\r/g,'').replace(/^[ \t]*\d{1,4}[ \t]*$/gm,'').replace(/-\n\s*(?=[a-záéíóúñ])/g,'').replace(/\n{2,}/g,' ¶ ').replace(/\n/g,' ').replace(/[ \t]+/g,' ').trim();
-const cover=id=>'https://archive.org/services/img/'+id;
-/* ===== interfaz ===== */
-function ui(){
-  document.documentElement.dataset.theme=theme;document.documentElement.lang=lang;
-  $('#appn').textContent=APP.name;$('#sub').textContent=APP.sub[lang];document.title=APP.name;
-  $('#sth').textContent=T[lang].theme[theme==='dark'?0:1];$('#th').textContent=theme==='dark'?'☀':'☾';
-  document.querySelectorAll('.lgs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===lang));
-  $('#au').setAttribute('aria-pressed',!!auto);$('#au').title=T[lang].auto;$('#spd').title=T[lang].spd;$('#mh').textContent=T[lang].books;
-  $('#vw').textContent=txtMode?T[lang].page:T[lang].text;$('#retry').textContent=T[lang].retry;$('#spd').textContent=rate+'×';
-  $('#play').textContent=reading?'❚❚':'▶';$('#chb').textContent=T[lang].chb;$('#chb').title=T[lang].ch;
-  $('meta[name=theme-color]').content=theme==='dark'?'#161b33':'#efe6d2';
-}
-function toggleTheme(){theme=theme==='dark'?'light':'dark';ls.s(K+'theme',theme);ui()}
-function setLang(l){lang=l;ls.s(K+'lang',lang);ui();ind()}
-const FL={es:'<svg viewBox="0 0 36 26" preserveAspectRatio="none"><rect width="36" height="26" fill="#c60b1e"/><rect y="6.5" width="36" height="13" fill="#ffc400"/></svg>',
-en:'<svg viewBox="0 0 60 30" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" stroke="#c8102e" stroke-width="3"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6"/></svg>'};
-document.querySelectorAll('.lgs').forEach(d=>{d.innerHTML=['es','en'].map(l=>`<button data-l="${l}" aria-label="${l.toUpperCase()}">${FL[l]}</button>`).join('');d.querySelectorAll('button').forEach(b=>b.onclick=()=>setLang(b.dataset.l))});
-$('#sth').onclick=$('#th').onclick=toggleTheme;
-/* ===== estantería ===== */
-const res={};
-async function archiveFind(b){
-  const base=b[3]+' AND mediatype:texts AND NOT access-restricted-item:true';
-  for(const q of [base+' AND language:(spa OR spanish)',base]){
-    const r=await fetch('https://archive.org/advancedsearch.php?q='+encodeURIComponent(q)+'&fl%5B%5D=identifier&fl%5B%5D=imagecount&sort%5B%5D=downloads+desc&rows=15&output=json');
-    if(!r.ok)throw 0;
-    const d=(await r.json()).response.docs.find(x=>+x.imagecount>=20);
-    if(d)return{id:d.identifier,n:+d.imagecount};
-  }
-  return null;
-}
-/* Fuente alternativa: Wikisource en español (solo texto, páginas virtuales) */
-const WS='https://es.wikisource.org/w/api.php?format=json&origin=*&';
-const wj=async q=>{const r=await fetch(WS+q);if(!r.ok)throw 0;return r.json()};
-async function wsFind(b){
-  const re=new RegExp(b[5],'i');
-  try{const p=Object.values((await wj('action=query&redirects=1&prop=info&titles='+encodeURIComponent(b[4]))).query.pages)[0];if(p&&!('missing' in p)&&p.title)return p.title}catch(e){}
-  try{const h=(await wj('action=query&list=search&srnamespace=0&srlimit=8&srsearch='+encodeURIComponent(b[4]+' '+b[2]))).query.search.find(x=>re.test(x.title));if(h)return h.title}catch(e){}
-  return null;
-}
-async function wsPages(root){
-  let tt=[];
-  try{tt=(await wj('action=parse&prop=links&page='+encodeURIComponent(root))).parse.links.filter(l=>l.ns===0&&'exists' in l&&l['*'].startsWith(root+'/')).map(l=>l['*'])}catch(e){}
-  tt=[...new Set(tt.length?tt:[root])];const got={};
-  for(let i=0;i<tt.length;i+=20){
-    const j=await wj('action=query&prop=extracts&explaintext=1&exlimit=20&titles='+encodeURIComponent(tt.slice(i,i+20).join('|')));
-    Object.values(j.query.pages).forEach(p=>{got[p.title]=p.extract||''})}
-  const paras=[],marks=new Map();
-  tt.forEach(t=>{if(tt.length>1){marks.set(paras.length,t.slice(root.length+1));paras.push(t.slice(root.length+1))}
-    (got[t]||'').replace(/\r/g,'').replace(/^=+\s*(.*?)\s*=+\s*$/gm,'$1').split('\n').map(x=>x.trim()).filter(Boolean).forEach(x=>{
-      if(x.length<=1800)paras.push(x);else x.split(/(?<=[.!?;:])\s+/).forEach(y=>paras.push(y))})});
-  const pg=[];let cur=[],len=0;
-  const ch=[];paras.forEach((x,i)=>{if(marks.has(i))ch.push({t:marks.get(i),p:pg.length});cur.push(x);len+=x.length;if(len>=1100){pg.push(cur.join(' ¶ '));cur=[];len=0}});
-  if(cur.length)pg.push(cur.join(' ¶ '));
-  if(pg.join('').length<2000)throw 0;
-  return{pg,ch};
-}
-async function resolve(b){
-  if(res[b[0]])return res[b[0]];
-  const c=ls.g(K+'id2-'+b[0]);if(c){try{return res[b[0]]=JSON.parse(c)}catch(e){}}
-  let o=null;
-  if(b[3]){try{o=await archiveFind(b)}catch(e){}}
-  if(!o&&b[4]){const t=await wsFind(b);if(t)o={ws:t}}
-  if(!o)throw 0;
-  ls.s(K+'id2-'+b[0],JSON.stringify(o));return res[b[0]]=o;
-}
-function shelf(){
-  $('#grid').innerHTML=BOOKS.map((b,i)=>`<button class="bk" data-i="${i}"><div class="cv" id="cv${i}"><span>${esc(b[1])}</span></div><b>${esc(b[1])}</b><i>${esc(b[2])}</i></button>`).join('');
-  $('#grid').querySelectorAll('.bk').forEach(e=>e.onclick=()=>openBook(+e.dataset.i));
-  Promise.all(BOOKS.map(async(b,i)=>{try{const o=await resolve(b);if(!o.ws){const im=new Image();im.onload=()=>{if(im.naturalWidth>40)$('#cv'+i).replaceChildren(im)};im.src=cover(o.id)}}catch(e){const c=$('#cv'+i);if(c)c.closest('.bk').remove()}})).then(()=>{if(!$('#grid .bk'))$('#grid').innerHTML='<p>'+T[lang].err+'</p><button class="pill" id="rt">'+T[lang].retry+'</button>',$('#rt').onclick=shelf});
-}
-/* ===== apertura ===== */
-async function openBook(i,p){
-  stopRead();clearTimeout(autoT);closeMenu();closeCMenu();const b=BOOKS[i];msg(T[lang].load,0);$('#rd').hidden=false;$('#shelf').hidden=true;
-  try{const o=await resolve(b);bk={i,key:b[0],id:o.id,ws:!!o.ws,title:b[1],tp:null};
-    bk.ch=[];if(o.ws){const w=await wsPages(o.ws);bk.pg=w.pg;bk.ch=w.ch;n=bk.pg.length}else n=o.n;
-    txtMode=!!o.ws||prefTxt;$('#vw').hidden=!!o.ws;$('#img').hidden=txtMode;txt.hidden=!txtMode;ui();
-    page=Math.max(0,Math.min(n-1,p!==undefined?p:(+ls.g(K+'pos-'+b[0])||0)));sub=0;
-    ls.s(K+'open',i);$('#tt').textContent=b[1];msg('');document.body.classList.remove('c');paint();chInit();
-  }catch(e){msg(T[lang].err,1,()=>openBook(i,p))}
-}
-function closeBook(){stopRead();clearTimeout(autoT);closeMenu();closeCMenu();$('#chb').hidden=true;ls.d(K+'open');bk=null;$('#rd').hidden=true;$('#shelf').hidden=false;rid++}
-function closeMenu(){$('#menu').hidden=true}
-function closeCMenu(){$('#cmenu').hidden=true}
-/* ===== capítulos e índice ===== */
-const CRE=/^[ \t]*((?:cap[ií]tulo|libro|parte|acto|jornada|tratado|leyenda)\s+(?:[ivxlc]+|\d+|primer[oa]?|segund[oa]|tercer[oa]?|cuart[oa]|quint[oa]|sext[oa]|s[eé]ptim[oa]|octav[oa]|noven[oa]|d[eé]cim[oa]|[uú]nic[oa])\b[^\n]{0,50})$/gim;
-async function scanCh(B){
-  const P=await loadText(),L=P.length,out=[];
-  P.forEach((t,k)=>{const hits=[];let m;CRE.lastIndex=0;while((m=CRE.exec(t)))hits.push(m[1].replace(/\s+/g,' ').trim());
-    if(!hits.length||hits.length>=4)return;
-    const p=Math.abs(L-n)<=1?k:Math.round(k*(n-1)/Math.max(1,L-1));
-    hits.forEach(h=>{if(out.slice(-2).some(o=>o.t.toLowerCase()===h.toLowerCase()&&p-o.p<8))return;out.push({t:h.slice(0,70),p:Math.max(0,Math.min(n-1,p))})})});
-  return out;
-}
-function chInit(){
-  const B=bk;$('#chb').hidden=!B.ch||B.ch.length<2;if(B.ws)return;
-  const c=ls.g(K+'ch1-'+B.key);
-  if(c){try{B.ch=JSON.parse(c);$('#chb').hidden=B.ch.length<4;return}catch(e){}}
-  scanCh(B).then(ch=>{const ok=ch.length>=4;ls.s(K+'ch1-'+B.key,JSON.stringify(ok?ch:[]));if(bk===B&&ok){B.ch=ch;$('#chb').hidden=false}}).catch(()=>{});
-}
-$('#chb').onclick=()=>{if(!bk||!bk.ch||!bk.ch.length)return;let cur=0;bk.ch.forEach((x,i)=>{if(x.p<=page)cur=i});
-  $('#cmh').textContent=T[lang].ch;$('#cbt').textContent=bk.title;
-  $('#clist').innerHTML=bk.ch.map((x,i)=>`<button class="mi" data-p="${x.p}"${i===cur?' aria-current="true"':''}>${esc(x.t)}<i>${T[lang].page} ${x.p+1}</i></button>`).join('');
-  $('#clist').querySelectorAll('.mi').forEach(e=>e.onclick=()=>{closeCMenu();page=+e.dataset.p;sub=0;paint()});
-  $('#cmenu').hidden=false;const a=$('#clist [aria-current]');if(a)a.scrollIntoView({block:'center'})};
-$('#cmenu').onclick=e=>{if(e.target.id==='cmenu')closeCMenu()};
-$('#mb').onclick=()=>{$('#mlist').innerHTML=BOOKS.map((b,i)=>!res[b[0]]?'':`<button class="mi" data-i="${i}"${bk&&bk.i===i?' aria-current="true"':''}>${esc(b[1])}<i>${esc(b[2])}</i></button>`).join('');
-  $('#mlist').querySelectorAll('.mi').forEach(e=>e.onclick=()=>{const i=+e.dataset.i;closeMenu();if(!bk||i!==bk.i)openBook(i)});$('#menu').hidden=false};
-$('#menu').onclick=e=>{if(e.target.id==='menu')closeMenu()};
-function msg(t,retry,fn){const m=$('#msg');m.hidden=!t;$('#mt').textContent=t;$('#retry').hidden=!retry;$('#retry').onclick=fn||null}
-/* ===== texto OCR ===== */
-function loadText(){
-  const B=bk;if(!B.tp)B.tp=fetch(`https://archive.org/download/${B.id}/${B.id}_djvu.txt`).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{
-    let P=t.split('\f');if(P.length<n*.5){const N=t.length;P=[];let a=0;for(let i=1;i<=n;i++){let b=i<n?t.indexOf('\n',Math.round(i*N/n)):N;if(b<0)b=N;P.push(t.slice(a,b));a=b}}return P}).catch(e=>{B.tp=null;throw e});
-  return B.tp;
-}
-const pageText=async p=>{if(bk.ws)return bk.pg[p]||'';const P=await loadText();const k=Math.abs(P.length-n)<=1?p:Math.round(p*(P.length-1)/Math.max(1,n-1));return clean(P[Math.max(0,Math.min(P.length-1,k))])};
-/* ===== ajuste de texto a pantalla (sin scroll) ===== */
-const MIN=14,MAX=26,m=$('#meas'),txt=$('#txt');let sc={};
-const fits=(s,px)=>{m.innerHTML=html(s);m.style.fontSize=px+'px';return m.scrollHeight<=m.clientHeight+1};
-function split(t){
-  const w=t.split(/ +/).filter(Boolean);if(!w.length)return[''];
-  const out=[];let i=0;
-  while(i<w.length){let lo=1,hi=w.length-i,b=1;
-    if(fits(w.slice(i).join(' '),MIN))b=hi;else while(lo<=hi){const mid=(lo+hi)>>1;if(fits(w.slice(i,i+mid).join(' '),MIN)){b=mid;lo=mid+1}else hi=mid-1}
-    out.push(w.slice(i,i+b).join(' '));i+=b}
-  return out;
-}
-function fitFont(s){let lo=MIN,hi=MAX,b=MIN;for(let k=0;k<7;k++){const x=(lo+hi)/2;if(fits(s,x)){b=x;lo=x}else hi=x}return b}
-/* ===== pintar página ===== */
-const src=(p,w)=>`https://archive.org/download/${bk.id}/page/n${p}${w?'_w1000':''}.jpg`;
-async function paint(){
-  const my=++rid,B=bk;ls.s(K+'pos-'+B.key,page);resetZoom();
-  if(!txtMode){
-    const im=$('#img');im.dataset.f=0;im.alt=B.title+' '+(page+1);im.src=src(page,1);
-    for(const k of [page+1,page+2])if(k<n)new Image().src=src(k,1);
-    sub=0;ind();armAuto();if(reading)speak();return;
-  }
-  try{
-    const t=await pageText(page);if(my!==rid)return;
-    const key=B.key+page+'|'+innerWidth+'x'+innerHeight;
-    scr=sc[key]||(sc[key]=split(t));
-    sub=sub==='last'?scr.length-1:Math.min(sub,scr.length-1);
-    const s=scr[sub];txt.innerHTML=html(s)||'<p>—</p>';txt.style.fontSize=fitFont(s)+'px';ind();armAuto();
-    if(reading)speak();
-  }catch(e){if(my===rid)msg(T[lang].err,1,()=>{msg('');paint()})}
-}
-$('#img').onerror=function(){const f=+this.dataset.f||0;this.dataset.f=f+1;
-  if(f===0)this.src=src(page,0);else if(f===1)this.src=`https://iiif.archive.org/image/iiif/2/${bk.id}%24${page}/full/!1000,1400/0/default.jpg`;
-  else msg(T[lang].err,1,()=>{msg('');paint()})};
-function ind(){if(!bk)return;$('#ind').textContent=(page+1)+' / '+n+(txtMode&&scr.length>1?' · '+(sub+1)+'/'+scr.length:'')}
-$('#ind').onclick=()=>{const v=parseInt(prompt(T[lang].goto+' (1–'+n+')',page+1));if(v>=1&&v<=n){page=v-1;sub=0;paint()}};
-function setView(){if(bk&&bk.ws)return;txtMode=!txtMode;prefTxt=txtMode;$('#img').hidden=txtMode;txt.hidden=!txtMode;sub=0;ui();paint()}
-$('#pv').onclick=()=>go(-1);$('#nx').onclick=()=>go(1);
-$('#vw').onclick=setView;$('#back').onclick=closeBook;
-/* ===== navegación y animación ===== */
-function target(d){
-  if(txtMode){const s=sub+d;if(s>=0&&s<scr.length)return{page,sub:s}}
-  const p=page+d;return p>=0&&p<n?{page:p,sub:txtMode&&d<0?'last':0}:null;
-}
-const S=$('#sheet');
-async function go(d){
-  const t=target(d);if(busy||!t)return snap();busy=1;const w=innerWidth;
-  S.style.transition='transform .18s ease';S.style.transform=`translateX(${-d*w}px)`;await sleep(180);
-  page=t.page;sub=t.sub;await paint();await sleep(30);
-  S.style.transition='none';S.style.transform=`translateX(${d*w}px)`;S.offsetWidth;
-  S.style.transition='transform .2s ease';S.style.transform='none';setTimeout(()=>busy=0,210);
-}
-function snap(){S.style.transition='transform .18s ease';S.style.transform='none'}
-/* ===== gestos (dedo y ratón) ===== */
-const st=$('#stage'),ptr=new Map();let g=null,lastTap=0,tapT=0;
-const applyZ=()=>{$('#img').style.transform=z>1?`translate(${tx}px,${ty}px) scale(${z})`:''};
-function resetZoom(){z=1;tx=ty=0;applyZ()}
-const dist=()=>{const [a,b]=[...ptr.values()];return Math.hypot(a.x-b.x,a.y-b.y)};
-st.onpointerdown=e=>{if(busy)return;st.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  g=ptr.size===2?{pinch:1,d0:dist(),z0:z}:{x0:e.clientX,y0:e.clientY,t0:Date.now(),dx:0,drag:0,tx0:tx,ty0:ty}};
-st.onpointermove=e=>{if(!g||!ptr.has(e.pointerId))return;ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(g.pinch&&ptr.size===2&&!txtMode){z=Math.max(1,Math.min(4,g.z0*dist()/g.d0));applyZ();return}
-  if(g.pinch)return;
-  const dx=e.clientX-g.x0,dy=e.clientY-g.y0;g.dx=dx;
-  if(z>1&&!txtMode){g.drag=2;tx=g.tx0+dx;ty=g.ty0+dy;applyZ();return}
-  if(g.drag||(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy))){g.drag=1;S.style.transition='none';const lim=!target(dx<0?1:-1);S.style.transform=`translateX(${lim?dx/4:dx}px)`}};
-st.onpointerup=st.onpointercancel=e=>{
-  ptr.delete(e.pointerId);if(!g)return;const o=g;
-  if(o.pinch){if(ptr.size<2){g=ptr.size?{pinch:1,d0:1,z0:z}:null;if(z<1.05)resetZoom()}return}
-  g=null;
-  if(o.drag===1){const v=Math.abs(o.dx)/(Date.now()-o.t0+1);if(Math.abs(o.dx)>innerWidth*.2||(v>.5&&Math.abs(o.dx)>40))go(o.dx<0?1:-1);else snap();return}
-  if(o.drag===2)return;
-  if(Math.abs(o.dx)>8)return;
-  const x=e.clientX,now=Date.now();
-  if(!txtMode&&now-lastTap<300){clearTimeout(tapT);lastTap=0;if(z>1)resetZoom();else{z=2.5;tx=(innerWidth/2-x)*1.5;ty=0;applyZ()}return}
-  lastTap=now;clearTimeout(tapT);
-  tapT=setTimeout(()=>{const w=innerWidth;if(z>1)return;if(x<w*.18)go(-1);else if(x>w*.82)go(1);else document.body.classList.toggle('c')},txtMode?0:290)};
-document.addEventListener('keydown',e=>{if($('#rd').hidden)return;
-  if(e.key==='ArrowRight')go(1);else if(e.key==='ArrowLeft')go(-1);else if(e.key==='Escape'){if(!$('#menu').hidden)closeMenu();else if(!$('#cmenu').hidden)closeCMenu();else closeBook()}
-  else if(e.key===' '){e.preventDefault();document.body.classList.toggle('c')}});
-addEventListener('resize',()=>{if(bk&&txtMode){clearTimeout(pend);pend=setTimeout(paint,180)}});
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{sc={};if(bk&&txtMode)paint()});
-/* ===== leer en voz alta ===== */
-const syn=window.speechSynthesis,PH=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
-RATES=PH?[.8,1,1.25,1.5]:[.8,1,1.25,1.5,2,2.5,3];
-if(!RATES.includes(rate)){rate=1;ls.s(K+'rate',1)}
-async function speak(){
-  if(!syn)return;const my=++tok;syn.cancel();
-  let t;try{t=txtMode?scr[sub]:await pageText(page)}catch(e){return}
-  t=t.replace(/(^|[^\p{L}])([áÁóÓ])(?![\p{L}])/gu,(x,a,c)=>a+({'á':'a','Á':'A','ó':'o','Ó':'O'}[c]));
-  if(my!==tok)return;
-  const parts=(t.replace(/¶/g,'. ').match(/[^.!?;:]+[.!?;:]*\s*/g)||[t]).map(s=>s.trim()).filter(Boolean);
-  const v=syn.getVoices().find(v=>v.lang.replace('_','-').toLowerCase().startsWith('es')&&!/^google/i.test(v.name))||null;
-  parts.forEach((s,i)=>{const u=new SpeechSynthesisUtterance(s);u.lang=APP.voice;u.rate=rate;if(v)u.voice=v;
-    if(i===parts.length-1)u.onend=()=>{if(my!==tok)return;if(auto&&target(1))go(1);else{reading=0;ui();armAuto()}};syn.speak(u)});
-}
-function stopRead(){reading=0;tok++;if(syn)syn.cancel();ui();armAuto()}
-function armAuto(){clearTimeout(autoT);if(auto&&!reading&&bk&&!$('#rd').hidden&&target(1))autoT=setTimeout(()=>{if(auto&&!reading&&bk)go(1)},8000)}
-$('#au').onclick=()=>{auto=!auto;ui();armAuto()};
-$('#play').onclick=()=>{if(reading)stopRead();else{reading=1;ui();speak()}};
-$('#spd').onclick=()=>{rate=RATES[(RATES.indexOf(rate)+1)%RATES.length];ls.s(K+'rate',rate);ui();if(reading)speak()};
-/* ===== WhatsApp ===== */
-$('#wa').onclick=()=>{if(!bk)return;
-  const link=location.origin+location.pathname+'?b='+bk.key+'&p='+(page+1);
-  const text=encodeURIComponent(T[lang].share+'\n'+bk.title+' · '+T[lang].page.toLowerCase()+' '+(page+1)+'\n'+link);
-  if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){
-    let left=0;const h=()=>{if(document.hidden)left=1};document.addEventListener('visibilitychange',h);
-    location.href='whatsapp://send?text='+text;
-    setTimeout(()=>{document.removeEventListener('visibilitychange',h);if(!left&&!document.hidden)location.href='https://wa.me/?text='+text},1500);
-  }else window.open('https://web.whatsapp.com/send?text='+text,'whatsapp_web');
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const J=async u=>{const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()};
+const st={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let tT;const toast=m=>{const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,3500)};
+const CATS=[["All","poster"],["Movies","movie poster film"],["Sci-Fi","science fiction poster"],["Horror","horror film poster"],["Music","concert poster"],["Travel","travel poster"],["Propaganda","propaganda poster"],["Art Nouveau","art nouveau poster"],["Vintage ads","vintage advertising poster"],["Theatre","theatre poster"]];
+const ERAS=[["Any era",""],["1900s","1900s"],["1920s","1920s"],["1940s","1940s"],["1950s","1950s"],["1960s","1960s"],["1970s","1970s"],["1980s","1980s"],["1990s","1990s"]];
+const SRC={
+ commons:{n:"Wikimedia Commons",on:1,f:async(q,p)=>{const j=await J("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=24&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=700&format=json&origin=*&gsroffset="+p*24+"&gsrsearch="+encodeURIComponent(q+" filetype:bitmap"));
+  return Object.values(j.query?.pages||{}).filter(g=>g.imageinfo?.[0]?.thumburl&&/public domain|^pd|cc0|cc[- ]by/i.test(g.imageinfo[0].extmetadata?.LicenseShortName?.value||"")).map(g=>({id:"c"+g.pageid,t:g.title.replace(/^File:|\.\w+$/g,""),img:g.imageinfo[0].thumburl,page:g.imageinfo[0].descriptionurl,s:"Commons"}))}},
+ loc:{n:"Library of Congress",on:1,f:async(q,p)=>{const j=await J("https://www.loc.gov/photos/?fo=json&c=24&sp="+(p+1)+"&q="+encodeURIComponent(q));
+  return(j.results||[]).filter(r=>r.image_url?.length).map(r=>({id:"l"+r.id,t:r.title,img:r.image_url[r.image_url.length-1].replace(/^http:/,"https:"),page:r.url,s:"Library of Congress"}))}},
+ ia:{n:"Archive.org",on:1,f:async(q,p)=>{const j=await J("https://archive.org/advancedsearch.php?output=json&rows=24&page="+(p+1)+"&fl[]=identifier&fl[]=title&q="+encodeURIComponent("("+q+") AND mediatype:image"));
+  return j.response.docs.map(d=>({id:"a"+d.identifier,t:d.title,img:"https://archive.org/services/img/"+d.identifier,page:"https://archive.org/details/"+d.identifier,s:"Archive.org"}))}},
+ eu:{n:"Europeana",on:1,f:async(q,p)=>{const j=await J("https://api.europeana.eu/record/v2/search.json?wskey=api2demo&media=true&rows=24&start="+(p*24+1)+"&qf=TYPE:IMAGE&query="+encodeURIComponent(q));
+  return(j.items||[]).filter(i=>i.edmPreview).map(i=>({id:"e"+i.id,t:(i.title||[""])[0],img:i.edmPreview[0],page:i.guid,s:"Europeana"}))}}
 };
-/* ===== inicio ===== */
-ui();shelf();
-{const q=new URLSearchParams(location.search),i=BOOKS.findIndex(b=>b[0]===q.get('b')),o=ls.g(K+'open');
- if(i>=0)openBook(i,Math.max(0,(+q.get('p')||1)-1));else if(o!==null&&BOOKS[+o])openBook(+o)}
-})();
-</script>
-</body>
-</html>
+function samples(){const T=[["Midnight Run",1978,"#ff6b6b","#ffd36b"],["Visit Lisbon",1957,"#2bb3a3","#f4e285"],["Neon Arcade",1989,"#8f5bff","#18f0ff"],["Jazz at the Pier",1962,"#e8a23a","#7a2e1d"],["Galaxy Drifter",1983,"#1d2b64","#f8cdda"],["Salon des Arts",1899,"#c9b37e","#5a3d2b"],["Paris by Night",1931,"#243b55","#e9d8a6"],["Rocket Age",1954,"#d64045","#f6f1d1"],["Summer Festival",1969,"#f9a826","#e63946"],["The Last Reel",1946,"#2d2d34","#c9a227"],["Alpine Express",1938,"#2a9d8f","#e9f5db"],["Synthwave Tour",1986,"#ff2e93","#2b1055"]];
+ return T.map((t,i)=>{const v=`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${t[2]}"/><stop offset="1" stop-color="${t[3]}"/></linearGradient></defs><rect width="800" height="1200" fill="url(#g)"/><circle cx="400" cy="470" r="230" fill="#0003"/><text x="400" y="960" font-family="Georgia,serif" font-style="italic" font-size="78" font-weight="700" text-anchor="middle" fill="#fff">${t[0]}</text><text x="400" y="1050" font-family="Arial" font-size="40" text-anchor="middle" fill="#fffd">${t[1]}</text></svg>`;
+  return{id:"s"+i,t:t[0]+" ("+t[1]+")",img:"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(v),page:"",s:"Sample"}})}
+
+let items=[],L=[],favs=st.get("pp_favs",{}),F={c:0,e:0},view="wall",page=0,busy=false,done=false,fav=false,seq=0;
+const query=()=>[$("#q").value.trim(),CATS[F.c][1],ERAS[F.e][1]].filter(Boolean).join(" ");
+const chips=(el,list,key)=>{el.innerHTML=list.map((c,i)=>`<button data-i="${i}" class="${F[key]===i?"on":""}">${esc(c[0])}</button>`).join("");
+ el.onclick=e=>{const b=e.target.closest("button");if(!b)return;F[key]=+b.dataset.i;chips(el,list,key);load()}};
+chips($("#cats"),CATS,"c");chips($("#eras"),ERAS,"e");
+$("#srcs").innerHTML=Object.entries(SRC).map(([k,v])=>`<button data-k="${k}" class="${v.on?"on":""}">${v.n}</button>`).join("");
+$("#srcs").onclick=e=>{const b=e.target.closest("button");if(!b)return;const s=SRC[b.dataset.k];s.on=!s.on;b.classList.toggle("on",s.on);load()};
+const saveFavs=()=>{st.set("pp_favs",favs);$("#fn").textContent=Object.keys(favs).length};saveFavs();
+
+const card=(p,i)=>`<div class="po" data-i="${i}" tabindex="0"><img loading="lazy" src="${esc(p.img)}" alt="${esc(p.t)}"><button class="h" data-h="${i}" aria-label="Favorite">♡</button><small>${esc((p.t||"Untitled").slice(0,70))} · ${esc(p.s)}</small></div>`;
+const fcard=(p,i)=>`<article class="fc" data-i="${i}"><img loading="lazy" src="${esc(p.img)}" alt="${esc(p.t)}"><div class="fr"><div><b>${esc((p.t||"Untitled").slice(0,80))}</b><span>${esc(p.s)}</span></div><div><button class="h" data-h="${i}" aria-label="Favorite">♡</button><button data-ar="${i}" aria-label="Hang on my wall">📷</button></div></div></article>`;
+function draw(list,start){
+ $("#wall").insertAdjacentHTML("beforeend",list.map((p,i)=>card(p,start+i)).join(""));
+ $("#feed").insertAdjacentHTML("beforeend",list.map((p,i)=>fcard(p,start+i)).join(""));
+ $$("#wall img:not([data-ok]),#feed img:not([data-ok])").forEach(im=>{im.dataset.ok=1;im.onerror=()=>im.closest(".po,.fc")?.remove()});hearts()}
+function hearts(){$$("[data-h]").forEach(b=>{const p=L[+b.dataset.h],on=p&&favs[p.id];b.textContent=on?"♥":"♡";b.classList.toggle("on",!!on)})}
+function repaint(){$("#wall").innerHTML="";$("#feed").innerHTML="";draw(L,0)}
+async function load(reset=true){
+ if(fav&&reset){fav=false;$("#vFav").classList.remove("on")}
+ if(busy&&!reset)return;if(fav||(done&&!reset))return;
+ const my=reset?++seq:seq;
+ if(reset){page=0;done=false;items=[];L=items;$("#wall").innerHTML="";$("#feed").innerHTML=""}
+ busy=true;$("#msg").textContent="Loading posters…";
+ const act=Object.values(SRC).filter(s=>s.on),q=query();
+ const res=await Promise.allSettled(act.map(s=>s.f(q,page)));
+ if(my!==seq)return;
+ const seen=new Set(items.map(p=>p.id));
+ let add=res.flatMap(r=>r.status==="fulfilled"?r.value:[]).filter(p=>p.img&&!seen.has(p.id)).sort(()=>Math.random()-.5);
+ const fails=res.filter(r=>r.status==="rejected").length;let sm=false;
+ if(!items.length&&!add.length&&fails){add=samples();sm=true}
+ if(!add.length||sm)done=true;
+ const s0=items.length;items.push(...add);page++;L=items;draw(add,s0);
+ $("#msg").textContent=sm?"Can't reach the poster sources, so these are samples. Open the file in Chrome or Safari with an internet connection.":!items.length?"No posters found. Try another search or era.":items.length+" posters"+(done?" · end of results":" · keep scrolling")+(fails?` · ${fails} source${fails>1?"s":""} unavailable`:"");
+ busy=false;
+ setTimeout(()=>{if(!done&&!fav&&$("#more").getBoundingClientRect().top<innerHeight+800)load(false)},300)}
+new IntersectionObserver(e=>{if(e[0].isIntersecting&&items.length&&!busy&&!done&&!fav)load(false)},{rootMargin:"900px"}).observe($("#more"));
+let qT;$("#q").oninput=()=>{clearTimeout(qT);qT=setTimeout(load,500)};
+
+function setView(v){view=v;document.body.classList.toggle("feed",v==="feed");$("#vWall").classList.toggle("on",v==="wall");$("#vFeed").classList.toggle("on",v==="feed");scrollTo({top:0})}
+$("#vWall").onclick=()=>setView("wall");$("#vFeed").onclick=()=>setView("feed");
+$("#vFav").onclick=()=>{fav=!fav;$("#vFav").classList.toggle("on",fav);
+ if(fav){L=Object.values(favs);repaint();$("#msg").textContent=L.length?L.length+" saved posters":"Nothing saved yet. Tap ♡ on any poster."}else load()};
+function toggleFav(p){if(favs[p.id])delete favs[p.id];else favs[p.id]=p;saveFavs();hearts()}
+document.addEventListener("click",e=>{
+ const h=e.target.closest("[data-h]");if(h){e.stopPropagation();toggleFav(L[+h.dataset.h]);return}
+ const a=e.target.closest("[data-ar]");if(a){openAR(L[+a.dataset.ar]);return}
+ const c=e.target.closest(".po,.fc img");if(c)openDetail(+(c.dataset.i??c.closest(".fc").dataset.i))});
+
+/* detail */
+let cur=null,ci=0;
+function openDetail(i){const p=L[i];if(!p)return;cur=p;ci=i;const d=$("#detail");
+ d.innerHTML=`<div class="sheet" role="dialog" aria-label="${esc(p.t)}"><img src="${esc(p.img)}" alt="${esc(p.t)}"><div class="info"><h2>${esc(p.t||"Untitled")}</h2><p>Source: ${esc(p.s)}</p>${p.page?`<p><a href="${esc(p.page)}" target="_blank" rel="noopener">View original and license</a></p>`:""}<div class="row"><button id="dF"></button><button id="dA" class="on">📷 Hang on my wall</button><button id="dP">▶ Play from here</button><button id="dX">Close</button></div></div></div>`;
+ d.hidden=false;const sync=()=>$("#dF").textContent=favs[p.id]?"♥ Saved":"♡ Save";sync();
+ $("#dF").onclick=()=>{toggleFav(p);sync()};$("#dX").onclick=()=>d.hidden=true;
+ $("#dA").onclick=()=>{d.hidden=true;openAR(p)};$("#dP").onclick=()=>{d.hidden=true;startShow(i)}}
+$("#detail").onclick=e=>{if(e.target.id==="detail")e.target.hidden=true};
+
+/* slideshow */
+const sh={l:[],i:0,t:null,paused:false,shuf:true,meta:true,idle:null};
+function startShow(from){sh.l=L.slice();if(!sh.l.length)return toast("Nothing to play yet.");
+ if(typeof from==="number")sh.i=from;else{sh.i=0;if(sh.shuf)sh.l.sort(()=>Math.random()-.5)}
+ sh.paused=false;$("#pause").textContent="Pause";$("#show").hidden=false;$("#stage").innerHTML="";
+ (document.documentElement.requestFullscreen?.()||Promise.resolve()).catch(()=>{});slide();bump()}
+function slide(){const p=sh.l[sh.i];if(!p)return;const sec=+$("#int").value,im=new Image(),r=(a,b)=>Math.random()*(b-a)+a;
+ im.src=p.img;im.className="slide";im.style.setProperty("--d",sec+2+"s");im.style.setProperty("--dx",r(-2.5,2.5)+"%");im.style.setProperty("--dy",r(-2.5,2.5)+"%");
+ const s=$("#stage"),old=[...s.children];s.append(im);const go=()=>requestAnimationFrame(()=>im.classList.add("on"));im.decode?im.decode().then(go,go):go();
+ setTimeout(()=>old.forEach(o=>o.remove()),1400);im.onerror=()=>step(1);
+ $("#cap").textContent=sh.meta?(p.t||"").slice(0,80):"";clearTimeout(sh.t);if(!sh.paused)sh.t=setTimeout(()=>step(1),sec*1000)}
+function step(d){const n=sh.l.length;if(!n)return;sh.i=(sh.i+d+n)%n;slide()}
+function bump(){const s=$("#show");s.classList.add("ui");clearTimeout(sh.idle);sh.idle=setTimeout(()=>s.classList.remove("ui"),3000)}
+function closeShow(){clearTimeout(sh.t);$("#show").hidden=true;document.fullscreenElement&&document.exitFullscreen().catch(()=>{})}
+$("#play").onclick=()=>startShow();
+["pointermove","pointerdown"].forEach(t=>$("#show").addEventListener(t,bump));
+$("#next").onclick=()=>step(1);$("#prev").onclick=()=>step(-1);$("#xShow").onclick=closeShow;$("#int").onchange=slide;
+$("#fs").onclick=()=>$("#show").requestFullscreen?.();
+$("#pause").onclick=e=>{sh.paused=!sh.paused;e.target.textContent=sh.paused?"Resume":"Pause";sh.paused?clearTimeout(sh.t):slide()};
+$("#shuf").onclick=e=>{sh.shuf=!sh.shuf;e.target.classList.toggle("on",sh.shuf)};
+$("#meta").onclick=e=>{sh.meta=!sh.meta;e.target.classList.toggle("on",sh.meta);slide()};
+document.addEventListener("keydown",e=>{
+ if(!$("#show").hidden){if(e.key==="Escape")closeShow();if(e.key==="ArrowRight")step(1);if(e.key==="ArrowLeft")step(-1);if(e.key===" "){e.preventDefault();$("#pause").click()}}
+ else if(!$("#ar").hidden){if(e.key==="Escape")closeAR()}else if(e.key==="Escape")$("#detail").hidden=true});
+
+/* AR wall: camera + motion sensors, one tap to hang (same idea as ArtPro) */
+const AR={list:[],E:null,sel:null,state:"aim",ori:{ok:false,a:0,b:0,g:0},max:5,busy:false,r:null};
+const arov=$("#ar");AR.xr=false;AR.mode="m-fb live";
+try{navigator.xr?.isSessionSupported?.("immersive-ar").then(v=>AR.xr=!!v,()=>{})}catch(e){}
+function setState(s){const X=!!AR.sess;AR.state=s;arov.className="layer "+AR.mode+" s-"+s+(AR.E&&AR.list.length?" canc":"");clearTimeout(AR.ht);
+ $("#arhint").textContent=s==="placed"?(X?"Hung · walk around freely · drag to move · pinch to resize":"Stay put and turn the phone · drag to move · pinch to resize"):X?"Move the phone slowly to scan the wall and floor":AR.list.length?"Aim where the poster’s centre should hang, then tap":"Stand 1–3 m from the wall. Aim where the wall meets the floor, then tap.";
+ if(s==="placed")AR.ht=setTimeout(()=>arov.classList.add("hh"),4500)}
+const hint=t=>{const h=$("#arhint");if(h.textContent!==t)h.textContent=t};
+const fade=(e,o)=>[e.pic,e.fr].forEach(m=>{m.material.transparent=o<1;m.material.opacity=o;m.material.needsUpdate=true});
+function commit(E){fade(E,1);AR.E=null;AR.list.push(E);if(AR.ret)AR.ret.visible=false;select(E);setState("placed")}
+function newE(p,im){const E=AR.E=mkPoster(p,im);if(AR.sess){E.g.matrixAutoUpdate=false;fade(E,.55)}AR.s.add(E.g);return E}
+const arQ=(q,al,be,ga,or)=>{q.setFromEuler(new THREE.Euler(be,al,-ga,"YXZ"));q.multiply(new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5)));q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),-or))};
+const arFov=()=>{const w=arov.clientWidth||innerWidth,h=arov.clientHeight||innerHeight,r=Math.PI/180,L=63,Sh=49,a=w/h;if(h>=w)return a<.75?L:2/r*Math.atan(Math.tan(Sh/2*r)/a);return a>4/3?2/r*Math.atan(Math.tan(L/2*r)/a):Sh};
+const loadImg=p=>new Promise((res,rej)=>{const im=new Image();im.crossOrigin="anonymous";im.onload=()=>res(im);im.onerror=()=>rej("img");im.src=p.img});
+function mkPoster(p,im){const a=im.naturalWidth/im.naturalHeight,L=.9,w=a<1?L*a:L,h=a<1?L:L/a;
+ const tex=new THREE.Texture(im);tex.encoding=THREE.sRGBEncoding;tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;tex.needsUpdate=true;
+ const g=new THREE.Group(),pic=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex})),fr=new THREE.Mesh(new THREE.PlaneGeometry(w+.04,h+.04),new THREE.MeshBasicMaterial({color:0x151515})),
+  ol=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(w+.1,h+.1)),new THREE.LineBasicMaterial({color:0xd6a64e}));
+ fr.position.z=-.002;ol.visible=false;g.add(fr,pic,ol);g.visible=false;return{p,g,pic,fr,ol,w,h,k:1,fb:null,base:new THREE.Matrix4(),anc:null,rel:null}}
+function lay(e){const f=e.fb;e.g.position.set(f.x,f.y,f.z);e.g.rotation.y=f.yaw;e.g.scale.setScalar(e.k);e.g.visible=true}
+function select(e){AR.sel=e;AR.list.forEach(x=>x.ol.visible=false);clearTimeout(AR.hl);if(e&&AR.list.length>1){e.ol.visible=true;AR.hl=setTimeout(()=>e.ol.visible=false,2500)}}
+function setWall(){const E=AR.E;if(!E)return;const d=new THREE.Vector3(0,0,-1).applyQuaternion(AR.c.quaternion),hl=Math.hypot(d.x,d.z),hx=hl>.01?d.x/hl:0,hz=hl>.01?d.z/hl:-1,ref=AR.list[0];let f=null;
+ if(ref){const ny=Math.sin(ref.fb.yaw),nz=Math.cos(ref.fb.yaw),c=ny*ref.fb.x+nz*ref.fb.z,dn=ny*d.x+nz*d.z,t=dn<-.1?c/dn:0;
+  if(t>.3&&t<14)f={x:t*d.x,y:Math.max(.25,Math.min(3.2,1.4+t*d.y)),z:t*d.z,yaw:ref.fb.yaw};else return toast("Aim at the same wall, then tap.")}
+ else{let dist=2;if(d.y<-.1)dist=1.4/Math.tan(Math.asin(-d.y));dist=Math.max(.6,Math.min(6,dist));f={x:hx*dist,y:Math.max(1.45,E.h/2+.1),z:hz*dist,yaw:Math.atan2(-hx,-hz)}}
+ E.fb=f;lay(E);commit(E)}
+function runAR(stream,p,im){
+ const v=$("#arvid");v.srcObject=stream;v.play().catch(()=>{});$("#toast").hidden=true;
+ const oc=$("#arcv"),nc=document.createElement("canvas");nc.id="arcv";oc.replaceWith(nc);
+ const R=AR.r=new THREE.WebGLRenderer({canvas:nc,alpha:true,antialias:true}),C=AR.c=new THREE.PerspectiveCamera(60,1,.05,50),S=AR.s=new THREE.Scene();
+ R.outputEncoding=THREE.sRGBEncoding;R.setClearColor(0,0);C.position.set(0,1.4,0);AR.q=new THREE.Quaternion();
+ AR.onRes=()=>{const W=arov.clientWidth||innerWidth,H=arov.clientHeight||innerHeight;R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(W,H,false);C.aspect=W/H;C.fov=arFov();C.updateProjectionMatrix()};AR.onRes();addEventListener("resize",AR.onRes);
+ const o0=AR.ori={ok:false,a:0,b:0,g:0};
+ AR.onOri=e=>{if(e.beta==null)return;const d=AR.ori;d.a=e.alpha||0;d.b=e.beta;d.g=e.gamma||0;if(!d.ok){d.ok=true;AR.first=true}};addEventListener("deviceorientation",AR.onOri);
+ setTimeout(()=>{if(AR.busy&&AR.ori===o0&&!o0.ok){arCleanup();toast("AR needs motion sensors, so it works on a phone or tablet.")}},2500);
+ AR.list=[];AR.sel=null;AR.E=mkPoster(p,im);S.add(AR.E.g);setState("aim");
+ (function loop(){AR.raf=requestAnimationFrame(loop);const d=AR.ori;
+  if(d.ok){const k=Math.PI/180;arQ(AR.q,d.a*k,d.b*k,d.g*k,((screen.orientation&&screen.orientation.angle)||window.orientation||0)*k);
+   if(AR.first){C.quaternion.copy(AR.q);AR.first=false}else{const ang=C.quaternion.angleTo(AR.q);if(ang>.0012)C.quaternion.slerp(AR.q,Math.min(.7,Math.max(.12,ang*14)))}}
+  R.render(S,C)})()}
+const IMGERR="This poster can’t be shown on a wall (its source blocks it). Try another poster.";
+function openAR(p){
+ if(AR.busy)return;
+ if(AR.xr&&window.isSecureContext){   // Android Chrome: real world tracking, posters stay put while you walk
+  AR.busy=true;AR.mode="m-xr live";$("#detail").hidden=true;arov.hidden=false;const ip=loadImg(p);ip.catch(()=>{});
+  navigator.xr.requestSession("immersive-ar",{requiredFeatures:["hit-test"],optionalFeatures:["dom-overlay","anchors"],domOverlay:{root:arov}}).then(sess=>{AR.sess=sess;sess.addEventListener("end",arCleanup);
+   ip.then(im=>runXR(sess,p,im),()=>{arCleanup();toast(IMGERR)})},()=>{arCleanup();openCam(p)});
+  return}
+ openCam(p)}
+async function openCam(p){
+ const rq=window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission?DeviceOrientationEvent.requestPermission().catch(()=>"denied"):Promise.resolve("granted");
+ if(!navigator.mediaDevices?.getUserMedia||!window.isSecureContext)return toast("AR needs a secure (https) page and a camera. Open the app from your website on a phone.");
+ AR.busy=true;AR.mode="m-fb live";$("#detail").hidden=true;arov.hidden=false;toast("Starting camera…");
+ try{const[perm,stream,im]=await Promise.all([rq,navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false}).then(s=>(AR.stream=s)),loadImg(p)]);
+  if(perm!=="granted")throw"motion";runAR(stream,p,im)}
+ catch(e){arCleanup();toast(e==="motion"?"AR needs motion access. Allow it and try again.":e==="img"?IMGERR:"Camera not available. Allow camera access and try again.")}}
+/* Android: WebXR with hit-test + anchors, so posters keep their place in the room as you walk */
+const _M=new THREE.Matrix4(),_p=new THREE.Vector3(),_n=new THREE.Vector3(),_c=new THREE.Vector3(),_x=new THREE.Vector3(),_y=new THREE.Vector3(),_s=new THREE.Vector3(),_up=new THREE.Vector3(0,1,0);
+function runXR(sess,p,im){
+ const R=AR.r=new THREE.WebGLRenderer({alpha:true,antialias:true}),S=AR.s=new THREE.Scene();
+ R.outputEncoding=THREE.sRGBEncoding;R.xr.enabled=true;R.xr.setReferenceSpaceType("local");AR.list=[];AR.sel=null;newE(p,im).g.visible=false;
+ const ret=AR.ret=new THREE.Mesh(new THREE.RingGeometry(.06,.08,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xd6a64e}));ret.matrixAutoUpdate=false;ret.visible=false;S.add(ret);
+ ["#artop","#arbot","#arhint","#arpick"].forEach(q=>$(q).addEventListener("beforexrselect",e=>e.preventDefault()));
+ $("#toast").hidden=true;
+ R.xr.setSession(sess).then(()=>{
+  sess.requestReferenceSpace("viewer").then(vs=>sess.requestHitTestSource({space:vs})).then(h=>AR.hit=h);
+  sess.addEventListener("selectstart",ev=>{if(AR.state==="placed"&&!AR.dr&&!pn)xrDragStart(ev)});
+  sess.addEventListener("selectend",ev=>{if(AR.dr&&AR.dr.src===ev.inputSource)xrDragEnd(ev)});
+  sess.addEventListener("select",()=>{if(AR.state==="aim")AR.tap=true});
+  setState("aim");R.setAnimationLoop(xrFrame)}).catch(()=>{arCleanup();toast("AR couldn’t start on this device.")})}
+function xrFrame(t,frame){if(!frame||!AR.r)return;const ref=AR.r.xr.getReferenceSpace(),E=AR.E;if(!ref)return;
+ if(AR.dr)xrDrag(frame,ref);
+ AR.list.forEach(e=>{if(e.anc&&!(AR.dr&&AR.dr.e===e&&AR.dr.mv)){const pp=frame.getPose(e.anc.anchorSpace,ref);if(pp)e.base.fromArray(pp.transform.matrix).multiply(e.rel)}
+  e.g.matrix.copy(e.base).scale(_s.setScalar(e.k));e.g.matrixWorldNeedsUpdate=true});
+ if(!E||AR.state==="placed"||!AR.hit)return;
+ const hs=frame.getHitTestResults(AR.hit),vp=frame.getViewerPose(ref),cam=vp?vp.transform.position:{x:0,y:0,z:0};let best=null,kind=null,bm=null;
+ for(const h of hs){const po=h.getPose(ref);if(!po)continue;_M.fromArray(po.transform.matrix);const ny=_M.elements[5],k=Math.abs(ny)<.35?"wall":ny>.7?"floor":null;
+  if(k==="wall"){best=h;kind=k;bm=_M.clone();break}if(k==="floor"&&!best){best=h;kind=k;bm=_M.clone()}}
+ if(!best){E.g.visible=false;AR.ret.visible=false;hint("Move the phone slowly to scan the wall and floor");AR.tap=false;return}
+ _p.setFromMatrixPosition(bm);_c.set(cam.x-_p.x,cam.y-_p.y,cam.z-_p.z);
+ if(kind==="wall"){_n.set(bm.elements[4],bm.elements[5],bm.elements[6]);_n.y=0;_n.normalize();if(_n.dot(_c)<0)_n.negate()}else{_n.copy(_c);_n.y=0;_n.normalize()}
+ const ctr=_p.clone();if(kind==="floor")ctr.y+=Math.max(1.45,E.h/2+.1);ctr.addScaledVector(_n,.003);_x.crossVectors(_up,_n).normalize();_y.crossVectors(_n,_x);
+ E.base.makeBasis(_x,_y,_n).setPosition(ctr);E.g.matrix.copy(E.base).scale(_s.setScalar(E.k));E.g.matrixWorldNeedsUpdate=true;E.g.visible=true;
+ AR.ret.matrix.copy(bm);AR.ret.matrixWorldNeedsUpdate=true;AR.ret.visible=true;hint(kind==="wall"?"Wall found · tap to hang here":"Floor found · tap at the base of the wall");
+ if(AR.tap){AR.tap=false;const rel=bm.clone().invert().multiply(E.base);commit(E);
+  if(best.createAnchor)best.createAnchor().then(an=>{if(AR.list.indexOf(E)<0){try{an.delete()}catch(x){}return}E.anc=an;E.rel=rel}).catch(()=>{})}   // the anchor keeps it glued to the wall
+ AR.tap=false}
+function xrDragStart(ev){try{const ref=AR.r.xr.getReferenceSpace(),po=ev.frame.getPose(ev.inputSource.targetRaySpace,ref);if(!po)return;
+ const m=po.transform.matrix,rc=AR.rc||(AR.rc=new THREE.Raycaster());rc.ray.origin.set(m[12],m[13],m[14]);rc.ray.direction.set(-m[8],-m[9],-m[10]).normalize();
+ let best=null,bd=1e9;AR.list.forEach(e=>{e.g.updateMatrixWorld(true);const h=rc.intersectObject(e.pic,false)[0];if(h&&h.distance<bd){bd=h.distance;best=e}});
+ if(!best)return;if(best!==AR.sel)select(best);
+ const b=best.base.elements,n=new THREE.Vector3(b[8],b[9],b[10]).normalize(),c=new THREE.Vector3(b[12],b[13],b[14]),dn=n.dot(rc.ray.direction);if(Math.abs(dn)<.05)return;
+ const t=n.dot(c.clone().sub(rc.ray.origin))/dn;AR.dr={e:best,src:ev.inputSource,mv:false,off:rc.ray.origin.clone().add(rc.ray.direction.clone().multiplyScalar(t)).sub(c)}}catch(x){}}
+function xrDrag(frame,ref){const d=AR.dr,po=frame.getPose(d.src.targetRaySpace,ref);if(!po)return;const m=po.transform.matrix,o=new THREE.Vector3(m[12],m[13],m[14]),dir=new THREE.Vector3(-m[8],-m[9],-m[10]).normalize(),
+ b=d.e.base.elements,n=new THREE.Vector3(b[8],b[9],b[10]).normalize(),c=new THREE.Vector3(b[12],b[13],b[14]),dn=n.dot(dir);if(Math.abs(dn)<.05)return;
+ const t=n.dot(c.clone().sub(o))/dn;if(t<.1||t>20)return;const hp=o.add(dir.multiplyScalar(t)).sub(d.off);
+ if(!d.mv&&hp.distanceTo(c)>.03){d.mv=true;if(d.e.anc){try{d.e.anc.delete()}catch(x){}d.e.anc=null}}if(d.mv)d.e.base.setPosition(hp)}
+function xrDragEnd(ev){const d=AR.dr;AR.dr=null;if(!d||!d.mv)return;
+ try{const p=new THREE.Vector3(),q=new THREE.Quaternion(),sc=new THREE.Vector3();d.e.base.decompose(p,q,sc);
+  ev.frame.createAnchor(new XRRigidTransform({x:p.x,y:p.y,z:p.z,w:1},{x:q.x,y:q.y,z:q.z,w:q.w}),AR.r.xr.getReferenceSpace()).then(an=>{
+   if(AR.list.indexOf(d.e)<0||(AR.dr&&AR.dr.e===d.e)){try{an.delete()}catch(x){}return}d.e.anc=an;d.e.rel=new THREE.Matrix4()}).catch(()=>{})}catch(x){}}
+function arCleanup(){const sx=AR.sess;AR.sess=null;if(sx)try{sx.end().catch(()=>{})}catch(e){}
+ cancelAnimationFrame(AR.raf);clearTimeout(AR.ht);clearTimeout(AR.hl);removeEventListener("resize",AR.onRes);removeEventListener("deviceorientation",AR.onOri);
+ AR.stream?.getTracks().forEach(t=>t.stop());AR.stream=null;$("#arvid").srcObject=null;try{AR.hit?.cancel?.()}catch(e){}AR.hit=null;AR.dr=null;AR.tap=false;AR.ret=null;
+ if(AR.r){try{AR.r.setAnimationLoop(null);AR.r.dispose();AR.r.forceContextLoss()}catch(e){}AR.r=null}
+ AR.list.forEach(e=>{if(e.anc)try{e.anc.delete()}catch(x){}});AR.list=[];AR.E=null;AR.sel=null;AR.busy=false;$("#arpick").hidden=true;arov.hidden=true}
+const closeAR=arCleanup;
+function openPicker(){const seen=new Set(),l=[...Object.values(favs),...items].filter(p=>!seen.has(p.id)&&seen.add(p.id)).slice(0,60),b=$("#arpl");
+ b.innerHTML=l.map((p,i)=>`<img src="${esc(p.img)}" alt="${esc(p.t)}" data-t="${i}">`).join("");b._l=l;$("#arpick").hidden=false}
+$("#arpl").onclick=async e=>{const i=e.target.dataset.t;if(i===undefined)return;const p=$("#arpl")._l[+i];
+ if(AR.list.length>=AR.max)return toast("Maximum of 5 posters on the wall");$("#arpick").hidden=true;
+ try{const im=await loadImg(p);newE(p,im);setState("aim")}catch(x){toast("This poster can’t be shown on a wall (its source blocks it). Try another.");$("#arpick").hidden=false}};
+$("#arpx").onclick=()=>{$("#arpick").hidden=true;if(!AR.list.length&&!AR.E)closeAR()};
+$("#arX").onclick=closeAR;$("#arAdd").onclick=()=>{if(!AR.E)openPicker()};
+$("#arCancel").onclick=()=>{if(!AR.E)return;AR.s.remove(AR.E.g);AR.E=null;setState("placed")};
+$("#arDel").onclick=()=>{const e=AR.sel;if(!e)return;AR.s.remove(e.g);if(e.anc)try{e.anc.delete()}catch(x){}AR.list.splice(AR.list.indexOf(e),1);select(AR.list[AR.list.length-1]||null);if(!AR.list.length)openPicker()};
+/* touch: tap to hang, drag to move, pinch to resize */
+const rayAt=(x,y)=>{const r=AR.r.domElement.getBoundingClientRect(),rc=AR.rc||(AR.rc=new THREE.Raycaster());rc.setFromCamera({x:(x-r.left)/r.width*2-1,y:-((y-r.top)/r.height)*2+1},AR.c);return rc};
+const pickAt=rc=>{let best=null,bd=1e9;AR.list.forEach(e=>{e.g.updateMatrixWorld(true);const h=rc.intersectObject(e.pic,false)[0];if(h&&h.distance<bd){bd=h.distance;best=e}});return best};
+function planeHit(e,rc){const f=e.fb,n=new THREE.Vector3(Math.sin(f.yaw),0,Math.cos(f.yaw)),c=new THREE.Vector3(f.x,f.y,f.z),dn=n.dot(rc.ray.direction);if(Math.abs(dn)<.05)return null;
+ const t=n.dot(c.clone().sub(rc.ray.origin))/dn;return t<.2||t>20?null:rc.ray.origin.clone().add(rc.ray.direction.clone().multiplyScalar(t))}
+const P=new Map();let tap=null,dg=null,pn=null;
+arov.addEventListener("pointerdown",e=>{if(!AR.r||e.target.closest("button,#arpick"))return;arov.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(P.size===1&&!AR.sess){tap={x:e.clientX,y:e.clientY,t:Date.now(),mv:false};
+  if(AR.state==="placed"){const rc=rayAt(e.clientX,e.clientY),b=pickAt(rc);if(b){if(b!==AR.sel)select(b);const hp=planeHit(b,rc);if(hp)dg={e:b,off:hp.sub(new THREE.Vector3(b.fb.x,b.fb.y,b.fb.z))}}}}
+ else if(P.size===2&&AR.sel){tap=null;dg=null;const[a,b]=[...P.values()];pn={d:Math.hypot(a.x-b.x,a.y-b.y)||1,k:AR.sel.k}}});
+arov.addEventListener("pointermove",e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pn&&P.size>=2){const[a,b]=[...P.values()],k=Math.max(.3,Math.min(4,pn.k*(Math.hypot(a.x-b.x,a.y-b.y)||1)/pn.d));AR.sel.k=k;if(!AR.sess)AR.sel.g.scale.setScalar(k)}
+ else if(dg){const hp=planeHit(dg.e,rayAt(e.clientX,e.clientY));if(hp){hp.sub(dg.off);const f=dg.e.fb;f.x=hp.x;f.y=Math.max(.25,Math.min(3.2,hp.y));f.z=hp.z;lay(dg.e)}}
+ else if(tap&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)>10)tap.mv=true});
+const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);
+ if(tap&&!tap.mv&&P.size===0&&!AR.sess&&AR.state==="aim"&&Date.now()-tap.t<600)setWall();
+ if(P.size<2)pn=null;if(!P.size){dg=null;tap=null}};
+arov.addEventListener("pointerup",up);arov.addEventListener("pointercancel",up);
+/* photo: camera picture + posters, shared or saved */
+$("#shutter").onclick=()=>{if(!AR.r||AR.sess)return;const cv=AR.r.domElement,v=$("#arvid"),w=cv.width,h=cv.height,c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");
+ if(v.videoWidth){const k=Math.max(w/v.videoWidth,h/v.videoHeight);x.drawImage(v,(w-v.videoWidth*k)/2,(h-v.videoHeight*k)/2,v.videoWidth*k,v.videoHeight*k)}
+ const hv=AR.list.map(e=>e.ol.visible);AR.list.forEach(e=>e.ol.visible=false);AR.r.render(AR.s,AR.c);x.drawImage(cv,0,0);AR.list.forEach((e,i)=>e.ol.visible=hv[i]);
+ x.font=`italic 700 ${Math.max(16,w*.035)}px Georgia,serif`;x.textAlign="right";x.fillStyle="rgba(255,255,255,.75)";x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=6;x.fillText("PosterPro",w*.95,h*.95);
+ c.toBlob(async b=>{if(!b)return toast("Could not take the photo.");const f=new File([b],"posterpro-wall.jpg",{type:"image/jpeg"});
+  try{if(navigator.canShare?.({files:[f]})){await navigator.share({files:[f],title:"My PosterPro wall"});return}}catch(e){if(e.name==="AbortError")return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="posterpro-wall.jpg";a.click();toast("Photo saved to your downloads.")},"image/jpeg",.92)};
+load();
+</script></body></html>
