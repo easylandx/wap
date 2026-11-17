@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PosterPro</title>
+<style>
+:root{--bg:#0c0c0e;--card:#17171b;--tx:#f2efe8;--mu:#9a968c;--ac:#e8b04a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px system-ui,sans-serif}
+header{padding:18px 16px 8px;position:sticky;top:0;background:linear-gradient(var(--bg) 80%,transparent);z-index:5}
+h1{margin:0;font:700 26px Georgia,serif;letter-spacing:.5px}h1 span{color:var(--ac)}
+.tag{color:var(--mu);font-size:13px;margin:2px 0 10px}
+input,select,button{font:inherit;color:var(--tx);background:var(--card);border:1px solid #2c2c33;border-radius:10px;padding:9px 12px}
+button{cursor:pointer}button.p{background:var(--ac);color:#111;border:0;font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.row input{flex:1;min-width:140px}
+.chip{border-radius:20px;padding:6px 13px;font-size:13px}.chip.on{background:var(--ac);color:#111;border-color:var(--ac)}
+#src label{font-size:12px;color:var(--mu);margin-right:8px;white-space:nowrap}
+#grid{columns:2 150px;gap:12px;padding:12px 16px 90px}@media(min-width:700px){#grid{columns:4 170px}}
+.po{break-inside:avoid;margin:0 0 12px;background:var(--card);border-radius:10px;overflow:hidden;position:relative;cursor:pointer}
+.po img{width:100%;display:block;min-height:120px;background:#222}
+.po small{display:block;padding:6px 8px;color:var(--mu);font-size:11px}
+.po b{position:absolute;top:6px;right:6px;background:#000a;border-radius:50%;width:28px;height:28px;text-align:center;line-height:28px}
+#msg{padding:0 16px;color:var(--mu);font-size:13px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#0c0c0eee;backdrop-filter:blur(8px);z-index:6}
+nav button{flex:1}
+.ov{position:fixed;inset:0;background:#000;z-index:20;display:none}.ov.show{display:block}
+#frame{position:absolute;inset:0;overflow:hidden}
+#frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 1.2s}
+#frame img.on{opacity:1;animation:kb 14s ease-out forwards}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.12) translate(-1.5%,1%)}}
+#meta{position:absolute;left:0;right:0;bottom:0;padding:18px 18px 28px;background:linear-gradient(transparent,#000c);font-size:14px}
+.bar{position:absolute;top:0;left:0;right:0;display:flex;gap:8px;padding:12px;z-index:3;flex-wrap:wrap}
+#cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#222}
+#pz{position:absolute;touch-action:none;left:30%;top:25%;width:40%;cursor:grab}
+#pz img{width:100%;display:block;pointer-events:none}
+#pz.black{border:10px solid #111;box-shadow:0 8px 24px #0009}#pz.wood{border:10px solid #8a5a2b;box-shadow:0 8px 24px #0009}
+#pz.neon{border:4px solid #0ff;box-shadow:0 0 18px #0ff,0 0 40px #f0f}
+#sz{position:absolute;bottom:20px;left:16px;right:16px;z-index:3;display:flex;gap:10px;align-items:center}#sz input{flex:1;padding:0}
+</style></head><body>
+<header>
+<h1>Poster<span>Pro</span></h1><div class="tag">Curate, play, and preview iconic posters on your wall.</div>
+<div class="row"><input id="q" placeholder="Search posters (e.g. Casablanca, Art Nouveau)…"><button class="p" id="go">Search</button></div>
+<div class="row" id="cats"></div>
+<div class="row" id="src"></div>
+</header>
+<div id="msg"></div><div id="grid"></div>
+<nav><button id="fav">♥ Favorites</button><button id="play" class="p">▶ Auto-play</button><button id="ar">📷 AR wall</button></nav>
+
+<div class="ov" id="slide"><div id="frame"></div><div class="bar">
+<button id="x1">✕</button><select id="sec"><option value="10000">10s</option><option value="30000">30s</option><option value="60000">1m</option><option value="300000">5m</option></select>
+<button id="shuf">Shuffle: on</button><button id="x2">Fullscreen</button></div><div id="meta"></div></div>
+
+<div class="ov" id="arv"><video id="cam" playsinline muted autoplay></video>
+<div id="pz"><img id="pimg" crossorigin="anonymous"></div>
+<div class="bar"><button id="x3">✕</button><select id="fr"><option value="">No frame</option><option value="black">Black matte</option><option value="wood">Wood</option><option value="neon">Neon</option></select>
+<label style="align-self:center"><input type="checkbox" id="wm" checked style="width:auto"> Watermark</label><button class="p" id="snap">📸 Capture &amp; share</button></div>
+<div id="sz">Size <input type="range" id="szr" min="15" max="90" value="40"></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const CATS={"All posters":"poster","Movies":"movie poster film","Sci-Fi":"science fiction film poster","Horror":"horror film poster","Music":"concert poster music","Travel":"travel poster","War / Propaganda":"propaganda poster WWII","Art Nouveau":"art nouveau poster","Vintage Ads":"vintage advertising poster","Theatre":"theatre poster"};
+const SRC={
+ commons:{n:"Wikimedia Commons",on:1,f:async q=>{const j=await(await fetch("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=24&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=800&format=json&origin=*&gsrsearch="+encodeURIComponent(q+" filetype:bitmap"))).json();
+  return Object.values(j.query?.pages||{}).filter(p=>p.imageinfo).map(p=>({id:"c"+p.pageid,t:p.title.replace(/^File:|\.\w+$/g,""),img:p.imageinfo[0].thumburl,page:p.imageinfo[0].descriptionurl,s:"Commons"}))}},
+ loc:{n:"Library of Congress",on:1,f:async q=>{const j=await(await fetch("https://www.loc.gov/photos/?fo=json&c=24&q="+encodeURIComponent(q))).json();
+  return(j.results||[]).filter(r=>r.image_url?.length).map(r=>({id:"l"+r.id,t:r.title,img:r.image_url[r.image_url.length-1].replace(/^http:/,"https:"),page:r.url,s:"LoC"}))}},
+ ia:{n:"Archive.org",on:1,f:async q=>{const j=await(await fetch("https://archive.org/advancedsearch.php?output=json&rows=24&fl[]=identifier&fl[]=title&q="+encodeURIComponent("("+q+") AND mediatype:image"))).json();
+  return j.response.docs.map(d=>({id:"a"+d.identifier,t:d.title,img:"https://archive.org/services/img/"+d.identifier,page:"https://archive.org/details/"+d.identifier,s:"Archive.org"}))}},
+ eu:{n:"Europeana",on:1,f:async q=>{const j=await(await fetch("https://api.europeana.eu/record/v2/search.json?wskey=api2demo&media=true&rows=24&qf=TYPE:IMAGE&query="+encodeURIComponent(q))).json();
+  return(j.items||[]).filter(i=>i.edmPreview).map(i=>({id:"e"+i.id,t:(i.title||[""])[0],img:i.edmPreview[0],page:i.guid,s:"Europeana"}))}}
+};
+// Sources without a public API: opened as deep-link searches
+const LINKS={"Harry Ransom Center":q=>"https://norman.hrc.utexas.edu/fasearch/results.cfm?searchtext="+encodeURIComponent(q),
+ "MoviePosterDB":q=>"https://www.movieposterdb.com/search?q="+encodeURIComponent(q),
+ "Artvee":q=>"https://artvee.com/?s="+encodeURIComponent(q),"PICRYL":q=>"https://picryl.com/search?q="+encodeURIComponent(q),
+ "CineMaterial":q=>"https://www.cinematerial.com/search?q="+encodeURIComponent(q)};
+let items=[],cat="All posters",favs=JSON.parse(localStorage.getItem("pp_favs")||"[]"),showFav=false;
+try{favs=JSON.parse(localStorage.getItem("pp_favs")||"[]")}catch(e){favs=[]}
+const sv=()=>{try{localStorage.setItem("pp_favs",JSON.stringify(favs))}catch(e){}};
+$("#cats").innerHTML=Object.keys(CATS).map(c=>`<button class="chip${c===cat?" on":""}" data-c="${c}">${c}</button>`).join("");
+$("#cats").onclick=e=>{const c=e.target.dataset.c;if(!c)return;cat=c;[...$("#cats").children].forEach(b=>b.classList.toggle("on",b.dataset.c===c));showFav=false;load()};
+$("#src").innerHTML=Object.entries(SRC).map(([k,v])=>`<label><input type="checkbox" data-k="${k}" ${v.on?"checked":""}> ${v.n}</label>`).join("")+Object.keys(LINKS).map(n=>`<label><a style="color:var(--ac)" data-l="${n}" href="#" target="_blank" rel="noopener">${n} ↗</a></label>`).join("");
+$("#src").onclick=e=>{const k=e.target.dataset.k,l=e.target.dataset.l;if(k)SRC[k].on=e.target.checked;if(l){e.target.href=LINKS[l](query())}};
+const query=()=>($("#q").value.trim()+" "+(CATS[cat]||"")).trim();
+async function load(){
+ $("#grid").innerHTML="";$("#msg").textContent="Loading…";
+ const act=Object.values(SRC).filter(s=>s.on);
+ const res=await Promise.allSettled(act.map(s=>s.f(query())));
+ items=res.flatMap(r=>r.status==="fulfilled"?r.value:[]);
+ const fails=res.filter(r=>r.status==="rejected").length;
+ items=items.sort(()=>Math.random()-.5);
+ $("#msg").textContent=items.length+" posters"+(fails?` · ${fails} source(s) unavailable (check connection)`:"")+" · tap to open in AR, ♥ to save";
+ render(items)}
+function render(list){
+ $("#grid").innerHTML=list.map((p,i)=>`<div class="po" data-i="${i}"><img loading="lazy" src="${p.img}" alt=""><b data-f="${i}">${favs.some(f=>f.id===p.id)?"♥":"♡"}</b><small>${(p.t||"").slice(0,60)} · ${p.s}</small></div>`).join("");
+ $("#grid").onclick=e=>{const i=e.target.dataset.f;if(i!==undefined){const p=list[i],k=favs.findIndex(f=>f.id===p.id);k>=0?favs.splice(k,1):favs.push(p);sv();e.target.textContent=k>=0?"♡":"♥";return}
+  const c=e.target.closest(".po");if(c)openAR(list[c.dataset.i])};
+ $("#grid").querySelectorAll("img").forEach(im=>im.onerror=()=>im.closest(".po")?.remove())}
+$("#go").onclick=load;$("#q").onkeydown=e=>e.key==="Enter"&&load();
+$("#fav").onclick=()=>{showFav=!showFav;$("#msg").textContent=showFav?favs.length+" favorites":"";render(showFav?favs:items)};
+// Auto-play
+let tm,idx=0,shuf=true,order=[];
+function startPlay(){const l=showFav&&favs.length?favs:items;if(!l.length)return alert("Search first!");order=[...l];if(shuf)order.sort(()=>Math.random()-.5);idx=0;$("#slide").classList.add("show");next();clearInterval(tm);tm=setInterval(next,+$("#sec").value)}
+function next(){const p=order[idx++%order.length];const im=new Image();im.onload=()=>{[...$("#frame").children].forEach(c=>c.classList.remove("on"));$("#frame").appendChild(im);requestAnimationFrame(()=>im.classList.add("on"));setTimeout(()=>{while($("#frame").children.length>2)$("#frame").firstChild.remove()},1500)};im.onerror=next;im.src=p.img;$("#meta").innerHTML=`<b>${p.t||""}</b><br><span style="color:var(--mu)">${p.s} · <a style="color:var(--ac)" target="_blank" rel="noopener" href="${p.page}">source</a></span>`}
+$("#play").onclick=startPlay;$("#sec").onchange=()=>{clearInterval(tm);tm=setInterval(next,+$("#sec").value)};
+$("#shuf").onclick=e=>{shuf=!shuf;e.target.textContent="Shuffle: "+(shuf?"on":"off")};
+$("#x1").onclick=()=>{clearInterval(tm);$("#slide").classList.remove("show");document.fullscreenElement&&document.exitFullscreen()};
+$("#x2").onclick=()=>$("#slide").requestFullscreen?.();
+// AR
+let stream,cur;
+async function openAR(p){cur=p;$("#arv").classList.add("show");$("#pimg").src=p.img;$("#pz").style.cssText="";$("#szr").value=40;
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});$("#cam").srcObject=stream}catch(e){alert("Camera unavailable — open this file over https or localhost and allow camera access. You can still preview on the grey wall.")}}
+$("#ar").onclick=()=>{const p=(showFav?favs:items)[0];if(!p)return alert("Search and pick a poster first (tap one to open AR).");openAR(p)};
+$("#x3").onclick=()=>{stream?.getTracks().forEach(t=>t.stop());$("#arv").classList.remove("show")};
+$("#fr").onchange=e=>$("#pz").className=e.target.value;
+$("#szr").oninput=e=>$("#pz").style.width=e.target.value+"%";
+const pts=new Map();let d0=0,w0=0;const pz=$("#pz");
+pz.onpointerdown=e=>{pz.setPointerCapture(e.pointerId);pts.set(e.pointerId,e);if(pts.size==2){const[a,b]=[...pts.values()];d0=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);w0=pz.offsetWidth}};
+pz.onpointermove=e=>{if(!pts.has(e.pointerId))return;const o=pts.get(e.pointerId);pts.set(e.pointerId,e);
+ if(pts.size==2){const[a,b]=[...pts.values()];const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);pz.style.width=Math.max(60,w0*d/d0)+"px"}
+ else{pz.style.left=pz.offsetLeft+e.clientX-o.clientX+"px";pz.style.top=pz.offsetTop+e.clientY-o.clientY+"px"}};
+pz.onpointerup=pz.onpointercancel=e=>pts.delete(e.pointerId);
+$("#snap").onclick=async()=>{
+ const v=$("#cam"),W=innerWidth,H=innerHeight,c=document.createElement("canvas");c.width=W*2;c.height=H*2;const x=c.getContext("2d");x.scale(2,2);
+ x.fillStyle="#2a2a2e";x.fillRect(0,0,W,H);
+ if(v.videoWidth){const s=Math.max(W/v.videoWidth,H/v.videoHeight),w=v.videoWidth*s,h=v.videoHeight*s;x.drawImage(v,(W-w)/2,(H-h)/2,w,h)}
+ const im=$("#pimg"),r=pz.getBoundingClientRect(),f=$("#fr").value;
+ try{
+  if(f){const b={black:["#111",10],wood:["#8a5a2b",10],neon:["#0ff",4]}[f];x.shadowColor=f==="neon"?"#0ff":"#000";x.shadowBlur=f==="neon"?24:20;x.fillStyle=b[0];x.fillRect(r.left,r.top,r.width,r.height);x.shadowBlur=0}
+  const bw=f?{black:10,wood:10,neon:4}[f]:0;x.drawImage(im,r.left+bw,r.top+bw,r.width-2*bw,r.height-2*bw);
+  if($("#wm").checked){x.font="600 16px Georgia";x.fillStyle="#fffc";x.shadowColor="#000";x.shadowBlur=4;x.fillText("PosterPro",16,H-18)}
+  c.toBlob(async b=>{const file=new File([b],"posterpro.png",{type:"image/png"});
+   if(navigator.canShare?.({files:[file]}))try{await navigator.share({files:[file],title:"My wall — PosterPro",text:cur?.t||""})}catch(e){}
+   else{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="posterpro.png";a.click()}});
+ }catch(e){alert("This source blocks image export (CORS). Try a Wikimedia Commons or Archive.org poster.")}};
+load();
+</script></body></html>
