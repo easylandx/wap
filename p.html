@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16171a">
+<title>PosterPro</title>
+<style>
+:root{--bg:#16171a;--panel:#1f2024;--line:#33353b;--ink:#f1ece0;--mute:#a09b8e;--brass:#d6a64e;--r:10px}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Helvetica Neue",Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px}
+button:hover{border-color:var(--brass)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+button.on{background:var(--brass);color:#1a1405;border-color:var(--brass)}
+header{padding:calc(18px + env(safe-area-inset-top)) 20px 8px;max-width:1200px;margin:auto}
+.logo{font:italic 700 34px/1 Georgia,"Times New Roman",serif;letter-spacing:-.5px;margin:0}
+.logo b{color:var(--brass);font-style:normal}
+.tag{color:var(--mute);margin:6px 0 16px;font-family:Georgia,serif}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bar input{flex:1 1 220px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:10px 16px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
+.chips button{white-space:nowrap;flex:none;font-size:13px;padding:6px 12px}
+main{max-width:1200px;margin:auto;padding:8px 20px calc(40px + env(safe-area-inset-bottom))}
+#status{color:var(--mute);min-height:22px;margin:8px 0 14px}
+#grid{columns:2 150px;column-gap:14px}
+@media(min-width:700px){#grid{columns:4 190px}}
+.card{break-inside:avoid;margin:0 0 14px;position:relative;background:var(--panel);border-radius:var(--r);overflow:hidden;cursor:pointer;border:1px solid var(--line)}
+.card img{display:block;width:100%;height:auto;background:#222}
+.card figcaption{padding:8px 10px 10px;font-size:13px}
+.card figcaption span{display:block;color:var(--mute);font-size:12px}
+.heart{position:absolute;top:8px;right:8px;width:34px;height:34px;padding:0;border-radius:50%;background:#000a;font-size:16px;line-height:1}
+.heart.on{color:#1a1405}
+.layer{position:fixed;inset:0;z-index:20;background:var(--bg)}
+#detail{background:#000c;display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:880px;width:100%;max-height:92vh;overflow:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+@media(min-width:700px){.sheet{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.sheet img{width:100%;max-height:70vh;object-fit:contain;background:#111}
+.sheet .info{padding:20px}
+.sheet h2{font:italic 700 24px/1.15 Georgia,serif;margin:0 0 6px}
+.sheet p{color:var(--mute);margin:4px 0}
+.sheet a{color:var(--brass)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+/* slideshow */
+#show{background:#000;overflow:hidden;cursor:none}
+#show.ui{cursor:default}
+#stage{position:absolute;inset:0}
+.slide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 1.1s;transform-origin:center;animation:kb var(--d) ease-in-out forwards}
+.slide.on{opacity:1}
+@keyframes kb{from{transform:scale(1) translate(0,0)}to{transform:scale(1.1) translate(var(--dx),var(--dy))}}
+@media(prefers-reduced-motion:reduce){.slide{animation:none}}
+#cap{position:absolute;left:24px;bottom:calc(24px + env(safe-area-inset-bottom));font:italic 22px Georgia,serif;text-shadow:0 2px 12px #000;max-width:70vw}
+#cap small{display:block;font:13px "Helvetica Neue",Arial,sans-serif;color:#ddd;font-style:normal}
+.ctl{position:absolute;left:0;right:0;top:0;padding:calc(12px + env(safe-area-inset-top)) 16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;background:linear-gradient(#000b,transparent);opacity:0;transition:opacity .3s}
+#show.ui .ctl,#ar.ui .ctl{opacity:1}
+.ctl button,.ctl select{background:#000a;border:1px solid #fff4;border-radius:999px;padding:7px 12px}
+.ctl select option{color:#000}
+/* AR */
+#ar{background:#000;touch-action:none}
+#arStage{position:absolute;inset:0;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#cfc8b8,#8d8676 80%)}
+#arStage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#arStage.nocam video{display:none}
+#arPoster{position:absolute;box-sizing:content-box;touch-action:none;user-select:none}
+#arPoster img{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none}
+.f-none{box-shadow:0 10px 30px #0008}
+.f-black{border:var(--b) solid #111;box-shadow:0 10px 30px #0008}
+.f-wood{border:var(--b) solid #8b5a2b;box-shadow:0 10px 30px #0008}
+.f-neon{border:var(--b) solid #111;box-shadow:0 0 0 2px #18f0ff,0 0 36px 6px #18f0ffaa}
+#ar .ctl{justify-content:space-between;align-items:center;z-index:2;opacity:1}
+#ar .grp{display:flex;gap:6px;flex-wrap:wrap}
+.hint{position:absolute;left:0;right:0;bottom:130px;text-align:center;color:#fff;font-size:13px;text-shadow:0 1px 6px #000;pointer-events:none}
+.shutter{position:absolute;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%);width:72px;height:72px;border-radius:50%;border:4px solid #fff;background:#fff3;padding:0}
+.shutter::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#fff}
+.shutter:active::after{inset:10px}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .4s}
+.flash.go{opacity:.85;transition:none}
+#toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#000d;color:#fff;padding:10px 16px;border-radius:999px;z-index:50;font-size:14px;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1 class="logo">Poster<b>Pro</b></h1>
+  <p class="tag">Curate, play, and preview iconic posters on your wall.</p>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Search posters (e.g. Metropolis, Paris, jazz)" aria-label="Search posters">
+    <button id="favBtn">♥ Favorites <span id="favN">0</span></button>
+    <button id="playBtn">▶ Play</button>
+  </div>
+  <div class="chips" id="decades" aria-label="Decade"></div>
+  <div class="chips" id="cats" aria-label="Category"></div>
+</header>
+<main>
+  <div id="status"></div>
+  <div id="grid"></div>
+</main>
+
+<div id="detail" class="layer" hidden></div>
+
+<div id="show" class="layer" hidden>
+  <div id="stage"></div>
+  <div id="cap"></div>
+  <div class="ctl">
+    <select id="int" aria-label="Interval"><option value="10">10 s</option><option value="30">30 s</option><option value="60">1 min</option><option value="300">5 min</option></select>
+    <button id="shuf">Shuffle</button>
+    <button id="meta" class="on">Title</button>
+    <button id="prev" aria-label="Previous">‹</button>
+    <button id="pause">Pause</button>
+    <button id="next" aria-label="Next">›</button>
+    <button id="closeShow">Close</button>
+  </div>
+</div>
+
+<div id="ar" class="layer" hidden>
+  <div id="arStage" class="nocam">
+    <video id="cam" playsinline muted></video>
+    <div id="arPoster" class="f-none"><img id="arImg" alt=""></div>
+    <div class="flash" id="flash"></div>
+  </div>
+  <div class="ctl">
+    <div class="grp"><button id="arClose">✕ Close</button></div>
+    <div class="grp">
+      <select id="arSize" aria-label="Poster size"><option value="18">18×27 in</option><option value="24" selected>24×36 in</option><option value="27">27×40 in</option></select>
+      <button data-f="none" class="on">No frame</button><button data-f="black">Black matte</button><button data-f="wood">Wood</button><button data-f="neon">Neon</button>
+      <button id="wm" class="on">Watermark</button>
+    </div>
+  </div>
+  <div class="hint">Drag to move · pinch to resize and rotate</div>
+  <button class="shutter" id="shutter" aria-label="Take photo"></button>
+</div>
+<div id="toast" hidden></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rnd=(a,b)=>Math.random()*(b-a)+a;
+let toastT;function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200)}
+
+/* ---------- Data: Wikimedia Commons adapter ---------- */
+const DECADES=[["","All eras",null],["pre-1950","Pre-1950s",[0,1949]],["1950-60s","’50s–’60s",[1950,1969]],["1970s","’70s",[1970,1979]],["1980s","’80s",[1980,1989]],["1990s","’90s",[1990,1999]],["2000s+","2000s+",[2000,2100]]];
+const CATS=[["","All","poster"],["cinema","Cinema","film poster"],["music","Music & Concerts","concert poster"],["travel","Travel & Retro Ads","travel poster"],["art","Fine Art & Exhibition","exhibition poster"],["scifi","Sci-Fi & Gaming","science fiction poster"]];
+const decadeOf=y=>y==null?null:(DECADES.find(d=>d[2]&&y>=d[2][0]&&y<=d[2][1])||[])[0]||null;
+const strip=s=>String(s||"").replace(/<[^>]*>/g,"").trim();
+const yearOf=s=>{const m=String(s||"").match(/\b(1[5-9]\d\d|20\d\d)\b/);return m?+m[1]:null};
+
+async function fetchCommons({q,cat,dec}){
+  const term=[q,(CATS.find(c=>c[0]===cat)||CATS[0])[2],dec&&dec!=="pre-1950"&&dec!=="2000s+"?dec.replace("-60s","").replace("1950","195"):""].join(" ").trim();
+  const p=new URLSearchParams({action:"query",format:"json",origin:"*",generator:"search",gsrnamespace:"6",gsrlimit:"50",gsrsearch:term+" filetype:bitmap",prop:"imageinfo",iiprop:"url|size|extmetadata",iiurlwidth:"1280"});
+  const r=await fetch("https://commons.wikimedia.org/w/api.php?"+p);
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const pages=Object.values((await r.json()).query?.pages||{});
+  return pages.flatMap(pg=>{
+    const ii=pg.imageinfo?.[0];if(!ii)return[];
+    const m=ii.extmetadata||{},lic=m.LicenseShortName?.value||"Unknown";
+    if(!/public domain|^pd|cc0|cc[- ]by/i.test(lic))return[];
+    const year=yearOf(m.DateTimeOriginal?.value)||yearOf(m.DateTime?.value);
+    return[{id:"wm:"+pg.pageid,source:"Wikimedia Commons",title:strip(m.ObjectName?.value)||pg.title.replace(/^File:|\.\w+$/g,""),
+      year,decade:decadeOf(year),creator:strip(m.Artist?.value),
+      thumb:(ii.thumburl||ii.url).replace("/1280px-","/500px-"),img:ii.thumburl||ii.url,
+      license:{name:lic,url:m.LicenseUrl?.value},page:ii.descriptionurl}];
+  });
+}
+
+/* offline / blocked fallback: generated sample posters */
+function samples(){
+  const S=[["Midnight Run","1978","#ff6b6b","#ffd36b"],["Visit Lisbon","1957","#2bb3a3","#f4e285"],["Neon Arcade","1989","#8f5bff","#18f0ff"],["Jazz at the Pier","1962","#e8a23a","#7a2e1d"],["Galaxy Drifter","1983","#1d2b64","#f8cdda"],["Salon des Arts","1899","#c9b37e","#5a3d2b"]];
+  return S.map((s,i)=>{
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s[2]}"/><stop offset="1" stop-color="${s[3]}"/></linearGradient></defs><rect width="800" height="1200" fill="url(#g)"/><circle cx="400" cy="470" r="230" fill="#0003"/><text x="400" y="960" font-family="Georgia,serif" font-style="italic" font-size="82" font-weight="700" text-anchor="middle" fill="#fff">${s[0]}</text><text x="400" y="1050" font-family="Arial" font-size="40" text-anchor="middle" fill="#fffd">${s[1]}</text></svg>`;
+    const u="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+    return{id:"sample:"+i,source:"Sample",title:s[0],year:+s[1],decade:decadeOf(+s[1]),creator:"PosterPro",thumb:u,img:u,license:{name:"Generated sample"},page:""};
+  });
+}
+
+/* ---------- State & browser ---------- */
+let favs=store.get("pp_favs",{}),posters=[],view="browse",F={q:"",dec:"",cat:""},seq=0;
+const saveFavs=()=>{store.set("pp_favs",favs);$("#favN").textContent=Object.keys(favs).length};
+function chips(el,list,key){
+  el.innerHTML=list.map(c=>`<button data-v="${c[0]}" class="${F[key]===c[0]?"on":""}">${esc(c[1])}</button>`).join("");
+  el.onclick=e=>{const b=e.target.closest("button");if(!b)return;F[key]=b.dataset.v;view="browse";chips(el,list,key);syncFav();load()};
+}
+function syncFav(){$("#favBtn").classList.toggle("on",view==="fav")}
+async function load(){
+  const my=++seq;
+  if(view==="fav"){posters=Object.values(favs);return render()}
+  $("#status").textContent="Searching Wikimedia Commons…";
+  try{
+    let list=await fetchCommons(F);
+    const d=DECADES.find(x=>x[0]===F.dec);
+    if(d&&d[2])list=list.filter(p=>p.year&&p.year>=d[2][0]&&p.year<=d[2][1]);
+    if(my!==seq)return;
+    posters=list;
+    $("#status").textContent=list.length?`${list.length} free-licensed posters from Wikimedia Commons`:"No posters found. Try a broader search or another era.";
+  }catch(e){
+    if(my!==seq)return;
+    posters=samples();
+    $("#status").textContent="Could not reach Wikimedia Commons. Showing sample posters. Check your connection and search again.";
+  }
+  render();
+}
+function render(){
+  if(view==="fav"){
+    const q=F.q.toLowerCase();posters=Object.values(favs).filter(p=>!q||p.title.toLowerCase().includes(q));
+    $("#status").textContent=posters.length?"Your favorites":"No favorites yet. Tap ♥ on any poster to save it here.";
+  }
+  $("#grid").innerHTML=posters.map((p,i)=>`<figure class="card" data-i="${i}"><img loading="lazy" src="${esc(p.thumb)}" alt="${esc(p.title)}"><button class="heart ${favs[p.id]?"on":""}" data-h="${i}" aria-label="Favorite">${favs[p.id]?"♥":"♡"}</button><figcaption>${esc(p.title.slice(0,70))}<span>${p.year||"Year unknown"}${p.creator?" · "+esc(p.creator.slice(0,40)):""}</span></figcaption></figure>`).join("");
+}
+$("#grid").onclick=e=>{
+  const h=e.target.closest("[data-h]");
+  if(h){e.stopPropagation();toggleFav(posters[+h.dataset.h]);render();return}
+  const c=e.target.closest(".card");if(c)openDetail(posters[+c.dataset.i]);
+};
+function toggleFav(p){if(favs[p.id])delete favs[p.id];else favs[p.id]=p;saveFavs()}
+let qT;$("#q").oninput=e=>{F.q=e.target.value.trim();clearTimeout(qT);qT=setTimeout(()=>view==="fav"?render():load(),400)};
+$("#favBtn").onclick=()=>{view=view==="fav"?"browse":"fav";syncFav();load()};
+$("#playBtn").onclick=()=>posters.length?startShow(posters,0):toast("Nothing to play yet. Search for posters first.");
+
+/* ---------- Detail sheet ---------- */
+let cur=null;
+function openDetail(p){
+  cur=p;const d=$("#detail");
+  d.innerHTML=`<div class="sheet" role="dialog" aria-label="${esc(p.title)}"><img src="${esc(p.img)}" alt="${esc(p.title)}"><div class="info"><h2>${esc(p.title)}</h2><p>${p.year||"Year unknown"}${p.creator?" · "+esc(p.creator):""}</p><p>Source: ${esc(p.source)}</p><p>License: ${p.license.url?`<a href="${esc(p.license.url)}" target="_blank" rel="noopener">${esc(p.license.name)}</a>`:esc(p.license.name)}</p>${p.page?`<p><a href="${esc(p.page)}" target="_blank" rel="noopener">View original page</a></p>`:""}<div class="row"><button id="dFav" class="${favs[p.id]?"on":""}">${favs[p.id]?"♥ Saved":"♡ Save"}</button><button id="dPlay">▶ Play from here</button><button id="dAR">Try on your wall</button><button id="dX">Close</button></div></div></div>`;
+  d.hidden=false;
+  $("#dX").onclick=closeDetail;
+  $("#dFav").onclick=e=>{toggleFav(p);e.target.className=favs[p.id]?"on":"";e.target.textContent=favs[p.id]?"♥ Saved":"♡ Save";render()};
+  $("#dPlay").onclick=()=>{closeDetail();startShow(posters,Math.max(0,posters.indexOf(p)))};
+  $("#dAR").onclick=()=>openAR(p);
+}
+function closeDetail(){$("#detail").hidden=true}
+$("#detail").onclick=e=>{if(e.target.id==="detail")closeDetail()};
+
+/* ---------- Slideshow (Digital Frame mode) ---------- */
+const sh={list:[],i:0,t:null,paused:false,shuffle:false,meta:true,idle:null};
+function startShow(list,i){
+  sh.list=list;sh.i=i;sh.paused=false;$("#pause").textContent="Pause";
+  $("#show").hidden=false;$("#stage").innerHTML="";
+  (document.documentElement.requestFullscreen?.()||Promise.resolve()).catch(()=>{});
+  slide();bumpUI();
+}
+function slide(){
+  const p=sh.list[sh.i];if(!p)return;
+  const sec=+$("#int").value,img=new Image();
+  img.src=p.img;img.alt=p.title;img.className="slide";
+  img.style.setProperty("--d",(sec+2)+"s");img.style.setProperty("--dx",rnd(-2.5,2.5)+"%");img.style.setProperty("--dy",rnd(-2.5,2.5)+"%");
+  const st=$("#stage"),old=[...st.children];st.append(img);
+  const show=()=>requestAnimationFrame(()=>img.classList.add("on"));
+  img.decode?img.decode().then(show,show):show();
+  setTimeout(()=>old.forEach(o=>o.remove()),1400);
+  $("#cap").innerHTML=sh.meta?`${esc(p.title.slice(0,80))}<small>${p.year||""}</small>`:"";
+  clearTimeout(sh.t);if(!sh.paused)sh.t=setTimeout(()=>step(1),sec*1000);
+}
+function step(d){
+  const n=sh.list.length;if(!n)return;
+  if(sh.shuffle&&n>1){let j;do{j=Math.floor(Math.random()*n)}while(j===sh.i);sh.i=j}else sh.i=(sh.i+d+n)%n;
+  slide();
+}
+function bumpUI(){$("#show").classList.add("ui");clearTimeout(sh.idle);sh.idle=setTimeout(()=>$("#show").classList.remove("ui"),3000)}
+function closeShow(){clearTimeout(sh.t);$("#show").hidden=true;if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
+$("#show").addEventListener("pointermove",bumpUI);$("#show").addEventListener("pointerdown",bumpUI);
+$("#next").onclick=()=>step(1);$("#prev").onclick=()=>step(-1);$("#closeShow").onclick=closeShow;
+$("#pause").onclick=e=>{sh.paused=!sh.paused;e.target.textContent=sh.paused?"Resume":"Pause";sh.paused?clearTimeout(sh.t):slide()};
+$("#shuf").onclick=e=>{sh.shuffle=!sh.shuffle;e.target.classList.toggle("on",sh.shuffle)};
+$("#meta").onclick=e=>{sh.meta=!sh.meta;e.target.classList.toggle("on",sh.meta);slide()};
+$("#int").onchange=()=>slide();
+document.addEventListener("keydown",e=>{
+  if(!$("#show").hidden){if(e.key==="Escape")closeShow();if(e.key==="ArrowRight")step(1);if(e.key==="ArrowLeft")step(-1);if(e.key===" "){e.preventDefault();$("#pause").click()}}
+  else if(!$("#ar").hidden){if(e.key==="Escape")closeAR()}
+  else if(!$("#detail").hidden&&e.key==="Escape")closeDetail();
+});
+
+/* ---------- AR wall preview (camera + drag/pinch overlay) ---------- */
+const ar={x:0,y:0,w:200,base:200,rot:0,frame:"none",wm:true,img:null,stream:null};
+const stageEl=$("#arStage"),pEl=$("#arPoster"),cam=$("#cam");
+const frameW=()=>ar.frame==="none"?0:ar.w*0.035;
+function apply(){
+  pEl.style.width=ar.w+"px";pEl.style.left=ar.x+"px";pEl.style.top=ar.y+"px";
+  pEl.style.setProperty("--b",frameW()+"px");
+  pEl.style.transform=`translate(-50%,-50%) rotate(${ar.rot}rad)`;
+  pEl.className="f-"+ar.frame;
+}
+async function openAR(p){
+  closeDetail();$("#ar").hidden=false;$("#ar").classList.add("ui");
+  ar.rot=0;ar.frame="none";$$("[data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f==="none"));
+  $("#arSize").value="24";
+  ar.img=new Image();ar.img.crossOrigin="anonymous";
+  ar.img.onload=()=>{
+    const W=stageEl.clientWidth,H=stageEl.clientHeight,asp=ar.img.naturalWidth/ar.img.naturalHeight;
+    ar.base=Math.min(W*0.5,H*0.5*asp);ar.w=ar.base;ar.x=W/2;ar.y=H*0.42;apply();
+  };
+  ar.img.src=p.img;$("#arImg").src=p.img;
+  try{
+    ar.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+    cam.srcObject=ar.stream;await cam.play();stageEl.classList.remove("nocam");
+  }catch(e){
+    stageEl.classList.add("nocam");
+    toast("Camera unavailable. Using a sample wall. Open this file over https or localhost and allow camera access.");
+  }
+}
+function closeAR(){ar.stream?.getTracks().forEach(t=>t.stop());ar.stream=null;cam.srcObject=null;$("#ar").hidden=true}
+$("#arClose").onclick=closeAR;
+$("#arSize").onchange=e=>{ar.w=ar.base*(+e.target.value/24);apply()};
+$$("[data-f]").forEach(b=>b.onclick=()=>{ar.frame=b.dataset.f;$$("[data-f]").forEach(x=>x.classList.toggle("on",x===b));apply()});
+$("#wm").onclick=e=>{ar.wm=!ar.wm;e.target.classList.toggle("on",ar.wm)};
+
+const ptrs=new Map();
+stageEl.addEventListener("pointerdown",e=>{stageEl.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY})});
+stageEl.addEventListener("pointermove",e=>{
+  if(!ptrs.has(e.pointerId))return;
+  const old=[...ptrs.values()].map(o=>({...o}));
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const cur=[...ptrs.values()];
+  if(cur.length===1){ar.x+=cur[0].x-old[0].x;ar.y+=cur[0].y-old[0].y}
+  else if(cur.length>=2){
+    const d0=Math.hypot(old[0].x-old[1].x,old[0].y-old[1].y)||1,d1=Math.hypot(cur[0].x-cur[1].x,cur[0].y-cur[1].y);
+    const a0=Math.atan2(old[1].y-old[0].y,old[1].x-old[0].x),a1=Math.atan2(cur[1].y-cur[0].y,cur[1].x-cur[0].x);
+    ar.w=Math.max(60,Math.min(stageEl.clientWidth*2,ar.w*d1/d0));ar.rot+=a1-a0;
+    ar.x+=(cur[0].x+cur[1].x-old[0].x-old[1].x)/2;ar.y+=(cur[0].y+cur[1].y-old[0].y-old[1].y)/2;
+  }
+  apply();
+});
+["pointerup","pointercancel"].forEach(t=>stageEl.addEventListener(t,e=>ptrs.delete(e.pointerId)));
+stageEl.addEventListener("wheel",e=>{e.preventDefault();ar.w=Math.max(60,ar.w*(e.deltaY<0?1.05:.95));apply()},{passive:false});
+
+async function snap(){
+  const W=stageEl.clientWidth,H=stageEl.clientHeight,k=2,c=document.createElement("canvas");
+  c.width=W*k;c.height=H*k;const x=c.getContext("2d");x.scale(k,k);
+  if(!stageEl.classList.contains("nocam")&&cam.videoWidth){
+    const s=Math.max(W/cam.videoWidth,H/cam.videoHeight),w=cam.videoWidth*s,h=cam.videoHeight*s;
+    x.drawImage(cam,(W-w)/2,(H-h)/2,w,h);
+  }else{
+    const g=x.createRadialGradient(W/2,H*.3,10,W/2,H*.3,Math.max(W,H));g.addColorStop(0,"#cfc8b8");g.addColorStop(.8,"#8d8676");x.fillStyle=g;x.fillRect(0,0,W,H);
+  }
+  const ih=ar.w*ar.img.naturalHeight/ar.img.naturalWidth,b=frameW();
+  x.save();x.translate(ar.x,ar.y);x.rotate(ar.rot);
+  x.shadowColor="rgba(0,0,0,.45)";x.shadowBlur=26;x.shadowOffsetY=10;
+  if(ar.frame!=="none"){
+    const neon=ar.frame==="neon";
+    x.fillStyle=ar.frame==="wood"?"#8b5a2b":"#111";
+    if(neon){x.shadowColor="#18f0ff";x.shadowBlur=40;x.shadowOffsetY=0}
+    x.fillRect(-ar.w/2-b,-ih/2-b,ar.w+2*b,ih+2*b);
+    if(neon){x.shadowColor="transparent";x.strokeStyle="#18f0ff";x.lineWidth=3;x.strokeRect(-ar.w/2-b,-ih/2-b,ar.w+2*b,ih+2*b)}
+    x.shadowColor="transparent";
+  }
+  x.drawImage(ar.img,-ar.w/2,-ih/2,ar.w,ih);x.restore();
+  if(ar.wm){x.font=`italic 700 ${Math.max(14,W*0.035)}px Georgia,serif`;x.textAlign="right";x.fillStyle="rgba(255,255,255,.75)";x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=6;x.fillText("PosterPro",W-W*0.04,H-H*0.03)}
+  return new Promise((res,rej)=>{try{c.toBlob(b=>b?res(b):rej(new Error("empty")),"image/jpeg",.92)}catch(e){rej(e)}});
+}
+$("#shutter").onclick=async()=>{
+  const f=$("#flash");f.classList.add("go");setTimeout(()=>f.classList.remove("go"),80);
+  let blob;
+  try{blob=await snap()}catch(e){toast("Could not capture this poster image (the source blocks it). Try another poster.");return}
+  const file=new File([blob],"posterpro-wall.jpg",{type:"image/jpeg"});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"My PosterPro wall",text:"Previewed with PosterPro"});return}
+  }catch(e){if(e.name==="AbortError")return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="posterpro-wall.jpg";a.click();
+  toast("Photo saved to your downloads.");
+};
+
+/* ---------- Init ---------- */
+chips($("#decades"),DECADES,"dec");chips($("#cats"),CATS,"cat");saveFavs();load();
+</script>
+</body>
+</html>
