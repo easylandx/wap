@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#141416">
+<title>PosterPro</title>
+<style>
+:root{--bg:#141416;--pn:#1e1f23;--ln:#34363c;--ink:#f1ece0;--mu:#a29d90;--ac:#d6a64e;--sp:clamp(18px,4vw,40px)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Helvetica Neue",Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+button,select,input{font:inherit;color:inherit}
+button,select{background:var(--pn);border:1px solid var(--ln);border-radius:999px;padding:8px 15px;cursor:pointer}
+button:hover{border-color:var(--ac)}button.on{background:var(--ac);color:#1a1405;border-color:var(--ac)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+header{max-width:1400px;margin:auto;padding:calc(var(--sp) + env(safe-area-inset-top)) var(--sp) 8px}
+.logo{font:italic 700 clamp(34px,6vw,54px)/1 Georgia,serif;margin:0;letter-spacing:-1px}.logo b{color:var(--ac);font-style:normal}
+.tag{color:var(--mu);margin:8px 0 18px;font-family:Georgia,serif;font-size:17px}
+#q{width:100%;background:var(--pn);border:1px solid var(--ln);border-radius:999px;padding:12px 18px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 4px;scrollbar-width:none}
+.chips button{flex:none;white-space:nowrap;font-size:13px;padding:6px 13px}
+main{max-width:1400px;margin:auto;padding:8px var(--sp) calc(110px + env(safe-area-inset-bottom))}
+#msg{color:var(--mu);margin:8px 2px 18px;min-height:22px}
+#wall{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(10px,2vw,22px)}
+@media(min-width:620px){#wall{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){#wall{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:1200px){#wall{grid-template-columns:repeat(5,1fr)}}
+.po{position:relative;aspect-ratio:2/3;background:var(--pn);border-radius:6px;overflow:hidden;cursor:pointer;box-shadow:0 8px 22px #0007;transition:transform .25s}
+.po:hover{transform:translateY(-4px)}
+.po img{width:100%;height:100%;object-fit:cover;display:block}
+.po small{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 9px;font-size:12px;background:linear-gradient(transparent,#000d);opacity:0;transition:opacity .25s}
+.po:hover small,.po:focus-within small{opacity:1}
+@media(hover:none){.po small{opacity:1}}
+.h{position:absolute;top:8px;right:8px;width:34px;height:34px;padding:0;border-radius:50%;background:#000a;line-height:1}
+.h.on{color:#1a1405}
+#feed{display:none;flex-direction:column;gap:clamp(28px,6vh,60px);align-items:center}
+body.feed #wall{display:none}body.feed #feed{display:flex}
+body.feed{scroll-snap-type:y proximity}
+.fc{width:min(100%,560px);scroll-snap-align:center}
+.fc img{width:100%;max-height:78vh;object-fit:contain;display:block;border-radius:6px;background:var(--pn);box-shadow:0 14px 40px #000a;cursor:pointer}
+.fr{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px 0}
+.fr b{display:block;font:italic 700 18px/1.2 Georgia,serif}.fr span{color:var(--mu);font-size:13px}
+.fr div:last-child{display:flex;gap:8px;flex:none}.fr .h{position:static}
+#more{height:60px;text-align:center;color:var(--mu);margin-top:20px}
+nav{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10;display:flex;gap:6px;padding:7px;background:#0b0b0df0;border:1px solid var(--ln);border-radius:999px;backdrop-filter:blur(10px);max-width:calc(100vw - 32px)}
+nav button{border:0;background:none;padding:9px 15px;white-space:nowrap}
+nav button.on{background:var(--ac)}
+.layer{position:fixed;inset:0;z-index:30}
+#detail{background:#000d;display:flex;align-items:center;justify-content:center;padding:var(--sp)}
+.sheet{background:var(--pn);border:1px solid var(--ln);border-radius:16px;max-width:900px;width:100%;max-height:100%;overflow:auto;display:grid;grid-template-columns:minmax(0,1fr)}
+@media(min-width:700px){.sheet{grid-template-columns:1fr 1fr}}
+.sheet img{width:100%;max-height:72vh;object-fit:contain;background:#0d0d0f}
+.info{padding:24px}.info h2{font:italic 700 26px/1.15 Georgia,serif;margin:0 0 8px}.info p{color:var(--mu);margin:4px 0}.info a{color:var(--ac)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+#show{background:#000;overflow:hidden}#show:not(.ui){cursor:none}
+#stage{position:absolute;inset:0}
+.slide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 1.1s;animation:kb var(--d) ease-in-out forwards}
+.slide.on{opacity:1}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.1) translate(var(--dx),var(--dy))}}
+@media(prefers-reduced-motion:reduce){.slide{animation:none}.po{transition:none}}
+#cap{position:absolute;left:var(--sp);bottom:calc(var(--sp) + env(safe-area-inset-bottom));font:italic 22px Georgia,serif;text-shadow:0 2px 12px #000;max-width:70vw}
+.ctl{position:absolute;left:0;right:0;top:0;padding:calc(var(--sp) * .6 + env(safe-area-inset-top)) var(--sp);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;background:linear-gradient(#000b,transparent);opacity:0;transition:opacity .3s}
+.ui .ctl{opacity:1}
+.ctl button,.ctl select{background:#000a;border-color:#fff4}.ctl select option{color:#000}
+#ar{background:#0e0d0c;touch-action:none;overflow:hidden}
+#ar video,#ar canvas{position:absolute;inset:0;width:100%;height:100%}#ar video{object-fit:cover}
+#ar .c{display:none}
+#ar.s-placed #arAdd,#ar.s-placed #arDel,#ar.s-placed #shutter,#ar.canc.s-aim #arCancel{display:block}
+#arcross{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#fffd;box-shadow:0 0 0 2px #0007;display:none;pointer-events:none}
+#ar.s-aim #arcross{display:block}
+#artop{position:absolute;left:0;top:0;padding:calc(var(--sp) * .8 + env(safe-area-inset-top)) var(--sp)}
+#arbot{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:var(--sp) var(--sp) calc(var(--sp) + env(safe-area-inset-bottom))}
+#ar .ab{background:#0e0d0cd0;border-color:#fff4}#arAdd,#arCancel{justify-self:start}#arDel{justify-self:end}
+#shutter{width:72px;height:72px;border-radius:50%;border:4px solid #fff;background:#fff3;padding:0;position:relative}
+#shutter::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#fff}
+#arhint{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 2 * var(--sp));text-align:center;font-size:14px;padding:8px 14px;background:#0e0d0cd0;border:1px solid var(--ln);border-radius:12px;pointer-events:none;transition:opacity .5s}
+#ar.hh #arhint{opacity:0}#arhint:empty{display:none}
+#arpick{position:absolute;left:0;right:0;bottom:0;z-index:5;background:#141416f2;padding:var(--sp) var(--sp) calc(var(--sp) + env(safe-area-inset-bottom));border-radius:18px 18px 0 0}
+#arpick .pt{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+#arpl{display:flex;gap:10px;overflow-x:auto}#arpl img{height:120px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;cursor:pointer;flex:none}
+#toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#000e;padding:10px 16px;border-radius:999px;z-index:50;font-size:14px;max-width:calc(100vw - 40px);text-align:center}
+</style></head><body>
+<header>
+<h1 class="logo">Poster<b>Pro</b></h1>
+<p class="tag">Curate, play, and preview iconic posters on your wall.</p>
+<input id="q" type="search" placeholder="Search posters (Metropolis, Paris, jazz)" aria-label="Search posters">
+<div class="chips" id="cats"></div><div class="chips" id="eras"></div><div class="chips" id="srcs"></div>
+</header>
+<main><div id="msg"></div><div id="wall"></div><div id="feed"></div><div id="more"></div></main>
+<nav><button id="vWall" class="on">Wall</button><button id="vFeed">Feed</button><button id="vFav">♥ <span id="fn">0</span></button><button id="play">▶ Play</button></nav>
+
+<div id="detail" class="layer" hidden></div>
+<div id="show" class="layer" hidden><div id="stage"></div><div id="cap"></div>
+<div class="ctl"><select id="int" aria-label="Interval"><option value="10">10 s</option><option value="30">30 s</option><option value="60">1 min</option><option value="300">5 min</option></select>
+<button id="shuf" class="on">Shuffle</button><button id="meta" class="on">Title</button><button id="prev" aria-label="Previous">‹</button><button id="pause">Pause</button><button id="next" aria-label="Next">›</button><button id="fs">Fullscreen</button><button id="xShow">Close</button></div></div>
+<div id="ar" class="layer s-aim" hidden><video id="arvid" playsinline muted autoplay></video><canvas id="arcv"></canvas><div id="arcross"></div>
+<div id="artop"><button id="arX" class="ab">✕ Exit</button></div><div id="arhint"></div>
+<div id="arbot"><button id="arCancel" class="c ab">Cancel</button><button id="arAdd" class="c ab">＋ Add another</button><button id="shutter" class="c" aria-label="Take photo"></button><button id="arDel" class="c ab">🗑 Remove</button></div>
+<div id="arpick" hidden><div class="pt"><b>Choose a poster</b><button id="arpx">✕</button></div><div id="arpl"></div></div></div>
+<div id="toast" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const J=async u=>{const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()};
+const st={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let tT;const toast=m=>{const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,3500)};
+const CATS=[["All","poster"],["Movies","movie poster film"],["Sci-Fi","science fiction poster"],["Horror","horror film poster"],["Music","concert poster"],["Travel","travel poster"],["Propaganda","propaganda poster"],["Art Nouveau","art nouveau poster"],["Vintage ads","vintage advertising poster"],["Theatre","theatre poster"]];
+const ERAS=[["Any era",""],["1900s","1900s"],["1920s","1920s"],["1940s","1940s"],["1950s","1950s"],["1960s","1960s"],["1970s","1970s"],["1980s","1980s"],["1990s","1990s"]];
+const SRC={
+ commons:{n:"Wikimedia Commons",on:1,f:async(q,p)=>{const j=await J("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=24&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=700&format=json&origin=*&gsroffset="+p*24+"&gsrsearch="+encodeURIComponent(q+" filetype:bitmap"));
+  return Object.values(j.query?.pages||{}).filter(g=>g.imageinfo?.[0]?.thumburl&&/public domain|^pd|cc0|cc[- ]by/i.test(g.imageinfo[0].extmetadata?.LicenseShortName?.value||"")).map(g=>({id:"c"+g.pageid,t:g.title.replace(/^File:|\.\w+$/g,""),img:g.imageinfo[0].thumburl,page:g.imageinfo[0].descriptionurl,s:"Commons"}))}},
+ loc:{n:"Library of Congress",on:1,f:async(q,p)=>{const j=await J("https://www.loc.gov/photos/?fo=json&c=24&sp="+(p+1)+"&q="+encodeURIComponent(q));
+  return(j.results||[]).filter(r=>r.image_url?.length).map(r=>({id:"l"+r.id,t:r.title,img:r.image_url[r.image_url.length-1].replace(/^http:/,"https:"),page:r.url,s:"Library of Congress"}))}},
+ ia:{n:"Archive.org",on:1,f:async(q,p)=>{const j=await J("https://archive.org/advancedsearch.php?output=json&rows=24&page="+(p+1)+"&fl[]=identifier&fl[]=title&q="+encodeURIComponent("("+q+") AND mediatype:image"));
+  return j.response.docs.map(d=>({id:"a"+d.identifier,t:d.title,img:"https://archive.org/services/img/"+d.identifier,page:"https://archive.org/details/"+d.identifier,s:"Archive.org"}))}},
+ eu:{n:"Europeana",on:1,f:async(q,p)=>{const j=await J("https://api.europeana.eu/record/v2/search.json?wskey=api2demo&media=true&rows=24&start="+(p*24+1)+"&qf=TYPE:IMAGE&query="+encodeURIComponent(q));
+  return(j.items||[]).filter(i=>i.edmPreview).map(i=>({id:"e"+i.id,t:(i.title||[""])[0],img:i.edmPreview[0],page:i.guid,s:"Europeana"}))}}
+};
+function samples(){const T=[["Midnight Run",1978,"#ff6b6b","#ffd36b"],["Visit Lisbon",1957,"#2bb3a3","#f4e285"],["Neon Arcade",1989,"#8f5bff","#18f0ff"],["Jazz at the Pier",1962,"#e8a23a","#7a2e1d"],["Galaxy Drifter",1983,"#1d2b64","#f8cdda"],["Salon des Arts",1899,"#c9b37e","#5a3d2b"],["Paris by Night",1931,"#243b55","#e9d8a6"],["Rocket Age",1954,"#d64045","#f6f1d1"],["Summer Festival",1969,"#f9a826","#e63946"],["The Last Reel",1946,"#2d2d34","#c9a227"],["Alpine Express",1938,"#2a9d8f","#e9f5db"],["Synthwave Tour",1986,"#ff2e93","#2b1055"]];
+ return T.map((t,i)=>{const v=`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${t[2]}"/><stop offset="1" stop-color="${t[3]}"/></linearGradient></defs><rect width="800" height="1200" fill="url(#g)"/><circle cx="400" cy="470" r="230" fill="#0003"/><text x="400" y="960" font-family="Georgia,serif" font-style="italic" font-size="78" font-weight="700" text-anchor="middle" fill="#fff">${t[0]}</text><text x="400" y="1050" font-family="Arial" font-size="40" text-anchor="middle" fill="#fffd">${t[1]}</text></svg>`;
+  return{id:"s"+i,t:t[0]+" ("+t[1]+")",img:"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(v),page:"",s:"Sample"}})}
+
+let items=[],L=[],favs=st.get("pp_favs",{}),F={c:0,e:0},view="wall",page=0,busy=false,done=false,fav=false,seq=0;
+const query=()=>[$("#q").value.trim(),CATS[F.c][1],ERAS[F.e][1]].filter(Boolean).join(" ");
+const chips=(el,list,key)=>{el.innerHTML=list.map((c,i)=>`<button data-i="${i}" class="${F[key]===i?"on":""}">${esc(c[0])}</button>`).join("");
+ el.onclick=e=>{const b=e.target.closest("button");if(!b)return;F[key]=+b.dataset.i;chips(el,list,key);load()}};
+chips($("#cats"),CATS,"c");chips($("#eras"),ERAS,"e");
+$("#srcs").innerHTML=Object.entries(SRC).map(([k,v])=>`<button data-k="${k}" class="${v.on?"on":""}">${v.n}</button>`).join("");
+$("#srcs").onclick=e=>{const b=e.target.closest("button");if(!b)return;const s=SRC[b.dataset.k];s.on=!s.on;b.classList.toggle("on",s.on);load()};
+const saveFavs=()=>{st.set("pp_favs",favs);$("#fn").textContent=Object.keys(favs).length};saveFavs();
+
+const card=(p,i)=>`<div class="po" data-i="${i}" tabindex="0"><img loading="lazy" src="${esc(p.img)}" alt="${esc(p.t)}"><button class="h" data-h="${i}" aria-label="Favorite">♡</button><small>${esc((p.t||"Untitled").slice(0,70))} · ${esc(p.s)}</small></div>`;
+const fcard=(p,i)=>`<article class="fc" data-i="${i}"><img loading="lazy" src="${esc(p.img)}" alt="${esc(p.t)}"><div class="fr"><div><b>${esc((p.t||"Untitled").slice(0,80))}</b><span>${esc(p.s)}</span></div><div><button class="h" data-h="${i}" aria-label="Favorite">♡</button><button data-ar="${i}" aria-label="Hang on my wall">📷</button></div></div></article>`;
+function draw(list,start){
+ $("#wall").insertAdjacentHTML("beforeend",list.map((p,i)=>card(p,start+i)).join(""));
+ $("#feed").insertAdjacentHTML("beforeend",list.map((p,i)=>fcard(p,start+i)).join(""));
+ $$("#wall img:not([data-ok]),#feed img:not([data-ok])").forEach(im=>{im.dataset.ok=1;im.onerror=()=>im.closest(".po,.fc")?.remove()});hearts()}
+function hearts(){$$("[data-h]").forEach(b=>{const p=L[+b.dataset.h],on=p&&favs[p.id];b.textContent=on?"♥":"♡";b.classList.toggle("on",!!on)})}
+function repaint(){$("#wall").innerHTML="";$("#feed").innerHTML="";draw(L,0)}
+async function load(reset=true){
+ if(fav&&reset){fav=false;$("#vFav").classList.remove("on")}
+ if(busy&&!reset)return;if(fav||(done&&!reset))return;
+ const my=reset?++seq:seq;
+ if(reset){page=0;done=false;items=[];L=items;$("#wall").innerHTML="";$("#feed").innerHTML=""}
+ busy=true;$("#msg").textContent="Loading posters…";
+ const act=Object.values(SRC).filter(s=>s.on),q=query();
+ const res=await Promise.allSettled(act.map(s=>s.f(q,page)));
+ if(my!==seq)return;
+ const seen=new Set(items.map(p=>p.id));
+ let add=res.flatMap(r=>r.status==="fulfilled"?r.value:[]).filter(p=>p.img&&!seen.has(p.id)).sort(()=>Math.random()-.5);
+ const fails=res.filter(r=>r.status==="rejected").length;let sm=false;
+ if(!items.length&&!add.length&&fails){add=samples();sm=true}
+ if(!add.length||sm)done=true;
+ const s0=items.length;items.push(...add);page++;L=items;draw(add,s0);
+ $("#msg").textContent=sm?"Can't reach the poster sources, so these are samples. Open the file in Chrome or Safari with an internet connection.":!items.length?"No posters found. Try another search or era.":items.length+" posters"+(done?" · end of results":" · keep scrolling")+(fails?` · ${fails} source${fails>1?"s":""} unavailable`:"");
+ busy=false;
+ setTimeout(()=>{if(!done&&!fav&&$("#more").getBoundingClientRect().top<innerHeight+800)load(false)},300)}
+new IntersectionObserver(e=>{if(e[0].isIntersecting&&items.length&&!busy&&!done&&!fav)load(false)},{rootMargin:"900px"}).observe($("#more"));
+let qT;$("#q").oninput=()=>{clearTimeout(qT);qT=setTimeout(load,500)};
+
+function setView(v){view=v;document.body.classList.toggle("feed",v==="feed");$("#vWall").classList.toggle("on",v==="wall");$("#vFeed").classList.toggle("on",v==="feed");scrollTo({top:0})}
+$("#vWall").onclick=()=>setView("wall");$("#vFeed").onclick=()=>setView("feed");
+$("#vFav").onclick=()=>{fav=!fav;$("#vFav").classList.toggle("on",fav);
+ if(fav){L=Object.values(favs);repaint();$("#msg").textContent=L.length?L.length+" saved posters":"Nothing saved yet. Tap ♡ on any poster."}else load()};
+function toggleFav(p){if(favs[p.id])delete favs[p.id];else favs[p.id]=p;saveFavs();hearts()}
+document.addEventListener("click",e=>{
+ const h=e.target.closest("[data-h]");if(h){e.stopPropagation();toggleFav(L[+h.dataset.h]);return}
+ const a=e.target.closest("[data-ar]");if(a){openAR(L[+a.dataset.ar]);return}
+ const c=e.target.closest(".po,.fc img");if(c)openDetail(+(c.dataset.i??c.closest(".fc").dataset.i))});
+
+/* detail */
+let cur=null,ci=0;
+function openDetail(i){const p=L[i];if(!p)return;cur=p;ci=i;const d=$("#detail");
+ d.innerHTML=`<div class="sheet" role="dialog" aria-label="${esc(p.t)}"><img src="${esc(p.img)}" alt="${esc(p.t)}"><div class="info"><h2>${esc(p.t||"Untitled")}</h2><p>Source: ${esc(p.s)}</p>${p.page?`<p><a href="${esc(p.page)}" target="_blank" rel="noopener">View original and license</a></p>`:""}<div class="row"><button id="dF"></button><button id="dA" class="on">📷 Hang on my wall</button><button id="dP">▶ Play from here</button><button id="dX">Close</button></div></div></div>`;
+ d.hidden=false;const sync=()=>$("#dF").textContent=favs[p.id]?"♥ Saved":"♡ Save";sync();
+ $("#dF").onclick=()=>{toggleFav(p);sync()};$("#dX").onclick=()=>d.hidden=true;
+ $("#dA").onclick=()=>{d.hidden=true;openAR(p)};$("#dP").onclick=()=>{d.hidden=true;startShow(i)}}
+$("#detail").onclick=e=>{if(e.target.id==="detail")e.target.hidden=true};
+
+/* slideshow */
+const sh={l:[],i:0,t:null,paused:false,shuf:true,meta:true,idle:null};
+function startShow(from){sh.l=L.slice();if(!sh.l.length)return toast("Nothing to play yet.");
+ if(typeof from==="number")sh.i=from;else{sh.i=0;if(sh.shuf)sh.l.sort(()=>Math.random()-.5)}
+ sh.paused=false;$("#pause").textContent="Pause";$("#show").hidden=false;$("#stage").innerHTML="";
+ (document.documentElement.requestFullscreen?.()||Promise.resolve()).catch(()=>{});slide();bump()}
+function slide(){const p=sh.l[sh.i];if(!p)return;const sec=+$("#int").value,im=new Image(),r=(a,b)=>Math.random()*(b-a)+a;
+ im.src=p.img;im.className="slide";im.style.setProperty("--d",sec+2+"s");im.style.setProperty("--dx",r(-2.5,2.5)+"%");im.style.setProperty("--dy",r(-2.5,2.5)+"%");
+ const s=$("#stage"),old=[...s.children];s.append(im);const go=()=>requestAnimationFrame(()=>im.classList.add("on"));im.decode?im.decode().then(go,go):go();
+ setTimeout(()=>old.forEach(o=>o.remove()),1400);im.onerror=()=>step(1);
+ $("#cap").textContent=sh.meta?(p.t||"").slice(0,80):"";clearTimeout(sh.t);if(!sh.paused)sh.t=setTimeout(()=>step(1),sec*1000)}
+function step(d){const n=sh.l.length;if(!n)return;sh.i=(sh.i+d+n)%n;slide()}
+function bump(){const s=$("#show");s.classList.add("ui");clearTimeout(sh.idle);sh.idle=setTimeout(()=>s.classList.remove("ui"),3000)}
+function closeShow(){clearTimeout(sh.t);$("#show").hidden=true;document.fullscreenElement&&document.exitFullscreen().catch(()=>{})}
+$("#play").onclick=()=>startShow();
+["pointermove","pointerdown"].forEach(t=>$("#show").addEventListener(t,bump));
+$("#next").onclick=()=>step(1);$("#prev").onclick=()=>step(-1);$("#xShow").onclick=closeShow;$("#int").onchange=slide;
+$("#fs").onclick=()=>$("#show").requestFullscreen?.();
+$("#pause").onclick=e=>{sh.paused=!sh.paused;e.target.textContent=sh.paused?"Resume":"Pause";sh.paused?clearTimeout(sh.t):slide()};
+$("#shuf").onclick=e=>{sh.shuf=!sh.shuf;e.target.classList.toggle("on",sh.shuf)};
+$("#meta").onclick=e=>{sh.meta=!sh.meta;e.target.classList.toggle("on",sh.meta);slide()};
+document.addEventListener("keydown",e=>{
+ if(!$("#show").hidden){if(e.key==="Escape")closeShow();if(e.key==="ArrowRight")step(1);if(e.key==="ArrowLeft")step(-1);if(e.key===" "){e.preventDefault();$("#pause").click()}}
+ else if(!$("#ar").hidden){if(e.key==="Escape")closeAR()}else if(e.key==="Escape")$("#detail").hidden=true});
+
+/* AR wall: camera + motion sensors, one tap to hang (same idea as ArtPro) */
+const AR={list:[],E:null,sel:null,state:"aim",ori:{ok:false,a:0,b:0,g:0},max:5,busy:false,r:null};
+const arov=$("#ar");
+function setState(s){AR.state=s;arov.className="layer s-"+s+(AR.E&&AR.list.length?" canc":"");clearTimeout(AR.ht);
+ $("#arhint").textContent=s==="placed"?"Stay put and turn the phone · drag to move · pinch to resize":AR.list.length?"Aim where the poster’s centre should hang, then tap":"Stand 1–3 m from the wall. Aim where the wall meets the floor, then tap.";
+ if(s==="placed")AR.ht=setTimeout(()=>arov.classList.add("hh"),4500)}
+const arQ=(q,al,be,ga,or)=>{q.setFromEuler(new THREE.Euler(be,al,-ga,"YXZ"));q.multiply(new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5)));q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),-or))};
+const arFov=()=>{const w=arov.clientWidth||innerWidth,h=arov.clientHeight||innerHeight,r=Math.PI/180,L=63,Sh=49,a=w/h;if(h>=w)return a<.75?L:2/r*Math.atan(Math.tan(Sh/2*r)/a);return a>4/3?2/r*Math.atan(Math.tan(L/2*r)/a):Sh};
+const loadImg=p=>new Promise((res,rej)=>{const im=new Image();im.crossOrigin="anonymous";im.onload=()=>res(im);im.onerror=()=>rej("img");im.src=p.img});
+function mkPoster(p,im){const a=im.naturalWidth/im.naturalHeight,L=.9,w=a<1?L*a:L,h=a<1?L:L/a;
+ const tex=new THREE.Texture(im);tex.encoding=THREE.sRGBEncoding;tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;tex.needsUpdate=true;
+ const g=new THREE.Group(),pic=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex})),fr=new THREE.Mesh(new THREE.PlaneGeometry(w+.04,h+.04),new THREE.MeshBasicMaterial({color:0x151515})),
+  ol=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(w+.1,h+.1)),new THREE.LineBasicMaterial({color:0xd6a64e}));
+ fr.position.z=-.002;ol.visible=false;g.add(fr,pic,ol);g.visible=false;return{p,g,pic,ol,w,h,k:1,fb:null}}
+function lay(e){const f=e.fb;e.g.position.set(f.x,f.y,f.z);e.g.rotation.y=f.yaw;e.g.scale.setScalar(e.k);e.g.visible=true}
+function select(e){AR.sel=e;AR.list.forEach(x=>x.ol.visible=false);clearTimeout(AR.hl);if(e&&AR.list.length>1){e.ol.visible=true;AR.hl=setTimeout(()=>e.ol.visible=false,2500)}}
+function setWall(){const E=AR.E;if(!E)return;const d=new THREE.Vector3(0,0,-1).applyQuaternion(AR.c.quaternion),hl=Math.hypot(d.x,d.z),hx=hl>.01?d.x/hl:0,hz=hl>.01?d.z/hl:-1,ref=AR.list[0];let f=null;
+ if(ref){const ny=Math.sin(ref.fb.yaw),nz=Math.cos(ref.fb.yaw),c=ny*ref.fb.x+nz*ref.fb.z,dn=ny*d.x+nz*d.z,t=dn<-.1?c/dn:0;
+  if(t>.3&&t<14)f={x:t*d.x,y:Math.max(.25,Math.min(3.2,1.4+t*d.y)),z:t*d.z,yaw:ref.fb.yaw};else return toast("Aim at the same wall, then tap.")}
+ else{let dist=2;if(d.y<-.1)dist=1.4/Math.tan(Math.asin(-d.y));dist=Math.max(.6,Math.min(6,dist));f={x:hx*dist,y:Math.max(1.45,E.h/2+.1),z:hz*dist,yaw:Math.atan2(-hx,-hz)}}
+ E.fb=f;lay(E);AR.E=null;AR.list.push(E);select(E);setState("placed")}
+function runAR(stream,p,im){
+ const v=$("#arvid");v.srcObject=stream;v.play().catch(()=>{});$("#toast").hidden=true;
+ const oc=$("#arcv"),nc=document.createElement("canvas");nc.id="arcv";oc.replaceWith(nc);
+ const R=AR.r=new THREE.WebGLRenderer({canvas:nc,alpha:true,antialias:true}),C=AR.c=new THREE.PerspectiveCamera(60,1,.05,50),S=AR.s=new THREE.Scene();
+ R.outputEncoding=THREE.sRGBEncoding;R.setClearColor(0,0);C.position.set(0,1.4,0);AR.q=new THREE.Quaternion();
+ AR.onRes=()=>{const W=arov.clientWidth||innerWidth,H=arov.clientHeight||innerHeight;R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(W,H,false);C.aspect=W/H;C.fov=arFov();C.updateProjectionMatrix()};AR.onRes();addEventListener("resize",AR.onRes);
+ const o0=AR.ori={ok:false,a:0,b:0,g:0};
+ AR.onOri=e=>{if(e.beta==null)return;const d=AR.ori;d.a=e.alpha||0;d.b=e.beta;d.g=e.gamma||0;if(!d.ok){d.ok=true;AR.first=true}};addEventListener("deviceorientation",AR.onOri);
+ setTimeout(()=>{if(AR.busy&&AR.ori===o0&&!o0.ok){arCleanup();toast("AR needs motion sensors, so it works on a phone or tablet.")}},2500);
+ AR.list=[];AR.sel=null;AR.E=mkPoster(p,im);S.add(AR.E.g);setState("aim");
+ (function loop(){AR.raf=requestAnimationFrame(loop);const d=AR.ori;
+  if(d.ok){const k=Math.PI/180;arQ(AR.q,d.a*k,d.b*k,d.g*k,((screen.orientation&&screen.orientation.angle)||window.orientation||0)*k);
+   if(AR.first){C.quaternion.copy(AR.q);AR.first=false}else{const ang=C.quaternion.angleTo(AR.q);if(ang>.0012)C.quaternion.slerp(AR.q,Math.min(.7,Math.max(.12,ang*14)))}}
+  R.render(S,C)})()}
+async function openAR(p){
+ if(AR.busy)return;
+ const rq=window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission?DeviceOrientationEvent.requestPermission().catch(()=>"denied"):Promise.resolve("granted");
+ if(!navigator.mediaDevices?.getUserMedia||!window.isSecureContext)return toast("AR needs a secure (https) page and a camera. Open the app from your website on a phone.");
+ AR.busy=true;$("#detail").hidden=true;arov.hidden=false;toast("Starting camera…");
+ try{const[perm,stream,im]=await Promise.all([rq,navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false}).then(s=>(AR.stream=s)),loadImg(p)]);
+  if(perm!=="granted")throw"motion";runAR(stream,p,im)}
+ catch(e){arCleanup();toast(e==="motion"?"AR needs motion access. Allow it and try again.":e==="img"?"This poster can’t be shown on a wall (its source blocks it). Try another poster.":"Camera not available. Allow camera access and try again.")}}
+function arCleanup(){cancelAnimationFrame(AR.raf);clearTimeout(AR.ht);clearTimeout(AR.hl);removeEventListener("resize",AR.onRes);removeEventListener("deviceorientation",AR.onOri);
+ AR.stream?.getTracks().forEach(t=>t.stop());AR.stream=null;$("#arvid").srcObject=null;if(AR.r){try{AR.r.dispose();AR.r.forceContextLoss()}catch(e){}AR.r=null}
+ AR.list=[];AR.E=null;AR.sel=null;AR.busy=false;$("#arpick").hidden=true;arov.hidden=true}
+const closeAR=arCleanup;
+function openPicker(){const seen=new Set(),l=[...Object.values(favs),...items].filter(p=>!seen.has(p.id)&&seen.add(p.id)).slice(0,60),b=$("#arpl");
+ b.innerHTML=l.map((p,i)=>`<img src="${esc(p.img)}" alt="${esc(p.t)}" data-t="${i}">`).join("");b._l=l;$("#arpick").hidden=false}
+$("#arpl").onclick=async e=>{const i=e.target.dataset.t;if(i===undefined)return;const p=$("#arpl")._l[+i];
+ if(AR.list.length>=AR.max)return toast("Maximum of 5 posters on the wall");$("#arpick").hidden=true;
+ try{const im=await loadImg(p);AR.E=mkPoster(p,im);AR.s.add(AR.E.g);setState("aim")}catch(x){toast("This poster can’t be shown on a wall (its source blocks it). Try another.");$("#arpick").hidden=false}};
+$("#arpx").onclick=()=>{$("#arpick").hidden=true;if(!AR.list.length&&!AR.E)closeAR()};
+$("#arX").onclick=closeAR;$("#arAdd").onclick=()=>{if(!AR.E)openPicker()};
+$("#arCancel").onclick=()=>{if(!AR.E)return;AR.s.remove(AR.E.g);AR.E=null;setState("placed")};
+$("#arDel").onclick=()=>{const e=AR.sel;if(!e)return;AR.s.remove(e.g);AR.list.splice(AR.list.indexOf(e),1);select(AR.list[AR.list.length-1]||null);if(!AR.list.length)openPicker()};
+/* touch: tap to hang, drag to move, pinch to resize */
+const rayAt=(x,y)=>{const r=AR.r.domElement.getBoundingClientRect(),rc=AR.rc||(AR.rc=new THREE.Raycaster());rc.setFromCamera({x:(x-r.left)/r.width*2-1,y:-((y-r.top)/r.height)*2+1},AR.c);return rc};
+const pickAt=rc=>{let best=null,bd=1e9;AR.list.forEach(e=>{e.g.updateMatrixWorld(true);const h=rc.intersectObject(e.pic,false)[0];if(h&&h.distance<bd){bd=h.distance;best=e}});return best};
+function planeHit(e,rc){const f=e.fb,n=new THREE.Vector3(Math.sin(f.yaw),0,Math.cos(f.yaw)),c=new THREE.Vector3(f.x,f.y,f.z),dn=n.dot(rc.ray.direction);if(Math.abs(dn)<.05)return null;
+ const t=n.dot(c.clone().sub(rc.ray.origin))/dn;return t<.2||t>20?null:rc.ray.origin.clone().add(rc.ray.direction.clone().multiplyScalar(t))}
+const P=new Map();let tap=null,dg=null,pn=null;
+arov.addEventListener("pointerdown",e=>{if(!AR.r||e.target.closest("button,#arpick"))return;arov.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(P.size===1){tap={x:e.clientX,y:e.clientY,t:Date.now(),mv:false};
+  if(AR.state==="placed"){const rc=rayAt(e.clientX,e.clientY),b=pickAt(rc);if(b){if(b!==AR.sel)select(b);const hp=planeHit(b,rc);if(hp)dg={e:b,off:hp.sub(new THREE.Vector3(b.fb.x,b.fb.y,b.fb.z))}}}}
+ else if(P.size===2&&AR.sel){tap=null;dg=null;const[a,b]=[...P.values()];pn={d:Math.hypot(a.x-b.x,a.y-b.y)||1,k:AR.sel.k}}});
+arov.addEventListener("pointermove",e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pn&&P.size>=2){const[a,b]=[...P.values()],k=Math.max(.3,Math.min(4,pn.k*(Math.hypot(a.x-b.x,a.y-b.y)||1)/pn.d));AR.sel.k=k;AR.sel.g.scale.setScalar(k)}
+ else if(dg){const hp=planeHit(dg.e,rayAt(e.clientX,e.clientY));if(hp){hp.sub(dg.off);const f=dg.e.fb;f.x=hp.x;f.y=Math.max(.25,Math.min(3.2,hp.y));f.z=hp.z;lay(dg.e)}}
+ else if(tap&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)>10)tap.mv=true});
+const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);
+ if(tap&&!tap.mv&&P.size===0&&AR.state==="aim"&&Date.now()-tap.t<600)setWall();
+ if(P.size<2)pn=null;if(!P.size){dg=null;tap=null}};
+arov.addEventListener("pointerup",up);arov.addEventListener("pointercancel",up);
+/* photo: camera picture + posters, shared or saved */
+$("#shutter").onclick=()=>{if(!AR.r)return;const cv=AR.r.domElement,v=$("#arvid"),w=cv.width,h=cv.height,c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");
+ if(v.videoWidth){const k=Math.max(w/v.videoWidth,h/v.videoHeight);x.drawImage(v,(w-v.videoWidth*k)/2,(h-v.videoHeight*k)/2,v.videoWidth*k,v.videoHeight*k)}
+ const hv=AR.list.map(e=>e.ol.visible);AR.list.forEach(e=>e.ol.visible=false);AR.r.render(AR.s,AR.c);x.drawImage(cv,0,0);AR.list.forEach((e,i)=>e.ol.visible=hv[i]);
+ x.font=`italic 700 ${Math.max(16,w*.035)}px Georgia,serif`;x.textAlign="right";x.fillStyle="rgba(255,255,255,.75)";x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=6;x.fillText("PosterPro",w*.95,h*.95);
+ c.toBlob(async b=>{if(!b)return toast("Could not take the photo.");const f=new File([b],"posterpro-wall.jpg",{type:"image/jpeg"});
+  try{if(navigator.canShare?.({files:[f]})){await navigator.share({files:[f],title:"My PosterPro wall"});return}}catch(e){if(e.name==="AbortError")return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="posterpro-wall.jpg";a.click();toast("Photo saved to your downloads.")},"image/jpeg",.92)};
+load();
+</script></body></html>
